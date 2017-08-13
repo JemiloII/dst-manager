@@ -13,6 +13,7 @@ node_modules/
 typings/
 
 .idea/
+dst-manager.iml
 
 steamcmd/**
 !steamcmd/steamcmd.exe

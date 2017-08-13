@@ -1,0 +1,13 @@
+{
+  "name": "dst-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Don't Starve Together Server Manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Brian Jemilo II <jemiloii@gmail.com>",
+  "contributors": ["Jeremy Neu <jeremyneu@comcast.net>"],
+  "license": "private"
+}

@@ -1,0 +1,6 @@
+# IDES
+.idea/
+*.vs*
+*.iml
+
+servers/

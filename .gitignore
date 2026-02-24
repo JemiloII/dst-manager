@@ -4,3 +4,8 @@
 *.iml
 
 servers/
+node_modules/
+dist/
+.env
+*.db
+assets/

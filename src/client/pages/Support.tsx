@@ -19,6 +19,7 @@ export default function Support() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchTickets();
@@ -45,6 +46,7 @@ export default function Support() {
     setSubject('');
     setMessage('');
     setSuccess('Ticket submitted!');
+    setShowModal(false);
     setTimeout(() => setSuccess(''), 2000);
     fetchTickets();
   };
@@ -56,38 +58,23 @@ export default function Support() {
 
   return (
     <>
-      <h1 style={{ color: '#fff' }}>Support</h1>
-
-      <div className="card">
-        <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>Submit a Ticket</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="subject">Subject</label>
-            <input
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={4}
-              required
-            />
-          </div>
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
-          <button type="submit">Submit</button>
-        </form>
+      <div className="support-header">
+        <h1>Support Tickets</h1>
+        <button onClick={() => setShowModal(true)} className="btn-primary">
+          New Ticket
+        </button>
       </div>
 
+      {success && (
+        <div className="card success-banner">
+          <p className="success-message">{success}</p>
+        </div>
+      )}
+
       <div className="card">
-        <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>Your Tickets</h3>
+        <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>
+          {user?.role === 'admin' ? 'All Tickets' : 'Your Tickets'}
+        </h3>
         {tickets.length === 0 ? (
           <p style={{ color: '#aaa' }}>No tickets.</p>
         ) : (
@@ -112,6 +99,48 @@ export default function Support() {
           ))
         )}
       </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Submit a Ticket</h2>
+              <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="subject">Subject</label>
+                <input
+                  id="subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="message">Message</label>
+                <textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={6}
+                  required
+                />
+              </div>
+              {error && <p className="error-message">{error}</p>}
+              <div className="modal-actions">
+                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Submit Ticket
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

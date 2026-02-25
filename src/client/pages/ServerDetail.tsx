@@ -22,18 +22,41 @@ interface Server {
 }
 
 export default function ServerDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { code, tab: urlTab, shard, subtab } = useParams<{ code: string; tab?: string; shard?: string; subtab?: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [server, setServer] = useState<Server | null>(null);
-  const [tab, setTab] = useState<'overview' | 'world' | 'mods' | 'logs' | 'suggestions'>('overview');
+  const validTabs = ['overview', 'world', 'mods', 'logs', 'suggestions'] as const;
+  type TabType = typeof validTabs[number];
+  
+  // If we have shard/subtab in URL, we're on the world tab
+  let tab: TabType;
+  if (shard && subtab) {
+    tab = 'world';
+  } else if (urlTab && validTabs.includes(urlTab as TabType)) {
+    tab = urlTab as TabType;
+  } else {
+    tab = 'overview';
+  }
+  
   const [editing, setEditing] = useState(false);
+  
+  const handleTabChange = (newTab: TabType) => {
+    if (newTab === 'overview') {
+      navigate(`/servers/${code}`);
+    } else if (newTab === 'world') {
+      // Navigate to world with default shard and subtab
+      navigate(`/servers/${code}/world/forest/settings`);
+    } else {
+      navigate(`/servers/${code}/${newTab}`);
+    }
+  };
   const [form, setForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
   const [players, setPlayers] = useState<{ count: number; max: number; list: string[] }>({ count: 0, max: 0, list: [] });
 
   useEffect(() => {
     const fetchServer = async () => {
-      const res = await api.get(`/servers/${id}`);
+      const res = await api.get(`/servers/${code}`);
       if (!res.ok) {
         navigate('/');
         return;
@@ -50,12 +73,12 @@ export default function ServerDetail() {
       });
     };
     fetchServer();
-  }, [id, navigate]);
+  }, [code, navigate]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!code) return;
     const token = localStorage.getItem('accessToken');
-    const es = new EventSource(`/api/servers/${id}/events${token ? `?token=${token}` : ''}`);
+    const es = new EventSource(`/api/servers/${code}/events${token ? `?token=${token}` : ''}`);
 
     es.addEventListener('status', (e) => {
       const data = JSON.parse(e.data);
@@ -68,32 +91,32 @@ export default function ServerDetail() {
     });
 
     return () => es.close();
-  }, [id]);
+  }, [code]);
 
   const handleSave = async () => {
-    await api.put(`/servers/${id}`, form);
+    await api.put(`/servers/${code}`, form);
     setEditing(false);
-    const res = await api.get(`/servers/${id}`);
+    const res = await api.get(`/servers/${code}`);
     setServer(await res.json());
   };
 
   const handleStart = async () => {
-    await api.post(`/servers/${id}/start`);
+    await api.post(`/servers/${code}/start`);
   };
 
   const handleStop = async () => {
-    await api.post(`/servers/${id}/stop`);
+    await api.post(`/servers/${code}/stop`);
   };
 
   const handleDelete = async () => {
     if (!confirm('Delete this server? This cannot be undone.')) return;
-    await api.delete(`/servers/${id}`);
+    await api.delete(`/servers/${code}`);
     navigate('/');
   };
 
   const handleExport = () => {
     const token = localStorage.getItem('accessToken');
-    window.open(`/api/admin/export/${id}?token=${token}`, '_blank');
+    window.open(`/api/admin/export/${code}?token=${token}`, '_blank');
   };
 
   if (!server) return <div className="card"><p>Loading...</p></div>;
@@ -115,18 +138,18 @@ export default function ServerDetail() {
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {server.status === 'stopped' ? (
                 <button className="icon-btn" onClick={handleStart} title="Start">
-                  <img src="/button_icons/AFKstart.png" alt="Start" />
+                  <img src="/images/button_icons/AFKstart.png" alt="Start" />
                 </button>
               ) : (
                 <button className="icon-btn" onClick={handleStop} title="Stop">
-                  <img src="/button_icons/AFKstop.png" alt="Stop" />
+                  <img src="/images/button_icons/AFKstop.png" alt="Stop" />
                 </button>
               )}
               <button className="icon-btn" onClick={handleExport} title="Export">
-                <img src="/button_icons/folder.png" alt="Export" />
+                <img src="/images/button_icons/folder.png" alt="Export" />
               </button>
               <button className="icon-btn" onClick={handleDelete} title="Delete">
-                <img src="/button_icons/delete.png" alt="Delete" />
+                <img src="/images/button_icons/delete.png" alt="Delete" />
               </button>
             </div>
           )}
@@ -147,11 +170,11 @@ export default function ServerDetail() {
       </div>
 
       <div className="tab-bar">
-        <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>Config</button>
-        <button className={tab === 'world' ? 'active' : ''} onClick={() => setTab('world')}>World</button>
-        <button className={tab === 'mods' ? 'active' : ''} onClick={() => setTab('mods')}>Mods</button>
-        <button className={tab === 'logs' ? 'active' : ''} onClick={() => setTab('logs')}>Logs</button>
-        <button className={tab === 'suggestions' ? 'active' : ''} onClick={() => setTab('suggestions')}>Suggestions</button>
+        <button className={tab === 'overview' ? 'active' : ''} onClick={() => handleTabChange('overview')}>Config</button>
+        <button className={tab === 'world' ? 'active' : ''} onClick={() => handleTabChange('world')}>World</button>
+        <button className={tab === 'mods' ? 'active' : ''} onClick={() => handleTabChange('mods')}>Mods</button>
+        <button className={tab === 'logs' ? 'active' : ''} onClick={() => handleTabChange('logs')}>Logs</button>
+        <button className={tab === 'suggestions' ? 'active' : ''} onClick={() => handleTabChange('suggestions')}>Suggestions</button>
       </div>
 
       {tab === 'overview' && (
@@ -204,10 +227,10 @@ export default function ServerDetail() {
         </div>
       )}
 
-      {tab === 'world' && <WorldSettings serverId={parseInt(id!)} isOwner={isOwner} />}
-      {tab === 'mods' && <ModManager serverId={parseInt(id!)} isOwner={isOwner} />}
-      {tab === 'logs' && <LogViewer serverId={parseInt(id!)} />}
-      {tab === 'suggestions' && <Suggestions serverId={parseInt(id!)} isOwner={isOwner} />}
+      {tab === 'world' && <WorldSettings serverId={code!} isOwner={isOwner} />}
+      {tab === 'mods' && <ModManager serverId={code!} isOwner={isOwner} />}
+      {tab === 'logs' && <LogViewer serverId={code!} />}
+      {tab === 'suggestions' && <Suggestions serverId={code!} isOwner={isOwner} />}
     </>
   );
 }

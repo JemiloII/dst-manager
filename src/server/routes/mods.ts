@@ -57,6 +57,49 @@ mods.get('/search', async (c) => {
   }
 });
 
+mods.get('/details/:workshopId', async (c) => {
+  const workshopId = c.req.param('workshopId');
+  
+  try {
+    const response = await fetch(
+      `https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `itemcount=1&publishedfileids[0]=${workshopId}`
+      }
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      const details = data.response?.publishedfiledetails?.[0];
+      if (details) {
+        return c.json({
+          workshopId: details.publishedfileid,
+          title: details.title || `Workshop-${workshopId}`,
+          description: details.description || '',
+          previewUrl: details.preview_url || ''
+        });
+      }
+    }
+    
+    // Fallback to basic info
+    return c.json({
+      workshopId,
+      title: `Workshop-${workshopId}`,
+      description: '',
+      previewUrl: ''
+    });
+  } catch {
+    return c.json({
+      workshopId,
+      title: `Workshop-${workshopId}`,
+      description: '',
+      previewUrl: ''
+    });
+  }
+});
+
 mods.get('/server/:serverId', async (c) => {
   const user = c.get('user') as JwtPayload;
   const serverId = parseInt(c.req.param('serverId'));
@@ -71,7 +114,7 @@ mods.get('/server/:serverId', async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   const modOverridesPath = path.join(clusterDir, 'Master', 'modoverrides.lua');
 
   try {
@@ -104,16 +147,16 @@ mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
   const modsData = body as Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }>;
 
   const content = generateModOverrides(modsData);
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
 
   await fs.writeFile(path.join(clusterDir, 'Master', 'modoverrides.lua'), content);
   await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), content);
 
-  const allServers = await db.execute({ sql: 'SELECT kuid, id FROM servers', args: [] });
+  const allServers = await db.execute({ sql: 'SELECT kuid, share_code FROM servers', args: [] });
   const allWorkshopIds = new Set<string>();
 
   for (const srv of allServers.rows) {
-    const srvClusterDir = getClusterPath(srv.kuid as string, srv.id as number);
+    const srvClusterDir = getClusterPath(srv.kuid as string, srv.share_code as string);
     try {
       const modContent = await fs.readFile(path.join(srvClusterDir, 'Master', 'modoverrides.lua'), 'utf-8');
       const parsed = parseModOverrides(modContent);

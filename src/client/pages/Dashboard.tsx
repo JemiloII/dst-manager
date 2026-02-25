@@ -39,12 +39,12 @@ export default function Dashboard() {
     };
   }, [servers.length, updateStatus, updatePlayers]);
 
-  const handleStart = async (id: number) => {
-    await api.post(`/servers/${id}/start`);
+  const handleStart = async (code: string) => {
+    await api.post(`/servers/${code}/start`);
   };
 
-  const handleStop = async (id: number) => {
-    await api.post(`/servers/${id}/stop`);
+  const handleStop = async (code: string) => {
+    await api.post(`/servers/${code}/stop`);
   };
 
   if (loading) {
@@ -58,7 +58,7 @@ export default function Dashboard() {
         <div className="card">
           <p>No servers yet.</p>
           {user?.role !== 'guest' && (
-            <Link to="/servers/create">
+            <Link to="/create">
               <button>Create your first server</button>
             </Link>
           )}
@@ -70,7 +70,7 @@ export default function Dashboard() {
             <div key={server.id} className="server-card">
               <div className="server-info">
                 <h3>
-                  <Link to={`/servers/${server.id}`} style={{ color: '#fff', textDecoration: 'none' }}>
+                  <Link to={`/servers/${server.share_code}`} style={{ color: '#fff', textDecoration: 'none' }}>
                     {server.name}
                   </Link>
                 </h3>
@@ -87,19 +87,19 @@ export default function Dashboard() {
                 {user?.role !== 'guest' && (
                   <>
                     {server.status === 'stopped' ? (
-                      <button className="icon-btn" onClick={() => handleStart(server.id)} title="Start">
-                        <img src="/button_icons/AFKstart.png" alt="Start" />
+                      <button className="icon-btn" onClick={() => handleStart(server.share_code)} title="Start">
+                        <img src="/images/button_icons/AFKstart.png" alt="Start" />
                       </button>
                     ) : (
-                      <button className="icon-btn" onClick={() => handleStop(server.id)} title="Stop">
-                        <img src="/button_icons/AFKstop.png" alt="Stop" />
+                      <button className="icon-btn" onClick={() => handleStop(server.share_code)} title="Stop">
+                        <img src="/images/button_icons/AFKstop.png" alt="Stop" />
                       </button>
                     )}
                   </>
                 )}
-                <Link to={`/servers/${server.id}`}>
+                <Link to={`/servers/${server.share_code}`}>
                   <button className="icon-btn" title="Details">
-                    <img src="/button_icons/more_info.png" alt="Details" />
+                    <img src="/images/button_icons/more_info.png" alt="Details" />
                   </button>
                 </Link>
               </div>

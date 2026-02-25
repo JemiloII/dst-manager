@@ -16,7 +16,7 @@ function getDstBinary(): string {
   return path.join(env.DST_INSTALL_DIR, 'bin64', 'dontstarve_dedicated_server_nullrenderer_x64');
 }
 
-export async function startServer(serverId: number, kuid: string, clusterToken: string) {
+export async function startServer(serverId: number, kuid: string, shareCode: string, clusterToken: string) {
   if (processes.has(serverId)) {
     const existing = processes.get(serverId)!;
     if (existing.master || existing.caves) {
@@ -24,7 +24,7 @@ export async function startServer(serverId: number, kuid: string, clusterToken: 
     }
   }
 
-  const clusterDir = getClusterPath(kuid, serverId);
+  const clusterDir = getClusterPath(kuid, shareCode);
   const binary = getDstBinary();
 
   await db.execute({ sql: 'UPDATE servers SET status = ? WHERE id = ?', args: ['starting', serverId] });
@@ -32,18 +32,18 @@ export async function startServer(serverId: number, kuid: string, clusterToken: 
 
   const masterProcess = spawn(binary, [
     '-console',
-    '-persistent_storage_root', path.dirname(path.dirname(clusterDir)),
-    '-conf_dir', path.basename(path.dirname(clusterDir)),
-    '-cluster', path.basename(clusterDir),
+    '-persistent_storage_root', env.SERVERS_DIR,
+    '-conf_dir', shareCode,
+    '-cluster', shareCode,
     '-token', clusterToken,
     '-shard', 'Master',
   ], { cwd: path.join(env.DST_INSTALL_DIR, 'bin64'), stdio: ['pipe', 'pipe', 'pipe'] });
 
   const cavesProcess = spawn(binary, [
     '-console',
-    '-persistent_storage_root', path.dirname(path.dirname(clusterDir)),
-    '-conf_dir', path.basename(path.dirname(clusterDir)),
-    '-cluster', path.basename(clusterDir),
+    '-persistent_storage_root', env.SERVERS_DIR,
+    '-conf_dir', shareCode,
+    '-cluster', shareCode,
     '-token', clusterToken,
     '-shard', 'Caves',
   ], { cwd: path.join(env.DST_INSTALL_DIR, 'bin64'), stdio: ['pipe', 'pipe', 'pipe'] });

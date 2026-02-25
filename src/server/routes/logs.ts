@@ -29,7 +29,7 @@ logs.get('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   const logFile = path.join(clusterDir, shard, 'server_log.txt');
 
   try {
@@ -61,7 +61,7 @@ logs.delete('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   const logFile = path.join(clusterDir, shard, 'server_log.txt');
 
   try {

@@ -1,0 +1,23 @@
+$primary: #FF8A00;
+$primaryColor: #FF8A00;
+$primaryColorAlt: #ffaa33;
+
+@mixin ScrollBar {
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $primaryColor;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: $primaryColorAlt;
+  }
+}

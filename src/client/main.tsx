@@ -16,7 +16,11 @@ import Terms from './pages/Terms';
 import './styles/global.scss';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  // Wait for auth to load from storage
+  if (isLoading) return <div>Loading...</div>;
+  
   if (!isAuthenticated) return <Navigate to="/login" />;
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/" />;
   return <>{children}</>;
@@ -39,8 +43,10 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/s/:code" element={<ShareView />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/servers/create" element={<ProtectedRoute roles={['admin', 'user']}><CreateServer /></ProtectedRoute>} />
-          <Route path="/servers/:id" element={<ProtectedRoute><ServerDetail /></ProtectedRoute>} />
+          <Route path="/create" element={<ProtectedRoute roles={['admin', 'user']}><CreateServer /></ProtectedRoute>} />
+          <Route path="/servers/:code" element={<ProtectedRoute><ServerDetail /></ProtectedRoute>} />
+          <Route path="/servers/:code/:tab" element={<ProtectedRoute><ServerDetail /></ProtectedRoute>} />
+          <Route path="/servers/:code/world/:shard/:subtab" element={<ProtectedRoute><ServerDetail /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Admin /></ProtectedRoute>} />
         </Route>

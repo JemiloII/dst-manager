@@ -91,7 +91,9 @@ export function parseModOverrides(lua: string): Record<string, { enabled: boolea
   }
 
   const mods: Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }> = {};
-  const modPattern = /\["(workshop-\d+)"\]\s*=\s*\{([\s\S]*?)\}/g;
+  
+  // More robust pattern that handles nested braces
+  const modPattern = /\["(workshop-\d+)"\]\s*=\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
   let match;
 
   while ((match = modPattern.exec(lua)) !== null) {

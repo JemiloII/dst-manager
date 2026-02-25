@@ -10,16 +10,16 @@ const world = new Hono();
 
 world.use('*', authMiddleware());
 
-world.get('/:serverId/:shard', async (c) => {
+world.get('/:code/:shard', async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const code = c.req.param('code');
   const shard = c.req.param('shard');
 
   if (shard !== 'Master' && shard !== 'Caves') {
     return c.json({ error: 'Invalid shard, must be Master or Caves' }, 400);
   }
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -29,7 +29,7 @@ world.get('/:serverId/:shard', async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   const filePath = path.join(clusterDir, shard, 'leveldataoverride.lua');
 
   try {
@@ -44,16 +44,16 @@ world.get('/:serverId/:shard', async (c) => {
   }
 });
 
-world.put('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
+world.put('/:code/:shard', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const code = c.req.param('code');
   const shard = c.req.param('shard');
 
   if (shard !== 'Master' && shard !== 'Caves') {
     return c.json({ error: 'Invalid shard, must be Master or Caves' }, 400);
   }
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -82,7 +82,7 @@ world.put('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
   const preset = shard === 'Caves' ? 'DST_CAVE' : 'ENDLESS';
   const content = generateLevelDataOverride(preset, location, finalOverrides);
 
-  const clusterDir = getClusterPath(server.kuid as string, serverId);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   await fs.writeFile(path.join(clusterDir, shard, 'leveldataoverride.lua'), content);
 
   return c.json({ success: true });

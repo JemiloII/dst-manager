@@ -104,7 +104,7 @@ servers.post('/', requireRole('admin', 'user'), async (c) => {
 
   const serverId = Number(result.lastInsertRowid);
 
-  await createServerFiles(kuid, serverId, clusterToken, portOffset, {
+  await createServerFiles(kuid, shareCode, clusterToken, portOffset, {
     name,
     description: description || '',
     gameMode: gameMode || 'survival',
@@ -116,11 +116,18 @@ servers.post('/', requireRole('admin', 'user'), async (c) => {
   return c.json({ id: serverId, shareCode }, 201);
 });
 
-servers.get('/:id', async (c) => {
+servers.get('/:code', async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -162,7 +169,7 @@ servers.put('/:id', requireRole('admin', 'user'), async (c) => {
     ],
   });
 
-  await updateClusterIni(server.kuid as string, id, server.port_offset as number, {
+  await updateClusterIni(server.kuid as string, server.share_code as string, server.port_offset as number, {
     name: name || (server.name as string),
     description: (description ?? server.description) as string,
     gameMode: gameMode || (server.game_mode as string),
@@ -192,7 +199,7 @@ servers.delete('/:id', requireRole('admin', 'user'), async (c) => {
     await stopServer(id);
   } catch {}
 
-  const clusterDir = getClusterPath(server.kuid as string, id);
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
   await fs.rm(clusterDir, { recursive: true, force: true });
 
   await db.execute({ sql: 'DELETE FROM mod_suggestions WHERE server_id = ?', args: [id] });
@@ -226,7 +233,7 @@ servers.post('/:id/start', requireRole('admin', 'user'), async (c) => {
   }
   
   try {
-    await startServer(id, server.kuid as string, server.cluster_token as string);
+    await startServer(id, server.kuid as string, server.share_code as string, server.cluster_token as string);
     return c.json({ success: true });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Failed to start server';
@@ -281,9 +288,25 @@ servers.post('/:id/command', requireRole('admin', 'user'), async (c) => {
   }
 });
 
-servers.get('/:id/events', (c) => {
-  const id = parseInt(c.req.param('id'));
-  return sseHandler(id)(c);
+servers.get('/:code/events', authMiddleware(), async (c) => {
+  const user = c.get('user') as JwtPayload;
+  const code = c.req.param('code');
+  
+  // Look up the server ID from the share code
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  if (result.rows.length === 0) {
+    return c.json({ error: 'Server not found' }, 404);
+  }
+  
+  const server = result.rows[0];
+  
+  // Check permissions
+  if (user.role !== 'admin' && user.role !== 'guest' && server.user_id !== user.id) {
+    return c.json({ error: 'Forbidden' }, 403);
+  }
+  
+  const serverId = server.id as number;
+  return sseHandler(serverId)(c);
 });
 
 export default servers;

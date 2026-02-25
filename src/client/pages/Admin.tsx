@@ -28,7 +28,7 @@ export default function Admin() {
 
       <div className="card">
         <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>
-          <img src="/button_icons/update.png" alt="" style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: '0.5rem' }} />
+          <img src="/images/button_icons/update.png" alt="" style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: '0.5rem' }} />
           Update DST Server
         </h3>
         <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '0.75rem' }}>

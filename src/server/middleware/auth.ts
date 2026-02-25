@@ -10,12 +10,25 @@ export interface JwtPayload {
 
 export function authMiddleware() {
   return async (c: Context, next: Next) => {
+    // Check Authorization header first
     const header = c.req.header('Authorization');
-    if (!header?.startsWith('Bearer ')) {
+    let token: string | undefined;
+    
+    if (header?.startsWith('Bearer ')) {
+      token = header.slice(7);
+    } else {
+      // For SSE, check query parameter
+      const queryToken = c.req.query('token');
+      if (queryToken) {
+        token = queryToken;
+      }
+    }
+    
+    if (!token) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
+    
     try {
-      const token = header.slice(7);
       const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
       c.set('user', payload);
       await next();

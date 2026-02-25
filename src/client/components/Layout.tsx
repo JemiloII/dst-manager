@@ -23,14 +23,14 @@ export default function Layout() {
             <>
               <Link to="/" className={isActive('/')}>Dashboard</Link>
               {user?.role !== 'guest' && (
-                <Link to="/servers/create" className={isActive('/servers/create')}>Create Server</Link>
+                <Link to="/create" className={isActive('/create')}>Create Server</Link>
               )}
               <Link to="/support" className={isActive('/support')}>Support</Link>
               {user?.role === 'admin' && (
                 <Link to="/admin" className={isActive('/admin')}>Admin</Link>
               )}
               <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
-                {user?.username} ({user?.role})
+                {user?.username}
               </span>
               <button onClick={handleLogout} className="icon-btn" style={{ color: '#ccc', fontSize: '0.85rem' }}>
                 Logout

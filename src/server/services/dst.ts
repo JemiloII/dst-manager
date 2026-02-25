@@ -3,7 +3,8 @@ import path from 'path';
 import { env } from '../env.js';
 
 export function extractKuid(clusterToken: string): string | null {
-  const match = clusterToken.match(/\^\^(KU_[A-Za-z0-9_-]+)\^\^/);
+  // KUID is everything between the ^ markers
+  const match = clusterToken.match(/\^([^\^]+)\^/);
   return match ? match[1] : null;
 }
 
@@ -29,13 +30,13 @@ export function getPortsForServer(portOffset: number) {
   };
 }
 
-export function getClusterPath(kuid: string, serverId: number): string {
-  return path.join(env.SERVERS_DIR, kuid, `Cluster_${serverId}`);
+export function getClusterPath(kuid: string, shareCode: string): string {
+  return path.join(env.SERVERS_DIR, shareCode);
 }
 
 export async function createServerFiles(
   kuid: string,
-  serverId: number,
+  shareCode: string,
   clusterToken: string,
   portOffset: number,
   config: {
@@ -47,7 +48,7 @@ export async function createServerFiles(
     password: string;
   }
 ) {
-  const clusterDir = getClusterPath(kuid, serverId);
+  const clusterDir = getClusterPath(kuid, shareCode);
   const ports = getPortsForServer(portOffset);
 
   await fs.cp(env.DST_TEMPLATE_DIR, clusterDir, { recursive: true });
@@ -81,7 +82,7 @@ shard_enabled = true
 bind_ip = 127.0.0.1
 master_ip = 127.0.0.1
 master_port = ${ports.masterPort}
-cluster_key = dst-manager-${serverId}
+cluster_key = dst-manager-${shareCode}
 `.trim() + '\n';
 
   await fs.writeFile(path.join(clusterDir, 'cluster.ini'), clusterIni);
@@ -120,7 +121,7 @@ authentication_port = ${ports.cavesAuthPort}
 
 export async function updateClusterIni(
   kuid: string,
-  serverId: number,
+  shareCode: string,
   portOffset: number,
   config: {
     name: string;
@@ -131,7 +132,7 @@ export async function updateClusterIni(
     password: string;
   }
 ) {
-  const clusterDir = getClusterPath(kuid, serverId);
+  const clusterDir = getClusterPath(kuid, shareCode);
   const ports = getPortsForServer(portOffset);
 
   const desc = config.description
@@ -158,7 +159,7 @@ shard_enabled = true
 bind_ip = 127.0.0.1
 master_ip = 127.0.0.1
 master_port = ${ports.masterPort}
-cluster_key = dst-manager-${serverId}
+cluster_key = dst-manager-${shareCode}
 `.trim() + '\n';
 
   await fs.writeFile(path.join(clusterDir, 'cluster.ini'), clusterIni);
@@ -170,3 +171,4 @@ export async function updateModsSetup(workshopIds: string[]) {
   const content = lines.join('\n') + '\n';
   await fs.writeFile(path.join(modsDir, 'dedicated_server_mods_setup.lua'), content);
 }
+// Test HMR

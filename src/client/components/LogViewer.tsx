@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 
 interface Props {
-  serverId: number;
+  serverId: string;
 }
 
 export default function LogViewer({ serverId }: Props) {
@@ -52,7 +52,7 @@ export default function LogViewer({ serverId }: Props) {
           <button className={shard === 'Caves' ? 'active' : ''} onClick={() => setShard('Caves')}>Caves</button>
         </div>
         <button onClick={handleClear} style={{ fontSize: '0.85rem' }}>
-          <img src="/button_icons/clean_all.png" alt="" style={{ width: 16, height: 16, verticalAlign: 'middle', marginRight: '0.25rem' }} />
+          <img src="/images/button_icons/clean_all.png" alt="" style={{ width: 16, height: 16, verticalAlign: 'middle', marginRight: '0.25rem' }} />
           Clear
         </button>
       </div>

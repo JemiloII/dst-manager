@@ -7,7 +7,7 @@ export default function CreateServer() {
   const [name, setName] = useState('');
   const [clusterToken, setClusterToken] = useState('');
   const [description, setDescription] = useState('');
-  const [gameMode, setGameMode] = useState('survival');
+  const [gameMode, setGameMode] = useState('endless');
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [pvp, setPvp] = useState(false);
   const [password, setPassword] = useState('');
@@ -37,10 +37,10 @@ export default function CreateServer() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto' }}>
-      <h1 style={{ color: '#fff' }}>Create Server</h1>
+    <div className="create-server-container">
+      <h1>Create Server</h1>
       <div className="card">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="create-server-form">
           <div className="form-group">
             <label htmlFor="name">Server Name</label>
             <input
@@ -53,12 +53,66 @@ export default function CreateServer() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="clusterToken">Cluster Token</label>
-            <textarea
+            <label htmlFor="clusterToken" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Cluster Token
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <button
+                  type="button"
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #FF8A00',
+                    borderRadius: '50%',
+                    width: '20px',
+                    height: '20px',
+                    fontSize: '12px',
+                    color: '#FF8A00',
+                    cursor: 'help',
+                    padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    if (tooltip) (tooltip as HTMLElement).style.display = 'block';
+                  }}
+                  onMouseLeave={(e) => {
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    if (tooltip) (tooltip as HTMLElement).style.display = 'none';
+                  }}
+                >
+                  ?
+                </button>
+                <div
+                  style={{
+                    position: 'absolute',
+                    display: 'none',
+                    top: '30px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    background: 'rgba(0, 0, 0, 0.95)',
+                    border: '1px solid #FF8A00',
+                    borderRadius: '8px',
+                    padding: '0.5rem',
+                    minWidth: '400px',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
+                  <p style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '0.85rem' }}>Where to find your cluster token:</p>
+                  <img
+                    src="/images/dst_cluster_token_example.png"
+                    alt="Cluster Token Example"
+                    style={{ width: '100%', borderRadius: '4px' }}
+                  />
+                </div>
+              </div>
+            </label>
+            <input
               id="clusterToken"
+              type="text"
               value={clusterToken}
               onChange={(e) => setClusterToken(e.target.value)}
-              rows={3}
               required
               placeholder="Paste your cluster token here"
             />
@@ -77,11 +131,12 @@ export default function CreateServer() {
 
           <div className="form-group">
             <label htmlFor="description">Description (optional)</label>
-            <input
+            <textarea
               id="description"
-              type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder="Server description"
             />
           </div>
 
@@ -107,13 +162,13 @@ export default function CreateServer() {
           </div>
 
           <div className="form-group">
-            <label>
+            <label className="checkbox-label">
+              <span>PvP Enabled</span>
               <input
                 type="checkbox"
                 checked={pvp}
                 onChange={(e) => setPvp(e.target.checked)}
               />
-              PvP Enabled
             </label>
           </div>
 

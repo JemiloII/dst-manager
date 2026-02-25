@@ -14,7 +14,7 @@ interface Suggestion {
 }
 
 interface Props {
-  serverId: number;
+  serverId: string;
   isOwner: boolean;
 }
 

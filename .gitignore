@@ -4,6 +4,7 @@
 *.iml
 
 servers/
+scripts/
 node_modules/
 dist/
 .env

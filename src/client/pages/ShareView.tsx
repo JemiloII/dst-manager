@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../stores/auth';
+import { useAuth } from '../stores/Auth';
 
 interface SharedServer {
   id: number;

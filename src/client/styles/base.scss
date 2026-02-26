@@ -56,7 +56,7 @@ button, .btn {
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: darken($primary, 10%);
+    background-color: #e67a00;
   }
   
   &:disabled {
@@ -68,7 +68,7 @@ button, .btn {
     background-color: #6c757d;
     
     &:hover {
-      background-color: darken(#6c757d, 10%);
+      background-color: #565e64;
     }
   }
   
@@ -76,7 +76,7 @@ button, .btn {
     background-color: #dc3545;
     
     &:hover {
-      background-color: darken(#dc3545, 10%);
+      background-color: #c82333;
     }
   }
   
@@ -84,7 +84,7 @@ button, .btn {
     background-color: #28a745;
     
     &:hover {
-      background-color: darken(#28a745, 10%);
+      background-color: #218838;
     }
   }
   

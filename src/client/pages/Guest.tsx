@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../stores/auth';
+import { useAuth } from '../stores/Auth';
 
 export default function Guest() {
   const [displayName, setDisplayName] = useState('');

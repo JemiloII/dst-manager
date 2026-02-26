@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useServers } from '../stores/servers';
-import { useAuth } from '../stores/auth';
+import { useServers } from '../stores/Servers';
+import { useAuth } from '../stores/Auth';
 import { api } from '../api';
 
 export default function Dashboard() {

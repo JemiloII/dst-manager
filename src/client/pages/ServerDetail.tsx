@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../stores/auth';
+import { useAuth } from '../stores/Auth';
 import WorldSettings from '../components/WorldSettings';
 import ModManager from '../components/ModManager';
 import LogViewer from '../components/LogViewer';

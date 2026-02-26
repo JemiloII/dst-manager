@@ -1,7 +1,7 @@
 import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './stores/auth';
+import { useAuth } from './stores/Auth';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';

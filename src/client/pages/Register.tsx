@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../stores/auth';
+import { useAuth } from '../stores/Auth';
 
 export default function Register() {
   const [username, setUsername] = useState('');

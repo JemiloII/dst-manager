@@ -313,7 +313,7 @@
           "label": "Hunts",
           "options": ["None", "Little", "Default", "More", "Tons"],
           "mappings": ["never", "rare", "default", "often", "always"],
-          "icon": "koalafants.png",
+          "icon": "tracks.png",
           "override": "hunt"
         },
         {
@@ -918,7 +918,7 @@
           "label": "Biomes",
           "options": ["Together", "Classic"],
           "mappings": ["default", "classic"],
-          "icon": "biomes.png",
+          "icon": "world_map.png",
           "override": "biomes"
         },
         {
@@ -1720,7 +1720,7 @@
           "label": "Biomes",
           "options": ["Underground"],
           "mappings": ["default"],
-          "icon": "biomes.png",
+          "icon": "world_map.png",
           "override": "biomes"
         },
         {

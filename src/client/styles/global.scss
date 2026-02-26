@@ -3,7 +3,7 @@
 
 :root {
   --pico-primary: #{$primary};
-  --pico-primary-hover: #{darken($primary, 10%)};
+  --pico-primary-hover: #e67a00;
   --pico-primary-focus: #{rgba($primary, 0.25)};
   --pico-primary-inverse: #fff;
 }

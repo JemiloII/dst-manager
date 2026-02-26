@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
-import { useAuth } from '../stores/auth';
+import { useAuth } from '../stores/Auth';
 
 interface Suggestion {
   id: number;

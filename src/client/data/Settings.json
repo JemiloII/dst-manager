@@ -4,525 +4,902 @@
       "Global": [
         {
           "label": "Events",
-          "options": ["None", "Auto"]
+          "options": ["None", "Auto"],
+          "mappings": ["never", "default"],
+          "icon": "events.png",
+          "override": "events"
         },
         {
           "label": "Autumn",
-          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"],
+          "mappings": ["noseason", "veryshortseason", "shortseason", "default", "longseason", "verylongseason", "random"],
+          "icon": "autumn.png",
+          "override": "autumn"
         },
         {
           "label": "Winter",
-          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"],
+          "mappings": ["noseason", "veryshortseason", "shortseason", "default", "longseason", "verylongseason", "random"],
+          "icon": "winter.png",
+          "override": "winter"
         },
         {
           "label": "Spring",
-          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"],
+          "mappings": ["noseason", "veryshortseason", "shortseason", "default", "longseason", "verylongseason", "random"],
+          "icon": "spring.png",
+          "override": "spring"
         },
         {
           "label": "Summer",
-          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"],
+          "mappings": ["noseason", "veryshortseason", "shortseason", "default", "longseason", "verylongseason", "random"],
+          "icon": "summer.png",
+          "override": "summer"
         },
         {
           "label": "Day Type",
-          "options": ["Default", "Long Day", "Long Dusk", "Long Night", "No Day", "No Dusk", "No Night", "Only Day", "Only Dusk", "Only Night"]
+          "options": ["Default", "Long Day", "Long Dusk", "Long Night", "No Day", "No Dusk", "No Night", "Only Day", "Only Dusk", "Only Night"],
+          "mappings": ["default", "longday", "longdusk", "longnight", "noday", "nodusk", "nonight", "onlyday", "onlydusk", "onlynight"],
+          "icon": "day.png",
+          "override": "day"
         },
         {
           "label": "Spawn Mode",
-          "options": ["Florid Postern", "Random"]
+          "options": ["Florid Postern", "Random"],
+          "mappings": ["fixed", "scatter"],
+          "icon": "spawnmode.png",
+          "override": "spawnmode"
         },
         {
           "label": "Survivor Death",
-          "options": ["Change Survivor", "Become a Ghost"]
+          "options": ["Change Survivor", "Become a Ghost"],
+          "mappings": ["none", "always"],
+          "icon": "ghostenabled.png",
+          "override": "ghostenabled"
         },
         {
           "label": "Revive At Florid Postern",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "portalresurection.png",
+          "override": "portalresurection"
         },
         {
           "label": "Ghost Sanity Drain",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "ghostsanitydrain.png",
+          "override": "ghostsanitydrain"
         },
         {
           "label": "Death Reset Timer",
-          "options": ["Disabled", "Slow", "Default", "Fast", "Instant"]
+          "options": ["Disabled", "Slow", "Default", "Fast", "Instant"],
+          "mappings": ["none", "slow", "default", "fast", "always"],
+          "icon": "resettime.png",
+          "override": "resettime"
         },
         {
           "label": "Beefalo Mating Frequency",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "beefaloheat.png",
+          "override": "beefaloheat"
         },
         {
           "label": "Krampii",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "krampus.png",
+          "override": "krampus"
         }
       ],
       "Events": [
         {
           "label": "Midsummer Cawnival",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "crowcarnival.png",
+          "override": "crowcarnival"
         },
         {
           "label": "Hallowed Nights",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "hallowednights.png",
+          "override": "hallowednights"
         },
         {
           "label": "Winter's Feast",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "wintersfeast.png",
+          "override": "wintersfeast"
         },
         {
           "label": "Year of the Gobbler",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "perdshrine.png",
+          "override": "perdshrine"
         },
         {
           "label": "Year of the Varg",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "wargshrine.png",
+          "override": "wargshrine"
         },
         {
           "label": "Year of the Pig King",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "pigshrine.png",
+          "override": "pigshrine"
         },
         {
           "label": "Year of the Carrat",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yotc_carratshrine.png",
+          "override": "yotc_carratshrine"
         },
         {
           "label": "Year of the Beefalo",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yotb_beefaloshrine.png",
+          "override": "yotb_beefaloshrine"
         },
         {
           "label": "Year of the Catcoon",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yot_catcoonshrine.png",
+          "override": "yot_catcoonshrine"
         },
         {
           "label": "Year of the Bunnyman",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yotr_rabbitshrine.png",
+          "override": "yotr_rabbitshrine"
         },
         {
           "label": "Year of the Dragonfly",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yotd_dragonshrine.png",
+          "override": "yotd_dragonshrine"
         },
         {
           "label": "Year of the Depths Worm",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yots_wormshrine.png",
+          "override": "yots_wormshrine"
         },
         {
           "label": "Year of the Clockwork Knight",
-          "options": ["Default", "Always"]
+          "options": ["Default", "Always"],
+          "mappings": ["default", "always"],
+          "icon": "yoth_knightshrine.png",
+          "override": "yoth_knightshrine"
         }
       ],
       "Survivors": [
         {
           "label": "Extra Starting Resources",
-          "options": ["Always", "After Day 5", "After Day 10", "After Day 15", "After Day 20", "Never"]
+          "options": ["Always", "After Day 5", "After Day 10", "After Day 15", "After Day 20", "Never"],
+          "mappings": ["always", "5", "10", "15", "20", "never"],
+          "icon": "extrastartingitems.png",
+          "override": "extrastartingitems"
         },
         {
           "label": "Seasonal Starting Items",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "seasonalstartingitems.png",
+          "override": "seasonalstartingitems"
         },
         {
           "label": "Griefer Spawn Protection",
-          "options": ["None", "Auto Detect", "Always"]
+          "options": ["None", "Auto Detect", "Always"],
+          "mappings": ["never", "default", "always"],
+          "icon": "spawnprotection.png",
+          "override": "spawnprotection"
         },
         {
           "label": "Drop Items on Disconnect",
-          "options": ["Default", "Everything"]
+          "options": ["Default", "Everything"],
+          "mappings": ["default", "always"],
+          "icon": "dropeverythingondespawn.png",
+          "override": "dropeverythingondespawn"
         },
         {
           "label": "Max Health Penalty",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "healthpenalty.png",
+          "override": "healthpenalty"
         },
         {
           "label": "Damage Taken",
-          "options": ["Less", "Default", "More"]
+          "options": ["Less", "Default", "More"],
+          "mappings": ["less", "default", "more"],
+          "icon": "lessdamagetaken.png",
+          "override": "lessdamagetaken"
         },
         {
           "label": "Temperature Damage",
-          "options": ["Nonlethal", "Default"]
+          "options": ["Nonlethal", "Default"],
+          "mappings": ["nonlethal", "default"],
+          "icon": "temperaturedamage.png",
+          "override": "temperaturedamage"
         },
         {
           "label": "Hunger Damage",
-          "options": ["Nonlethal", "Default"]
+          "options": ["Nonlethal", "Default"],
+          "mappings": ["nonlethal", "default"],
+          "icon": "hunger.png",
+          "override": "hunger"
         },
         {
           "label": "Darkness Damage",
-          "options": ["Nonlethal", "Default"]
+          "options": ["Nonlethal", "Default"],
+          "mappings": ["nonlethal", "default"],
+          "icon": "darkness.png",
+          "override": "darkness"
         },
         {
           "label": "Sanity Monsters",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "shadowcreatures.png",
+          "override": "shadowcreatures"
         },
         {
           "label": "Enlightenment Monsters",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "brightmarecreatures.png",
+          "override": "brightmarecreatures"
         }
       ],
       "World": [
         {
           "label": "Hound Attacks",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "hounds.png",
+          "override": "hounds"
         },
         {
           "label": "Ice Hound Waves",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "winterhounds.png",
+          "override": "winterhounds"
         },
         {
           "label": "Fire Hound Waves",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "summerhounds.png",
+          "override": "summerhounds"
         },
         {
           "label": "Forest Petrification",
-          "options": ["None", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["none", "slow", "default", "fast", "veryfast"],
+          "icon": "petrified_tree.png",
+          "override": "petrification"
         },
         {
           "label": "Frog Rain",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "frog_rain.png",
+          "override": "frograin"
         },
         {
           "label": "Hunt Surprises",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "alternatehunt.png",
+          "override": "alternatehunt"
         },
         {
           "label": "Hunts",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "koalafants.png",
+          "override": "hunt"
         },
         {
           "label": "Lightning",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lightning.png",
+          "override": "lightning"
         },
         {
           "label": "Lunar Hail",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lunar_hail.png",
+          "override": "lunarhail_frequency"
         },
         {
           "label": "Meteor Frequency",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "meteor.png",
+          "override": "meteorshowers"
         },
         {
           "label": "Rain",
-          "options": ["None", "Less", "Default", "More", "Lots"]
+          "options": ["None", "Less", "Default", "More", "Lots"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "rain.png",
+          "override": "weather"
         },
         {
           "label": "Wandering Trader",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "wanderingtrader.png",
+          "override": "wanderingtrader_enabled"
         },
         {
           "label": "Wild Rift Frequency",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "shadowrift_portal.png",
+          "override": "rifts_frequency"
         },
         {
           "label": "Wild Rifts",
-          "options": ["None", "Auto Detect", "Always"]
+          "options": ["None", "Auto Detect", "Always"],
+          "mappings": ["never", "default", "always"],
+          "icon": "shadowrift_portal.png",
+          "override": "rifts_enabled"
         },
         {
           "label": "Wildfires",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "burntground.png",
+          "override": "wildfires"
         }
       ],
       "Resource Regrowth": [
         {
           "label": "Regrowth Multiplier",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "regrowth.png",
+          "override": "regrowth"
         },
         {
           "label": "Basic Resources",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "basicresource_regrowth.png",
+          "override": "basicresource_regrowth"
         },
         {
           "label": "Birchnut Trees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "deciduoustree.png",
+          "override": "deciduoustree_regrowth"
         },
         {
           "label": "Cacti",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "cactus.png",
+          "override": "cactus_regrowth"
         },
         {
           "label": "Carrots",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "carrots.png",
+          "override": "carrots_regrowth"
         },
         {
           "label": "Evergreens",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "evergreen.png",
+          "override": "evergreen_regrowth"
         },
         {
           "label": "Flowers",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "flowers.png",
+          "override": "flowers_regrowth"
         },
         {
           "label": "Lune Trees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "moon_tree.png",
+          "override": "moon_tree_regrowth"
         },
         {
           "label": "Palmcone Tree",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "palmconetree.png",
+          "override": "palmconetree_regrowth"
         },
         {
           "label": "Reeds",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "reeds.png",
+          "override": "reeds_regrowth"
         },
         {
           "label": "Salt Formations",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "saltstack.png",
+          "override": "saltstack_regrowth"
         },
         {
           "label": "Twiggy Trees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "twiggytrees.png",
+          "override": "twiggytrees_regrowth"
         }
       ],
       "Unnatural Portal Resources": [
         {
           "label": "Banana Bushes",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "bananabush.png",
+          "override": "bananabush_portalrate"
         },
         {
           "label": "Crustashines",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lightcrab.png",
+          "override": "lightcrab_portalrate"
         },
         {
           "label": "Monkeytails",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "monkeytail.png",
+          "override": "monkeytail_portalrate"
         },
         {
           "label": "Palmcone Sprouts",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "palmcone_seed.png",
+          "override": "palmcone_seed_portalrate"
         },
         {
           "label": "Portal Activity",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lunarrift_portal.png",
+          "override": "portal_spawnrate"
         },
         {
           "label": "Powder Monkeys",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "powder_monkey.png",
+          "override": "powder_monkey_portalrate"
         }
       ],
       "Creatures": [
         {
           "label": "Bees",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "bees.png",
+          "override": "bees_setting"
         },
         {
           "label": "Birds",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "birds.png",
+          "override": "birds"
         },
         {
           "label": "Bunnymen",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "bunnymen.png",
+          "override": "bunnymen_setting"
         },
         {
           "label": "Butterflies",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "butterfly.png",
+          "override": "butterfly"
         },
         {
           "label": "Catcoons",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "catcoons.png",
+          "override": "catcoons"
         },
         {
           "label": "Gnarwails",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "gnarwail.png",
+          "override": "gnarwail"
         },
         {
           "label": "Gobblers",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "perd.png",
+          "override": "perd"
         },
         {
           "label": "Grass Gekko Morphing",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "grassgekkos.png",
+          "override": "grassgekkos"
         },
         {
           "label": "Marotters",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "otter.png",
+          "override": "otters_setting"
         },
         {
           "label": "Moles",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "moles.png",
+          "override": "moles_setting"
         },
         {
           "label": "Pengulls",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "pengull.png",
+          "override": "penguins"
         },
         {
           "label": "Pigs",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "pigs.png",
+          "override": "pigs_setting"
         },
         {
           "label": "Rabbits",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "rabbits.png",
+          "override": "rabbits_setting"
         },
         {
           "label": "Schools of Fish",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "fishschool.png",
+          "override": "fishschools"
         },
         {
           "label": "Wobsters",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "wobsters.png",
+          "override": "wobsters"
         }
       ],
       "Hostile Creatures": [
         {
           "label": "Bats",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "bats.png",
+          "override": "bats_setting"
         },
         {
           "label": "Cookie Cutters",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "cookiecutters.png",
+          "override": "cookiecutters"
         },
         {
           "label": "Frogs",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "frogs.png",
+          "override": "frogs"
         },
         {
           "label": "Hounds",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "hounds.png"
         },
         {
           "label": "Killer Bees",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "wasps.png",
+          "override": "wasps"
         },
         {
           "label": "Lureplants",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lureplants.png",
+          "override": "lureplants"
         },
         {
           "label": "MacTusk",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "mactusk.png",
+          "override": "walrus_setting"
         },
         {
           "label": "Merms",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "merms.png",
+          "override": "merms"
         },
         {
           "label": "Moon Quay Pirates",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "pirateattacks.png",
+          "override": "pirateraids"
         },
         {
           "label": "Mosquitos",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "mosquitos.png",
+          "override": "mosquitos"
         },
         {
           "label": "Sharks",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "sharks.png",
+          "override": "sharks"
         },
         {
           "label": "Skittersquids",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "squid.png",
+          "override": "squid"
         },
         {
           "label": "Spider Warriors",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "spider_warriors.png",
+          "override": "spider_warriors"
         },
         {
           "label": "Spiders",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "spiders.png",
+          "override": "spiders_setting"
         }
       ],
       "Giants": [
         {
           "label": "Antlion Tribute",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "antlion_tribute.png",
+          "override": "antliontribute"
         },
         {
           "label": "Bearger",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "bearger.png",
+          "override": "bearger"
         },
         {
           "label": "Bee Queen",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "beequeen.png",
+          "override": "beequeen"
         },
         {
           "label": "Crabking",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "crabking.png",
+          "override": "crabking"
         },
         {
           "label": "Deerclops",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "deerclops.png",
+          "override": "deerclops"
         },
         {
           "label": "Dragonfly",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "dragonfly.png",
+          "override": "dragonfly"
         },
         {
           "label": "Eye of Terror",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "eyeofterror.png",
+          "override": "eyeofterror"
         },
         {
           "label": "Frostjaw",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "sharkboi.png",
+          "override": "sharkboi"
         },
         {
           "label": "Klaus",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "klaus.png",
+          "override": "klaus"
         },
         {
           "label": "Lord of the Fruit Flies",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "fruitfly.png",
+          "override": "fruitfly"
         },
         {
           "label": "Malbatross",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "malbatross.png",
+          "override": "malbatross"
         },
         {
           "label": "Meese/Geese",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "goosemoose.png",
+          "override": "goosemoose"
         },
         {
           "label": "Poison Birchnut Trees",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "deciduouspoison.png",
+          "override": "deciduousmonster"
         },
         {
           "label": "Scrappy Werepig",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "daywalker.png",
+          "override": "daywalker"
         },
         {
           "label": "Spider Queen",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "spiderqueen.png",
+          "override": "spiderqueen"
         },
         {
           "label": "Treeguards",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "liefs.png",
+          "override": "liefs"
         }
       ],
       "Lunar Mutations": [
         {
           "label": "Armored Bearger",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_bearger.png",
+          "override": "mutated_bearger"
         },
         {
           "label": "Bright-Beaked Birds",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_birds.png",
+          "override": "mutated_birds"
         },
         {
           "label": "Crystal Deerclops",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_deerclops.png",
+          "override": "mutated_deerclops"
         },
         {
           "label": "Crystal-Crested Buzzards",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_buzzard_gestalt.png",
+          "override": "mutated_buzzard_gestalt"
         },
         {
           "label": "Horror Hounds",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_hounds.png",
+          "override": "mutated_hounds"
         },
         {
           "label": "Mutated Birds",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_birds.png",
+          "override": "mutated_birds"
         },
         {
           "label": "Mutated Merms",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_merm.png",
+          "override": "mutated_merm"
         },
         {
           "label": "Permafrost Pengulls",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "moon_pengull.png",
+          "override": "penguins_moon"
         },
         {
           "label": "Possessed Vargs",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_warg.png",
+          "override": "mutated_warg"
         },
         {
           "label": "Shattered Spider Holes",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "moon_spider.png",
+          "override": "moon_spider"
         },
         {
           "label": "Shattered Spiders",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "moon_spiders.png",
+          "override": "moon_spider"
         }
       ]
     },
@@ -530,267 +907,458 @@
       "Global": [
         {
           "label": "Starting Season",
-          "options": ["Autumn", "Winter", "Spring", "Summer", "Autumn or Spring", "Winter or Summer", "Random"]
+          "options": ["Autumn", "Winter", "Spring", "Summer", "Autumn or Spring", "Winter or Summer", "Random"],
+          "mappings": ["default", "winter", "spring", "summer", "autumnorspring", "winterorsummer", "random"],
+          "icon": "season_start.png",
+          "override": "season_start"
         }
       ],
       "World": [
         {
           "label": "Biomes",
-          "options": ["Together", "Classic"]
+          "options": ["Together", "Classic"],
+          "mappings": ["default", "classic"],
+          "icon": "biomes.png",
+          "override": "biomes"
         },
         {
           "label": "Spawn Area",
-          "options": ["Plus", "Dark", "Default"]
+          "options": ["Plus", "Dark", "Default"],
+          "mappings": ["plus", "darkness", "default"],
+          "icon": "world_start.png",
+          "override": "start_location"
         },
         {
           "label": "World Size",
-          "options": ["Small", "Medium", "Large", "Huge"]
+          "options": ["Small", "Medium", "Large", "Huge"],
+          "mappings": ["small", "medium", "default", "huge"],
+          "icon": "world_size.png",
+          "override": "world_size"
         },
         {
           "label": "Branches",
-          "options": ["Never", "Least", "Default", "Most", "Random"]
+          "options": ["Never", "Least", "Default", "Most", "Random"],
+          "mappings": ["never", "least", "default", "most", "random"],
+          "icon": "world_branching.png",
+          "override": "branching"
         },
         {
           "label": "Loops",
-          "options": ["Never", "Default", "Always"]
+          "options": ["Never", "Default", "Always"],
+          "mappings": ["never", "default", "always"],
+          "icon": "world_loop.png",
+          "override": "loop"
         },
         {
           "label": "Roads",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "roads.png",
+          "override": "roads"
         },
         {
           "label": "Touch Stones",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "touchstone.png",
+          "override": "touchstone"
         },
         {
           "label": "Failed Survivors",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "skeletons.png",
+          "override": "boons"
         },
         {
           "label": "Starting Resource Variety",
-          "options": ["None", "Less", "Default", "Highly Random"]
+          "options": ["None", "Less", "Default", "Highly Random"],
+          "mappings": ["none", "less", "default", "highly random"],
+          "icon": "starting_variety.png",
+          "override": "prefabswaps_start"
         },
         {
           "label": "Celestial Fissures",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_fissure.png",
+          "override": "moon_fissure"
         },
         {
           "label": "JIMBO",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "balatro_machine.png",
+          "override": "junkyard"
         },
         {
           "label": "Junk Yard",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "junkyard.png",
+          "override": "junkyard"
         },
         {
           "label": "Stage Plays",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "stageplays.png",
+          "override": "stageplays"
         },
         {
           "label": "Terrarium",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "terrarium.png",
+          "override": "terrariumchest"
         }
       ],
       "Resources": [
         {
           "label": "Anenemies",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_waterplant.png",
+          "override": "ocean_waterplant"
         },
         {
           "label": "Beached Bull Kelp",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_bullkelp.png",
+          "override": "ocean_bullkelp"
         },
         {
           "label": "Berry Bushes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "berrybush.png",
+          "override": "berrybush"
         },
         {
           "label": "Boulders",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "rock.png",
+          "override": "rock"
         },
         {
           "label": "Bull Kelp",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_bullkelp.png",
+          "override": "ocean_bullkelp"
         },
         {
           "label": "Cacti",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "cactus.png",
+          "override": "cactus_regrowth"
         },
         {
           "label": "Carrots",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "carrots.png",
+          "override": "carrots_regrowth"
         },
         {
           "label": "Flint",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "flint.png",
+          "override": "flint"
         },
         {
           "label": "Flowers, Evil Flowers",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "flowers.png",
+          "override": "flowers_regrowth"
         },
         {
           "label": "Grass",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "grass.png",
+          "override": "grass"
         },
         {
           "label": "Hot Springs",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_hotspring.png",
+          "override": "moon_hotspring"
         },
         {
           "label": "Lunar Rocks",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_rock.png",
+          "override": "moon_rock"
         },
         {
           "label": "Lunar Saplings",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_sapling.png",
+          "override": "moon_sapling"
         },
         {
           "label": "Lune Trees",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_tree.png",
+          "override": "moon_tree_regrowth"
         },
         {
           "label": "Meteor Fields",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "meteor.png",
+          "override": "meteorshowers"
         },
         {
           "label": "Mini Glaciers",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "iceboulder.png",
+          "override": "rock_ice"
         },
         {
           "label": "Mushrooms",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "mushrooms.png"
         },
         {
           "label": "Palmcone Tree",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "palmconetree.png",
+          "override": "palmconetree_regrowth"
         },
         {
           "label": "Ponds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ponds.png",
+          "override": "ponds"
         },
         {
           "label": "Reeds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "reeds.png",
+          "override": "reeds_regrowth"
         },
         {
           "label": "Saplings",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "sapling.png",
+          "override": "sapling"
         },
         {
           "label": "Sea Stacks",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_seastack.png",
+          "override": "ocean_seastack"
         },
         {
           "label": "Spiky Bushes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "marsh_bush.png",
+          "override": "marshbush"
         },
         {
           "label": "Stone Fruit Bushes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_berrybush.png",
+          "override": "moon_berrybush"
         },
         {
           "label": "Trees (All)",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "trees.png",
+          "override": "trees"
         },
         {
           "label": "Tumbleweeds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "tumbleweeds.png",
+          "override": "tumbleweed"
         }
       ],
       "Creatures and Spawners": [
         {
           "label": "Bee Hives",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "beehive.png",
+          "override": "bees"
         },
         {
           "label": "Beefalos",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "beefalo.png",
+          "override": "beefalo"
         },
         {
           "label": "Buzzards",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "buzzard.png",
+          "override": "buzzard"
         },
         {
           "label": "Carrats",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_carrot.png",
+          "override": "moon_carrot"
         },
         {
           "label": "Hollow Stump",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "catcoonden.png",
+          "override": "catcoon"
         },
         {
           "label": "Marotter Dens",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_otterdens.png",
+          "override": "ocean_otterdens"
         },
         {
           "label": "Mole Burrows",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "molehill.png",
+          "override": "moles"
         },
         {
           "label": "Pig Houses",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "pighouse.png",
+          "override": "pigs"
         },
         {
           "label": "Rabbit Holes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "rabbithole.png",
+          "override": "rabbits"
         },
         {
           "label": "Saladmander",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_fruitdragon.png",
+          "override": "moon_fruitdragon"
         },
         {
           "label": "Shoals",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_shoal.png",
+          "override": "ocean_shoal"
         },
         {
           "label": "Volt Goats",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "lightning_goat.png",
+          "override": "lightninggoat"
         },
         {
           "label": "Wobster Mounds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_wobsterden.png",
+          "override": "ocean_wobsterden"
         }
       ],
       "Hostile Creatures and Spawners": [
         {
           "label": "Clockworks",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "chess_monsters.png",
+          "override": "chess"
         },
         {
           "label": "Hound Mounds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "houndmound.png",
+          "override": "houndmound"
         },
         {
           "label": "Killer Bee Hives",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "wasphive.png",
+          "override": "angrybees"
         },
         {
           "label": "Leaky Shack",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_waterplant.png",
+          "override": "ocean_waterplant"
         },
         {
           "label": "MacTusk Camps",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "mactuskcamp.png",
+          "override": "walrus"
         },
         {
           "label": "Sea Weeds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ocean_waterplant.png",
+          "override": "ocean_waterplant"
         },
         {
           "label": "Shattered Spider Holes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "moon_spider.png",
+          "override": "moon_spider"
         },
         {
           "label": "Spider Dens",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "spiderden.png",
+          "override": "spiders"
         },
         {
           "label": "Tallbirds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "tallbirdnest.png",
+          "override": "tallbirds"
         },
         {
           "label": "Tentacles",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "tentacles.png",
+          "override": "tentacles"
         }
       ]
     }
@@ -800,205 +1368,349 @@
       "World": [
         {
           "label": "Acid Rain",
-          "options": ["Disabled", "Enabled"]
+          "options": ["Disabled", "Enabled"],
+          "mappings": ["never", "always"],
+          "icon": "acid_rain.png",
+          "override": "acidrain_enabled"
         },
         {
           "label": "Ancient Gateway",
-          "options": ["Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "atriumgate.png",
+          "override": "atriumgate"
         },
         {
           "label": "Cave Worm Attacks",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "wormattacks.png",
+          "override": "wormattacks"
         },
         {
           "label": "Earthquakes",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "earthquakes.png",
+          "override": "earthquakes"
         },
         {
           "label": "Great Worm",
-          "options": ["Never", "Rare", "Default", "Often", "Always"]
+          "options": ["Never", "Rare", "Default", "Often", "Always"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "wormattacks_boss.png",
+          "override": "wormattacks_boss"
         },
         {
           "label": "Rain",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "rain.png",
+          "override": "weather"
         },
         {
           "label": "Wild Rift Frequency",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "shadowrift_portal.png",
+          "override": "rifts_frequency"
         },
         {
           "label": "Wild Rifts",
-          "options": ["None", "Auto Detect", "Always"]
+          "options": ["None", "Auto Detect", "Always"],
+          "mappings": ["never", "default", "always"],
+          "icon": "shadowrift_portal.png",
+          "override": "rifts_enabled"
         }
       ],
       "Resource Regrowth": [
         {
           "label": "Regrowth Multiplier",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "regrowth.png",
+          "override": "regrowth"
         },
         {
           "label": "Boulderboughs",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "tree_rock.png",
+          "override": "tree_rock_regrowth"
         },
         {
           "label": "Evergreens",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "evergreen.png",
+          "override": "evergreen_regrowth"
         },
         {
           "label": "Light Flower",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "flower_cave.png",
+          "override": "flower_cave_regrowth"
         },
         {
           "label": "Lightbug Flower",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "lightflier_flower.png",
+          "override": "lightflier_flower_regrowth"
         },
         {
           "label": "Lunar Mushtrees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "mushtree_moon.png",
+          "override": "mushtree_moon_regrowth"
         },
         {
           "label": "Mushroom Trees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "mushtree.png",
+          "override": "mushtree_regrowth"
         },
         {
           "label": "Reeds",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "reeds.png",
+          "override": "reeds_regrowth"
         },
         {
           "label": "Twiggy Trees",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "twiggytrees.png",
+          "override": "twiggytrees_regrowth"
         }
       ],
       "Creatures": [
         {
           "label": "Bulbous Lightbugs",
-          "options": ["None", "Little", "Default", "More", "Tons"]
+          "options": ["None", "Little", "Default", "More", "Tons"],
+          "mappings": ["never", "rare", "default", "often", "always"],
+          "icon": "lightfliers.png",
+          "override": "lightfliers"
         },
         {
           "label": "Bunnymen",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "bunnymen.png",
+          "override": "bunnymen_setting"
         },
         {
           "label": "Dust Moths",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "dustmoths.png",
+          "override": "dustmoths"
         },
         {
           "label": "Grass Gekko Morphing",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "grassgekkos.png",
+          "override": "grassgekkos"
         },
         {
           "label": "Moles",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "moles.png",
+          "override": "moles_setting"
         },
         {
           "label": "Mush Gnomes",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "mushgnome.png",
+          "override": "mushgnome"
         },
         {
           "label": "Pigs",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "pigs.png",
+          "override": "pigs_setting"
         },
         {
           "label": "Rock Lobsters",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "rocky.png",
+          "override": "rocky_setting"
         },
         {
           "label": "Slurtles",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "slurtles.png",
+          "override": "slurtles_setting"
         },
         {
           "label": "Snurtles",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "snurtles.png",
+          "override": "snurtles"
         },
         {
           "label": "Splumonkeys",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "monkeys.png",
+          "override": "monkey_setting"
         }
       ],
       "Hostile Creatures": [
         {
           "label": "Bats",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "bats.png",
+          "override": "bats_setting"
         },
         {
           "label": "Cave Spiders",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "spider_hider.png",
+          "override": "spider_hider"
         },
         {
           "label": "Dangling Depth Dwellers",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "spider_dropper.png",
+          "override": "spider_dropper"
         },
         {
           "label": "Merms",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "merms.png",
+          "override": "merms"
         },
         {
           "label": "Mimicreeps",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "itemmimics.png",
+          "override": "itemmimics"
         },
         {
           "label": "Naked Mole Bats",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "molebats.png",
+          "override": "molebats"
         },
         {
           "label": "Ornery Chests",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "chest_mimics.png",
+          "override": "chest_mimics"
         },
         {
           "label": "Ruins Nightmares",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "nightmarecreatures.png",
+          "override": "nightmarecreatures"
         },
         {
           "label": "Spider Warriors",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "spider_warriors.png",
+          "override": "spider_warriors"
         },
         {
           "label": "Spiders",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "spiders.png",
+          "override": "spiders_setting"
         },
         {
           "label": "Spitter Spiders",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "spider_spitter.png",
+          "override": "spider_spitter"
         }
       ],
       "Giants": [
         {
           "label": "Lord of the Fruit Flies",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "fruitfly.png",
+          "override": "fruitfly"
         },
         {
           "label": "Nightmare Werepig",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "daywalker2.png",
+          "override": "daywalker2"
         },
         {
           "label": "Spider Queen",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "spiderqueen.png",
+          "override": "spiderqueen"
         },
         {
           "label": "Toadstool",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "toadstool.png",
+          "override": "toadstool"
         },
         {
           "label": "Treeguards",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "liefs.png",
+          "override": "liefs"
         }
       ],
       "Lunar Mutations": [
         {
           "label": "Mutated Birds",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_birds.png",
+          "override": "mutated_birds"
         },
         {
           "label": "Mutated Merms",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "mutated_merm.png",
+          "override": "mutated_merm"
         },
         {
           "label": "Shattered Spider Holes",
-          "options": ["None", "Default"]
+          "options": ["None", "Default"],
+          "mappings": ["never", "default"],
+          "icon": "moon_spider.png",
+          "override": "moon_spider"
         },
         {
           "label": "Shattered Spiders",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "moon_spiders.png",
+          "override": "moon_spider"
         }
       ]
     },
@@ -1006,161 +1718,274 @@
       "World": [
         {
           "label": "Biomes",
-          "options": ["Underground"]
+          "options": ["Underground"],
+          "mappings": ["default"],
+          "icon": "biomes.png",
+          "override": "biomes"
         },
         {
           "label": "Spawn Area",
-          "options": ["Caves"]
+          "options": ["Caves"],
+          "mappings": ["default"],
+          "icon": "world_start.png",
+          "override": "start_location"
         },
         {
           "label": "World Size",
-          "options": ["Small", "Medium", "Large", "Huge"]
+          "options": ["Small", "Medium", "Large", "Huge"],
+          "mappings": ["small", "medium", "default", "huge"],
+          "icon": "world_size.png",
+          "override": "world_size"
         },
         {
           "label": "Branches",
-          "options": ["Never", "Least", "Default", "Most", "Random"]
+          "options": ["Never", "Least", "Default", "Most", "Random"],
+          "mappings": ["never", "least", "default", "most", "random"],
+          "icon": "world_branching.png",
+          "override": "branching"
         },
         {
           "label": "Loops",
-          "options": ["Never", "Default", "Always"]
+          "options": ["Never", "Default", "Always"],
+          "mappings": ["never", "default", "always"],
+          "icon": "world_loop.png",
+          "override": "loop"
         },
         {
           "label": "Touch Stones",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "touchstone.png",
+          "override": "touchstone"
         },
         {
           "label": "Failed Survivors",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "skeletons.png",
+          "override": "boons"
         },
         {
           "label": "Sinkhole Lights",
-          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"],
+          "mappings": ["never", "veryslow", "slow", "default", "fast", "veryfast"],
+          "icon": "cavelight.png",
+          "override": "cavelight"
         },
         {
           "label": "Starting Resource Variety",
-          "options": ["Classic", "Default", "Highly Random"]
+          "options": ["Classic", "Default", "Highly Random"],
+          "mappings": ["classic", "default", "highly random"],
+          "icon": "starting_variety.png",
+          "override": "prefabswaps_start"
         }
       ],
       "Resources": [
         {
           "label": "Bananas",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "banana.png",
+          "override": "banana"
         },
         {
           "label": "Berry Bushes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "berrybush.png",
+          "override": "berrybush"
         },
         {
           "label": "Boulderboughs",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "tree_rock.png",
+          "override": "tree_rock_regrowth"
         },
         {
           "label": "Boulders",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "rock.png",
+          "override": "rock"
         },
         {
           "label": "Cave Ferns",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "fern.png",
+          "override": "fern"
         },
         {
           "label": "Flint",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "flint.png",
+          "override": "flint"
         },
         {
           "label": "Glow Berries",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "wormlights.png",
+          "override": "wormlights"
         },
         {
           "label": "Grass",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "grass.png",
+          "override": "grass"
         },
         {
           "label": "Lichen",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "lichen.png",
+          "override": "lichen"
         },
         {
           "label": "Light Flowers",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "flower_cave.png",
+          "override": "flower_cave_regrowth"
         },
         {
           "label": "Mushroom Trees",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "mushtree.png",
+          "override": "mushtree_regrowth"
         },
         {
           "label": "Mushrooms",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "mushrooms.png"
         },
         {
           "label": "Ponds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "ponds.png",
+          "override": "ponds"
         },
         {
           "label": "Reeds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "reeds.png",
+          "override": "reeds_regrowth"
         },
         {
           "label": "Saplings",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "sapling.png",
+          "override": "sapling"
         },
         {
           "label": "Spiky Bushes",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "marsh_bush.png",
+          "override": "marshbush"
         },
         {
           "label": "Trees (All)",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "trees.png",
+          "override": "trees"
         }
       ],
       "Creatures and Spawners": [
         {
           "label": "Rabbit Hutches",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "bunnyhutch.png",
+          "override": "bunnymen"
         },
         {
           "label": "Rock Lobsters",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "rocky.png",
+          "override": "rocky_setting"
         },
         {
           "label": "Slurpers",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "slurper.png",
+          "override": "slurper"
         },
         {
           "label": "Slurtle Mounds",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "slurtleden.png",
+          "override": "slurtles"
         },
         {
           "label": "Splumonkey Pods",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "monkeybarrel.png",
+          "override": "monkey"
         }
       ],
       "Hostile Creatures and Spawners": [
         {
           "label": "Bats",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "bats.png",
+          "override": "bats_setting"
         },
         {
           "label": "Cave Worms",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "worms.png",
+          "override": "worms"
         },
         {
           "label": "Clockworks",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "chess_monsters.png",
+          "override": "chess"
         },
         {
           "label": "Nightmare Fissures",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "fissure.png",
+          "override": "fissure"
         },
         {
           "label": "Spider Dens",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "cave_spiderden.png",
+          "override": "cave_spiders"
         },
         {
           "label": "Spilagmites",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "rock_stalagmite.png",
+          "override": "rock_stalagmite"
         },
         {
           "label": "Tentacles",
-          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"],
+          "mappings": ["never", "rare", "uncommon", "default", "often", "mostly", "always", "insane"],
+          "icon": "tentacles.png",
+          "override": "tentacles"
         }
       ]
     }

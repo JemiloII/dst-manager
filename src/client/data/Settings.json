@@ -1,0 +1,1168 @@
+{
+  "Forest": {
+    "Settings": {
+      "Global": [
+        {
+          "label": "Events",
+          "options": ["None", "Auto"]
+        },
+        {
+          "label": "Autumn",
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+        },
+        {
+          "label": "Winter",
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+        },
+        {
+          "label": "Spring",
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+        },
+        {
+          "label": "Summer",
+          "options": ["None", "Very Short", "Short", "Default", "Long", "Very Long", "Random"]
+        },
+        {
+          "label": "Day Type",
+          "options": ["Default", "Long Day", "Long Dusk", "Long Night", "No Day", "No Dusk", "No Night", "Only Day", "Only Dusk", "Only Night"]
+        },
+        {
+          "label": "Spawn Mode",
+          "options": ["Florid Postern", "Random"]
+        },
+        {
+          "label": "Survivor Death",
+          "options": ["Change Survivor", "Become a Ghost"]
+        },
+        {
+          "label": "Revive At Florid Postern",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Ghost Sanity Drain",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Death Reset Timer",
+          "options": ["Disabled", "Slow", "Default", "Fast", "Instant"]
+        },
+        {
+          "label": "Beefalo Mating Frequency",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Krampii",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Events": [
+        {
+          "label": "Midsummer Cawnival",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Hallowed Nights",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Winter's Feast",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Gobbler",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Varg",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Pig King",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Carrat",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Beefalo",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Catcoon",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Bunnyman",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Dragonfly",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Depths Worm",
+          "options": ["Default", "Always"]
+        },
+        {
+          "label": "Year of the Clockwork Knight",
+          "options": ["Default", "Always"]
+        }
+      ],
+      "Survivors": [
+        {
+          "label": "Extra Starting Resources",
+          "options": ["Always", "After Day 5", "After Day 10", "After Day 15", "After Day 20", "Never"]
+        },
+        {
+          "label": "Seasonal Starting Items",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Griefer Spawn Protection",
+          "options": ["None", "Auto Detect", "Always"]
+        },
+        {
+          "label": "Drop Items on Disconnect",
+          "options": ["Default", "Everything"]
+        },
+        {
+          "label": "Max Health Penalty",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Damage Taken",
+          "options": ["Less", "Default", "More"]
+        },
+        {
+          "label": "Temperature Damage",
+          "options": ["Nonlethal", "Default"]
+        },
+        {
+          "label": "Hunger Damage",
+          "options": ["Nonlethal", "Default"]
+        },
+        {
+          "label": "Darkness Damage",
+          "options": ["Nonlethal", "Default"]
+        },
+        {
+          "label": "Sanity Monsters",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Enlightenment Monsters",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "World": [
+        {
+          "label": "Hound Attacks",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Ice Hound Waves",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Fire Hound Waves",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Forest Petrification",
+          "options": ["None", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Frog Rain",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Hunt Surprises",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Hunts",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Lightning",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Lunar Hail",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Meteor Frequency",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Rain",
+          "options": ["None", "Less", "Default", "More", "Lots"]
+        },
+        {
+          "label": "Wandering Trader",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Wild Rift Frequency",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Wild Rifts",
+          "options": ["None", "Auto Detect", "Always"]
+        },
+        {
+          "label": "Wildfires",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Resource Regrowth": [
+        {
+          "label": "Regrowth Multiplier",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Basic Resources",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Birchnut Trees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Cacti",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Carrots",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Evergreens",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Flowers",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Lune Trees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Palmcone Tree",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Reeds",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Salt Formations",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Twiggy Trees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ],
+      "Unnatural Portal Resources": [
+        {
+          "label": "Banana Bushes",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Crustashines",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Monkeytails",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Palmcone Sprouts",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Portal Activity",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Powder Monkeys",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Creatures": [
+        {
+          "label": "Bees",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Birds",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Bunnymen",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Butterflies",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Catcoons",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Gnarwails",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Gobblers",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Grass Gekko Morphing",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Marotters",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Moles",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Pengulls",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Pigs",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Rabbits",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Schools of Fish",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Wobsters",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Hostile Creatures": [
+        {
+          "label": "Bats",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Cookie Cutters",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Frogs",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Hounds",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Killer Bees",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Lureplants",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "MacTusk",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Merms",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Moon Quay Pirates",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Mosquitos",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Sharks",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Skittersquids",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Spider Warriors",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Spiders",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Giants": [
+        {
+          "label": "Antlion Tribute",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Bearger",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Bee Queen",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Crabking",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Deerclops",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Dragonfly",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Eye of Terror",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Frostjaw",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Klaus",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Lord of the Fruit Flies",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Malbatross",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Meese/Geese",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Poison Birchnut Trees",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Scrappy Werepig",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Spider Queen",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Treeguards",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ],
+      "Lunar Mutations": [
+        {
+          "label": "Armored Bearger",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Bright-Beaked Birds",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Crystal Deerclops",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Crystal-Crested Buzzards",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Horror Hounds",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Mutated Birds",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Mutated Merms",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Permafrost Pengulls",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Possessed Vargs",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Shattered Spider Holes",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Shattered Spiders",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        }
+      ]
+    },
+    "Generation": {
+      "Global": [
+        {
+          "label": "Starting Season",
+          "options": ["Autumn", "Winter", "Spring", "Summer", "Autumn or Spring", "Winter or Summer", "Random"]
+        }
+      ],
+      "World": [
+        {
+          "label": "Biomes",
+          "options": ["Together", "Classic"]
+        },
+        {
+          "label": "Spawn Area",
+          "options": ["Plus", "Dark", "Default"]
+        },
+        {
+          "label": "World Size",
+          "options": ["Small", "Medium", "Large", "Huge"]
+        },
+        {
+          "label": "Branches",
+          "options": ["Never", "Least", "Default", "Most", "Random"]
+        },
+        {
+          "label": "Loops",
+          "options": ["Never", "Default", "Always"]
+        },
+        {
+          "label": "Roads",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Touch Stones",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Failed Survivors",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Starting Resource Variety",
+          "options": ["None", "Less", "Default", "Highly Random"]
+        },
+        {
+          "label": "Celestial Fissures",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "JIMBO",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Junk Yard",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Stage Plays",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Terrarium",
+          "options": ["None", "Default"]
+        }
+      ],
+      "Resources": [
+        {
+          "label": "Anenemies",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Beached Bull Kelp",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Berry Bushes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Boulders",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Bull Kelp",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Cacti",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Carrots",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Flint",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Flowers, Evil Flowers",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Grass",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Hot Springs",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Lunar Rocks",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Lunar Saplings",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Lune Trees",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Meteor Fields",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Mini Glaciers",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Mushrooms",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Palmcone Tree",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Ponds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Reeds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Saplings",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Sea Stacks",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Spiky Bushes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Stone Fruit Bushes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Trees (All)",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Tumbleweeds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ],
+      "Creatures and Spawners": [
+        {
+          "label": "Bee Hives",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Beefalos",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Buzzards",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Carrats",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Hollow Stump",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Marotter Dens",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Mole Burrows",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Pig Houses",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Rabbit Holes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Saladmander",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Shoals",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Volt Goats",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Wobster Mounds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ],
+      "Hostile Creatures and Spawners": [
+        {
+          "label": "Clockworks",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Hound Mounds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Killer Bee Hives",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Leaky Shack",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "MacTusk Camps",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Sea Weeds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Shattered Spider Holes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Spider Dens",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Tallbirds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Tentacles",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ]
+    }
+  },
+  "Caves": {
+    "Settings": {
+      "World": [
+        {
+          "label": "Acid Rain",
+          "options": ["Disabled", "Enabled"]
+        },
+        {
+          "label": "Ancient Gateway",
+          "options": ["Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Cave Worm Attacks",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Earthquakes",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Great Worm",
+          "options": ["Never", "Rare", "Default", "Often", "Always"]
+        },
+        {
+          "label": "Rain",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Wild Rift Frequency",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Wild Rifts",
+          "options": ["None", "Auto Detect", "Always"]
+        }
+      ],
+      "Resource Regrowth": [
+        {
+          "label": "Regrowth Multiplier",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Boulderboughs",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Evergreens",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Light Flower",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Lightbug Flower",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Lunar Mushtrees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Mushroom Trees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Reeds",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Twiggy Trees",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ],
+      "Creatures": [
+        {
+          "label": "Bulbous Lightbugs",
+          "options": ["None", "Little", "Default", "More", "Tons"]
+        },
+        {
+          "label": "Bunnymen",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Dust Moths",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Grass Gekko Morphing",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Moles",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Mush Gnomes",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Pigs",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Rock Lobsters",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Slurtles",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Snurtles",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Splumonkeys",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ],
+      "Hostile Creatures": [
+        {
+          "label": "Bats",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Cave Spiders",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Dangling Depth Dwellers",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Merms",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Mimicreeps",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Naked Mole Bats",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Ornery Chests",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Ruins Nightmares",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Spider Warriors",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Spiders",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Spitter Spiders",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ],
+      "Giants": [
+        {
+          "label": "Lord of the Fruit Flies",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Nightmare Werepig",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Spider Queen",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Toadstool",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Treeguards",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ],
+      "Lunar Mutations": [
+        {
+          "label": "Mutated Birds",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Mutated Merms",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Shattered Spider Holes",
+          "options": ["None", "Default"]
+        },
+        {
+          "label": "Shattered Spiders",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        }
+      ]
+    },
+    "Generation": {
+      "World": [
+        {
+          "label": "Biomes",
+          "options": ["Underground"]
+        },
+        {
+          "label": "Spawn Area",
+          "options": ["Caves"]
+        },
+        {
+          "label": "World Size",
+          "options": ["Small", "Medium", "Large", "Huge"]
+        },
+        {
+          "label": "Branches",
+          "options": ["Never", "Least", "Default", "Most", "Random"]
+        },
+        {
+          "label": "Loops",
+          "options": ["Never", "Default", "Always"]
+        },
+        {
+          "label": "Touch Stones",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Failed Survivors",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Sinkhole Lights",
+          "options": ["None", "Very Slow", "Slow", "Default", "Fast", "Very Fast"]
+        },
+        {
+          "label": "Starting Resource Variety",
+          "options": ["Classic", "Default", "Highly Random"]
+        }
+      ],
+      "Resources": [
+        {
+          "label": "Bananas",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Berry Bushes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Boulderboughs",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Boulders",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Cave Ferns",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Flint",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Glow Berries",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Grass",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Lichen",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Light Flowers",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Mushroom Trees",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Mushrooms",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Ponds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Reeds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Saplings",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Spiky Bushes",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Trees (All)",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ],
+      "Creatures and Spawners": [
+        {
+          "label": "Rabbit Hutches",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Rock Lobsters",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Slurpers",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Slurtle Mounds",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Splumonkey Pods",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ],
+      "Hostile Creatures and Spawners": [
+        {
+          "label": "Bats",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Cave Worms",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Clockworks",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Nightmare Fissures",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Spider Dens",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Spilagmites",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        },
+        {
+          "label": "Tentacles",
+          "options": ["None", "Little", "Less", "Default", "More", "Lots", "Tons", "Insane"]
+        }
+      ]
+    }
+  }
+}

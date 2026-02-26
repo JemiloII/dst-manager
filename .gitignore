@@ -2,6 +2,7 @@
 .idea/
 *.vs*
 *.iml
+.claude/
 
 servers/
 scripts/
@@ -13,3 +14,4 @@ assets/
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+.claude/

@@ -71,7 +71,7 @@ JWT_SECRET=your-secret-key-here
 PORT=7891
 
 # Database URL (optional, defaults to local file)
-DATABASE_URL=file:data.db
+DATABASE_URL=file:dst-manager.db
 ```
 
 ## Usage

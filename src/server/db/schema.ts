@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const db = createClient({
-  url: process.env.DB_URL || 'file:data.db',
+  url: process.env.DATABASE_URL || 'file:data.db',
 });
 
 export async function initDb() {

@@ -41,6 +41,10 @@ const SETTING_LABELS: Record<string, SettingOption[]> = {
     { value: 'always', label: 'Enabled' },
     { value: 'never', label: 'Disabled' },
   ],
+  ghostenabled: [
+    { value: 'always', label: 'Become a Ghost' },
+    { value: 'none', label: 'Change Survivor' },
+  ],
   portalresurection: [
     { value: 'none', label: 'Disabled' },
     { value: 'always', label: 'Enabled' },
@@ -53,8 +57,8 @@ const SETTING_LABELS: Record<string, SettingOption[]> = {
     { value: 'always', label: 'Very Fast' },
   ],
   spawnmode: [
-    { value: 'fixed', label: 'Fixed' },
-    { value: 'scatter', label: 'Scatter' },
+    { value: 'fixed', label: 'Florid Postern' },
+    { value: 'scatter', label: 'Random' },
   ],
   day: [
     { value: 'default', label: 'Default' },
@@ -78,14 +82,34 @@ const SETTING_LABELS: Record<string, SettingOption[]> = {
     { value: 'random', label: 'Random' },
   ],
   events: [
-    { value: 'none', label: 'None' },
-    { value: 'default', label: 'Auto' },
+    { value: 'default', label: 'Default' },
+    { value: 'always', label: 'Always' },
   ],
 };
 
 function getOptionsForKey(key: string): SettingOption[] {
   // Season lengths
   if (['autumn', 'winter', 'spring', 'summer'].includes(key)) return SETTING_LABELS.season;
+  
+  // Event settings (all shrines and seasonal events)
+  const eventKeys = [
+    'crowcarnival', 'hallowednights', 'wintersfeast', 
+    'perdshrine', 'wargshrine', 'pigshrine', 
+    'yotc_carratshrine', 'yotb_beefaloshrine', 'yot_catcoonshrine',
+    'yotr_rabbitshrine', 'yotd_dragonshrine', 'yots_wormshrine', 'yoth_knightshrine'
+  ];
+  if (eventKeys.includes(key)) return SETTING_LABELS.events;
+  
+  // Boolean settings (enabled/disabled)
+  const booleanKeys = [
+    'extrastartingitems', 'seasonalstartingitems', 'spawnprotection', 
+    'dropeverythingondespawn', 'ghostenabled'
+  ];
+  if (booleanKeys.includes(key)) return SETTING_LABELS.boolean;
+  
+  // Penalty/damage settings (none/always for penalty)
+  if (key === 'healthpenalty') return SETTING_LABELS.portalresurection; // uses none/always
+  if (key === 'lessdamagetaken') return SETTING_LABELS.portalresurection; // uses none/always
   
   // Special settings with unique options
   if (key === 'world_size') return SETTING_LABELS.world_size;
@@ -94,7 +118,6 @@ function getOptionsForKey(key: string): SettingOption[] {
   if (key === 'spawnmode') return SETTING_LABELS.spawnmode;
   if (key === 'day') return SETTING_LABELS.day;
   if (key === 'season_start') return SETTING_LABELS.season_start;
-  if (key === 'ghostenabled') return SETTING_LABELS.boolean;
   if (key === 'events') return SETTING_LABELS.events;
   
   // Default for most settings
@@ -189,22 +212,28 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
   const shardName = shard === 'Master' ? 'Forest' : 'Caves';
   const configSection = (settingsConfig as any)[shardName]?.[tab] || {};
   
+  
   // Group the settings based on the config - show ALL settings from settings.json
-  const groupedSettings = Object.entries(configSection).map(([groupName, settingsList]) => {
+  const groupedSettings = Object.entries(configSection).map(([groupName, settingsGroup]) => {
     // Map ALL settings from the config - SHOW EVERYTHING
-    const settings = (settingsList as string[]).map(displayName => {
-      // Get the proper lua key from our mapping
-      const luaKey = getLuaKey(displayName);
-      // If no lua key, generate one from the display name
-      const finalKey = luaKey || displayName.toLowerCase()
-        .replace(/ /g, '_')
-        .replace(/'/g, '')
-        .replace(/-/g, '_')
-        .replace(/\//g, '_');
+    const settings = Object.entries(settingsGroup as Record<string, any>).map(([settingName, settingData], settingIndex) => {
+      // Get the data from the setting object
+      const { displayName, luaKey, iconKey, options } = settingData as {
+        displayName: string;
+        luaKey: string;
+        iconKey: string;
+        options: string[];
+      };
+      
+      // Create a unique key for React by prefixing with shard, tab, group and index
+      const uniqueKey = `${shardName.toLowerCase()}_${tab.toLowerCase()}_${groupName.toLowerCase().replace(/ /g, '_')}_${settingIndex}_${luaKey}`;
       
       return {
-        luaKey: finalKey,
-        displayName
+        luaKey,
+        displayName,
+        iconKey,
+        options,
+        uniqueKey
       };
     });
     
@@ -261,13 +290,13 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
             <div key={group.name} className="settings-group">
               <h3 className="group-title">{group.name}</h3>
               <div className="world-settings-grid">
-                {group.settings.map(({luaKey, displayName}) => {
-                  // Get icon from the mappings
-                  const iconName = WORLDSETTINGS_ICONS[luaKey] || WORLDGEN_ICONS[luaKey] || luaKey;
+                {group.settings.map(({luaKey, displayName, iconKey, options, uniqueKey}) => {
+                  // Use iconKey from settings.json, fallback to mappings
+                  const iconName = iconKey || WORLDSETTINGS_ICONS[luaKey] || WORLDGEN_ICONS[luaKey] || luaKey;
                   const currentValue = (overrides[luaKey] as string) || 'default';
                   
                   return (
-                    <div key={luaKey} className="world-setting-item">
+                    <div key={uniqueKey} className="world-setting-item">
                       <div className="setting-image">
                         {iconName ? (
                           <img 
@@ -280,7 +309,7 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
                             }}
                           />
                         ) : (
-                          <div style={{ width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)' }} />
+                          <div style={{ width: '140px', height: '140px', background: 'rgba(255,255,255,0.05)' }} />
                         )}
                       </div>
                       <div className="setting-label">{displayName}</div>
@@ -288,17 +317,17 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
                         {isOwner && (
                           <button
                             className="arrow-btn left"
-                            onClick={() => updateOverride(luaKey, cycleSetting(luaKey, currentValue, 'prev'))}
+                            onClick={() => updateOverride(luaKey, cycleSetting(luaKey, currentValue, 'prev', options))}
                             aria-label="Previous option"
                           >
                             ◀
                           </button>
                         )}
-                        <span className="setting-value">{getLabelForValue(luaKey, currentValue)}</span>
+                        <span className="setting-value">{getLabelForValue(luaKey, currentValue, options)}</span>
                         {isOwner && (
                           <button
                             className="arrow-btn right"
-                            onClick={() => updateOverride(luaKey, cycleSetting(luaKey, currentValue, 'next'))}
+                            onClick={() => updateOverride(luaKey, cycleSetting(luaKey, currentValue, 'next', options))}
                             aria-label="Next option"
                           >
                             ▶

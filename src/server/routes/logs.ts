@@ -11,7 +11,7 @@ logs.use('*', authMiddleware());
 
 logs.get('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const serverId = c.req.param('serverId');
   const shard = c.req.param('shard');
   const lines = parseInt(c.req.query('lines') || '200');
 
@@ -19,7 +19,7 @@ logs.get('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
     return c.json({ error: 'Invalid shard' }, 400);
   }
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -44,14 +44,14 @@ logs.get('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
 
 logs.delete('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const serverId = c.req.param('serverId');
   const shard = c.req.param('shard');
 
   if (shard !== 'Master' && shard !== 'Caves') {
     return c.json({ error: 'Invalid shard' }, 400);
   }
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }

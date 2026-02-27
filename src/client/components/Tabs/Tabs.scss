@@ -1,0 +1,60 @@
+@use '../../styles/variables' as *;
+
+.Tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &__buttons {
+    display: flex;
+    justify-content: flex-start;
+    border-radius: 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    transition: all 200ms ease;
+    font-weight: 500;
+    font-size: 0.9rem;
+    position: relative;
+
+    &--active {
+      background-color: $primary;
+      color: #fff;
+      font-weight: 600;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #fff;
+        opacity: 0.3;
+      }
+    }
+
+    &:hover:not(&--active) {
+      background-color: rgba($primary, 0.2);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}

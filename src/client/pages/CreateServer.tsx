@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import Checkbox from '../components/Checkbox';
 
 export default function CreateServer() {
   const navigate = useNavigate();
@@ -162,14 +163,11 @@ export default function CreateServer() {
           </div>
 
           <div className="form-group">
-            <label className="checkbox-label">
-              <span>PvP Enabled</span>
-              <input
-                type="checkbox"
-                checked={pvp}
-                onChange={(e) => setPvp(e.target.checked)}
-              />
-            </label>
+            <Checkbox
+              label="PvP Enabled"
+              checked={pvp}
+              onChange={setPvp}
+            />
           </div>
 
           <div className="form-group">

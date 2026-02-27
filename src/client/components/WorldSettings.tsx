@@ -3,13 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import Settings from '../data/Settings.json';
 import { useWorldSettingsStore } from '../stores/WorldSettingsStore';
+import Tabs from './Tabs';
 
 interface Props {
   serverId: string;
   isOwner: boolean;
 }
 
-export default function WorldSettings({ serverId, isOwner }: Props) {
+export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props & { onSaveRef?: React.MutableRefObject<(() => void) | undefined> }) {
   const navigate = useNavigate();
   const { shard: urlShard, subtab: urlSubtab } = useParams<{ shard?: string; subtab?: string }>();
   
@@ -18,8 +19,6 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
   const tab = (urlSubtab === 'generation' ? 'Generation' : 'Settings') as 'Settings' | 'Generation';
   
   const { selections, cycleSelection, loadFromMappings, getAllMappings } = useWorldSettingsStore();
-  const [rawMode, setRawMode] = useState(false);
-  const [rawText, setRawText] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
@@ -35,21 +34,11 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
     navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await api.get(`/world/${serverId}/${shard}`);
-      const data = await res.json();
-      loadFromMappings(data.overrides || {});
-      setRawText(data.raw || '');
-    };
-    fetchData();
-  }, [serverId, shard, loadFromMappings]);
-
   const handleSave = async () => {
     setError('');
     setSuccess('');
 
-    const body = rawMode ? { raw: rawText } : { overrides: getAllMappings() };
+    const body = { overrides: getAllMappings() };
     const res = await api.put(`/world/${serverId}/${shard}`, body);
     const data = await res.json();
 
@@ -60,6 +49,21 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
       setTimeout(() => setSuccess(''), 2000);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await api.get(`/world/${serverId}/${shard}`);
+      const data = await res.json();
+      loadFromMappings(data.overrides || {});
+    };
+    fetchData();
+  }, [serverId, shard, loadFromMappings]);
+
+  useEffect(() => {
+    if (onSaveRef) {
+      onSaveRef.current = handleSave;
+    }
+  });
 
   // Get the appropriate config based on shard and tab
   const shardName = shard === 'Master' ? 'Forest' : 'Caves';
@@ -90,47 +94,25 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <div className="tab-bar" style={{ marginBottom: 0 }}>
-            <button className={shard === 'Master' ? 'active' : ''} onClick={() => setShard('Master')}>Forest</button>
-            <button className={shard === 'Caves' ? 'active' : ''} onClick={() => setShard('Caves')}>Caves</button>
-          </div>
-          <div className="tab-bar" style={{ marginBottom: 0 }}>
-            <button className={tab === 'Settings' ? 'active' : ''} onClick={() => setTab('Settings')}>Settings</button>
-            <button className={tab === 'Generation' ? 'active' : ''} onClick={() => setTab('Generation')}>Generation</button>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={() => setRawMode(!rawMode)} className="icon-btn" title={rawMode ? 'Visual Editor' : 'Raw Paste'}>
-            <img src={rawMode ? "/images/button_icons/world.png" : "/images/button_icons/profile.png"} alt={rawMode ? 'Visual Editor' : 'Raw Paste'} />
-          </button>
-          {isOwner && (
-            <button onClick={handleSave} className="icon-btn" title="Save">
-              <img src="/images/button_icons/save.png" alt="Save" />
-            </button>
-          )}
+      <div className="world-settings-header">
+        <div className="world-settings-tabs">
+          <Tabs
+            tabs={['Forest', 'Caves']}
+            defaultActiveTab={shard === 'Master' ? 0 : 1}
+            onTabChange={(tabName) => setShard(tabName === 'Forest' ? 'Master' : 'Caves')}
+          />
+          <Tabs
+            tabs={['Settings', 'Generation']}
+            defaultActiveTab={tab === 'Settings' ? 0 : 1}
+            onTabChange={(tabName) => setTab(tabName as 'Settings' | 'Generation')}
+          />
         </div>
       </div>
 
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
 
-      {rawMode ? (
-        <div className="card">
-          <p style={{ color: '#aaa', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
-            Paste your leveldataoverride.lua content. Only safe key/value pairs will be extracted.
-          </p>
-          <textarea
-            value={rawText}
-            onChange={(e) => setRawText(e.target.value)}
-            rows={20}
-            style={{ fontFamily: 'monospace', fontSize: '0.85rem', width: '100%' }}
-            disabled={!isOwner}
-          />
-        </div>
-      ) : (
-        <div className="world-settings-groups">
+      <div className="world-settings-groups">
           {groupedSettings.map((group) => (
             <div key={group.name} className="settings-group">
               <h3 className="group-title">{group.name}</h3>
@@ -183,8 +165,7 @@ export default function WorldSettings({ serverId, isOwner }: Props) {
               </div>
             </div>
           ))}
-        </div>
-      )}
+      </div>
     </>
   );
 }

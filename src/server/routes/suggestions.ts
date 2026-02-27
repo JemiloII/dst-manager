@@ -8,9 +8,9 @@ suggestions.use('*', authMiddleware());
 
 suggestions.get('/:serverId', async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const serverId = c.req.param('serverId');
 
-  const serverResult = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const serverResult = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (serverResult.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -24,7 +24,7 @@ suggestions.get('/:serverId', async (c) => {
     sql: `SELECT ms.*, u.display_name as suggested_by
           FROM mod_suggestions ms
           JOIN users u ON ms.user_id = u.id
-          WHERE ms.server_id = ?
+          WHERE ms.server_id = (SELECT id FROM servers WHERE share_code = ?)
           ORDER BY ms.created_at DESC`,
     args: [serverId],
   });
@@ -34,18 +34,19 @@ suggestions.get('/:serverId', async (c) => {
 
 suggestions.post('/:serverId', async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const shareCode = c.req.param('serverId');
   const { workshopId, suggestedConfig } = await c.req.json();
 
   if (!workshopId) {
     return c.json({ error: 'Workshop ID required' }, 400);
   }
 
-  const serverResult = await db.execute({ sql: 'SELECT id FROM servers WHERE id = ?', args: [serverId] });
+  const serverResult = await db.execute({ sql: 'SELECT id FROM servers WHERE share_code = ?', args: [shareCode] });
   if (serverResult.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
+  const serverId = serverResult.rows[0].id as number;
   await db.execute({
     sql: 'INSERT INTO mod_suggestions (server_id, user_id, workshop_id, suggested_config) VALUES (?, ?, ?, ?)',
     args: [serverId, user.id, workshopId, JSON.stringify(suggestedConfig || {})],

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
@@ -6,6 +6,8 @@ import WorldSettings from '../components/WorldSettings';
 import ModManager from '../components/ModManager';
 import LogViewer from '../components/LogViewer';
 import Suggestions from '../components/Suggestions';
+import Tabs from '../components/Tabs';
+import Checkbox from '../components/Checkbox';
 
 interface Server {
   id: number;
@@ -25,6 +27,7 @@ export default function ServerDetail() {
   const { code, tab: urlTab, shard, subtab } = useParams<{ code: string; tab?: string; shard?: string; subtab?: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const worldSaveRef = useRef<(() => void) | undefined>();
   const [server, setServer] = useState<Server | null>(null);
   const validTabs = ['overview', 'world', 'mods', 'logs', 'suggestions'] as const;
   type TabType = typeof validTabs[number];
@@ -119,6 +122,12 @@ export default function ServerDetail() {
     window.open(`/api/admin/export/${code}?token=${token}`, '_blank');
   };
 
+  const handleSaveWorld = () => {
+    if (worldSaveRef.current) {
+      worldSaveRef.current();
+    }
+  };
+
   if (!server) return <div className="card"><p>Loading...</p></div>;
 
   const isOwner = user?.role === 'admin' || user?.id === server.user_id;
@@ -145,11 +154,16 @@ export default function ServerDetail() {
                   <img src="/images/button_icons/AFKstop.png" alt="Stop" />
                 </button>
               )}
-              <button className="icon-btn" onClick={handleExport} title="Export">
-                <img src="/images/button_icons/folder.png" alt="Export" />
-              </button>
+              {tab === 'world' && (
+                <button className="icon-btn" onClick={handleSaveWorld} title="Save World Settings">
+                  <img src="/images/button_icons/save.png" alt="Save" />
+                </button>
+              )}
               <button className="icon-btn" onClick={handleDelete} title="Delete">
                 <img src="/images/button_icons/delete.png" alt="Delete" />
+              </button>
+              <button className="icon-btn" onClick={handleExport} title="Export">
+                <img src="/images/button_icons/folder.png" alt="Export" />
               </button>
             </div>
           )}
@@ -169,13 +183,20 @@ export default function ServerDetail() {
         </div>
       </div>
 
-      <div className="tab-bar">
-        <button className={tab === 'overview' ? 'active' : ''} onClick={() => handleTabChange('overview')}>Config</button>
-        <button className={tab === 'world' ? 'active' : ''} onClick={() => handleTabChange('world')}>World</button>
-        <button className={tab === 'mods' ? 'active' : ''} onClick={() => handleTabChange('mods')}>Mods</button>
-        <button className={tab === 'logs' ? 'active' : ''} onClick={() => handleTabChange('logs')}>Logs</button>
-        <button className={tab === 'suggestions' ? 'active' : ''} onClick={() => handleTabChange('suggestions')}>Suggestions</button>
-      </div>
+      <Tabs
+        tabs={['Config', 'World', 'Mods', 'Logs', 'Suggestions']}
+        defaultActiveTab={tab === 'overview' ? 0 : tab === 'world' ? 1 : tab === 'mods' ? 2 : tab === 'logs' ? 3 : 4}
+        onTabChange={(tabName) => {
+          const tabMap: { [key: string]: TabType } = {
+            'Config': 'overview',
+            'World': 'world',
+            'Mods': 'mods',
+            'Logs': 'logs',
+            'Suggestions': 'suggestions'
+          };
+          handleTabChange(tabMap[tabName]);
+        }}
+      />
 
       {tab === 'overview' && (
         <div className="card">
@@ -202,7 +223,11 @@ export default function ServerDetail() {
                 <input type="number" min={1} max={64} value={form.maxPlayers} onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value) })} />
               </div>
               <div className="form-group">
-                <label><input type="checkbox" checked={form.pvp} onChange={(e) => setForm({ ...form, pvp: e.target.checked })} /> PvP</label>
+                <Checkbox
+                  label="PvP"
+                  checked={form.pvp}
+                  onChange={(checked) => setForm({ ...form, pvp: checked })}
+                />
               </div>
               <div className="form-group">
                 <label>Password</label>
@@ -227,7 +252,7 @@ export default function ServerDetail() {
         </div>
       )}
 
-      {tab === 'world' && <WorldSettings serverId={code!} isOwner={isOwner} />}
+      {tab === 'world' && <WorldSettings serverId={code!} isOwner={isOwner} onSaveRef={worldSaveRef} />}
       {tab === 'mods' && <ModManager serverId={code!} isOwner={isOwner} />}
       {tab === 'logs' && <LogViewer serverId={code!} />}
       {tab === 'suggestions' && <Suggestions serverId={code!} isOwner={isOwner} />}

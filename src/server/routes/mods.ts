@@ -102,9 +102,9 @@ mods.get('/details/:workshopId', async (c) => {
 
 mods.get('/server/:serverId', async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const serverId = c.req.param('serverId');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
@@ -131,9 +131,9 @@ mods.get('/server/:serverId', async (c) => {
 
 mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const serverId = parseInt(c.req.param('serverId'));
+  const serverId = c.req.param('serverId');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [serverId] });
+  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }

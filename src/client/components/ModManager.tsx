@@ -238,11 +238,6 @@ export default function ModManager({ serverId, isOwner }: Props) {
                   )}
                   <div className="mod-info">
                     <div className="mod-header">
-                      <img 
-                        src={mod.enabled ? '/images/button_icons/enabled_filter.png' : '/images/button_icons/disabled_filter.png'} 
-                        alt="" 
-                        style={{ width: '20px', height: '20px', marginRight: '0.5rem' }}
-                      />
                       <span className="mod-title">{info?.title || key}</span>
                       {Object.keys(mod.configuration_options).length > 0 && (
                         <small style={{ color: '#aaa', marginLeft: '0.5rem' }}>
@@ -264,7 +259,6 @@ export default function ModManager({ serverId, isOwner }: Props) {
                           className="mod-expand-btn" 
                           onClick={() => toggleExpanded(workshopId)}
                         >
-                          <img src="/images/button_icons/more_info.png" alt="" />
                           {expandedMods.has(workshopId) ? 'Show Less' : 'Read More'}
                         </button>
                       </>
@@ -275,13 +269,29 @@ export default function ModManager({ serverId, isOwner }: Props) {
                       rel="noopener noreferrer" 
                       className="mod-link"
                     >
-                      <img src="/images/button_icons/steam.png" alt="" />
                       View on Steam Workshop
                     </a>
                   </div>
                 </div>
                 {isOwner && (
                   <div className="mod-actions">
+                    <button 
+                      onClick={() => removeMod(key)} 
+                      className="icon-btn mod-delete-btn"
+                      title="Remove"
+                    >
+                      <img src="/images/button_icons/delete.png" alt="Remove" />
+                    </button>
+                    {Object.keys(mod.configuration_options).length > 0 ? (
+                      <button 
+                        className="icon-btn"
+                        title="Configure"
+                      >
+                        <img src="/images/button_icons/configure_mod.png" alt="Configure" />
+                      </button>
+                    ) : (
+                      <div className="icon-btn-placeholder"></div>
+                    )}
                     <button 
                       onClick={() => toggleMod(key)} 
                       className="icon-btn"
@@ -291,21 +301,6 @@ export default function ModManager({ serverId, isOwner }: Props) {
                         src={mod.enabled ? '/images/button_icons/enabled_filter.png' : '/images/button_icons/disabled_filter.png'} 
                         alt={mod.enabled ? 'Disable' : 'Enable'} 
                       />
-                    </button>
-                    {Object.keys(mod.configuration_options).length > 0 && (
-                      <button 
-                        className="icon-btn"
-                        title="Configure"
-                      >
-                        <img src="/images/button_icons/configure_mod.png" alt="Configure" />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => removeMod(key)} 
-                      className="icon-btn"
-                      title="Remove"
-                    >
-                      <img src="/images/button_icons/delete.png" alt="Remove" />
                     </button>
                   </div>
                 )}

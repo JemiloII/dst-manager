@@ -8,6 +8,7 @@ import LogViewer from '../components/LogViewer';
 import Suggestions from '../components/Suggestions';
 import Tabs from '../components/Tabs';
 import Checkbox from '../components/Checkbox';
+import ConfirmModal from '../components/ConfirmModal';
 
 interface Server {
   id: number;
@@ -43,6 +44,8 @@ export default function ServerDetail() {
   }
   
   const [editing, setEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const modSaveRef = useRef<(() => void) | undefined>();
   
   const handleTabChange = (newTab: TabType) => {
     if (newTab === 'overview') {
@@ -112,7 +115,6 @@ export default function ServerDetail() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this server? This cannot be undone.')) return;
     await api.delete(`/servers/${code}`);
     navigate('/');
   };
@@ -125,6 +127,12 @@ export default function ServerDetail() {
   const handleSaveWorld = () => {
     if (worldSaveRef.current) {
       worldSaveRef.current();
+    }
+  };
+
+  const handleSaveMods = () => {
+    if (modSaveRef.current) {
+      modSaveRef.current();
     }
   };
 
@@ -159,7 +167,12 @@ export default function ServerDetail() {
                   <img src="/images/button_icons/save.png" alt="Save" />
                 </button>
               )}
-              <button className="icon-btn" onClick={handleDelete} title="Delete">
+              {tab === 'mods' && (
+                <button className="icon-btn" onClick={handleSaveMods} title="Save Mods">
+                  <img src="/images/button_icons/save.png" alt="Save" />
+                </button>
+              )}
+              <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
                 <img src="/images/button_icons/delete.png" alt="Delete" />
               </button>
               <button className="icon-btn" onClick={handleExport} title="Export">
@@ -253,9 +266,20 @@ export default function ServerDetail() {
       )}
 
       {tab === 'world' && <WorldSettings serverId={code!} isOwner={isOwner} onSaveRef={worldSaveRef} />}
-      {tab === 'mods' && <ModManager serverId={code!} isOwner={isOwner} />}
+      {tab === 'mods' && <ModManager serverId={code!} isOwner={isOwner} onSaveRef={modSaveRef} />}
       {tab === 'logs' && <LogViewer serverId={code!} />}
       {tab === 'suggestions' && <Suggestions serverId={code!} isOwner={isOwner} />}
+      
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          handleDelete();
+        }}
+        title="Delete Server?"
+        body={`Are you sure you want to delete "${server?.name}"? This cannot be undone.`}
+      />
     </>
   );
 }

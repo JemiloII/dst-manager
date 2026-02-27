@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
+import ConfirmModal from './ConfirmModal';
+import Modal from './Modal';
+import ModListItem from './ModListItem';
+import SelectCycle from './SelectCycle';
 
 interface ModConfig {
   enabled: boolean;
@@ -22,41 +26,23 @@ interface SearchResult {
 interface Props {
   serverId: string;
   isOwner: boolean;
+  onSaveRef?: React.MutableRefObject<(() => void) | undefined>;
 }
 
-function parseBBCode(text: string): string {
-  if (!text) return '';
-  
-  // Basic BBCode parsing
-  return text
-    .replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>')
-    .replace(/\[i\](.*?)\[\/i\]/g, '<em>$1</em>')
-    .replace(/\[u\](.*?)\[\/u\]/g, '<u>$1</u>')
-    .replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '<a href="$1" target="_blank" rel="noopener">$2</a>')
-    .replace(/\[url\](.*?)\[\/url\]/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
-    .replace(/\[list\]/g, '<ul>')
-    .replace(/\[\/list\]/g, '</ul>')
-    .replace(/\[\*\]/g, '<li>')
-    .replace(/\[h1\](.*?)\[\/h1\]/g, '<h3>$1</h3>')
-    .replace(/\[h2\](.*?)\[\/h2\]/g, '<h4>$1</h4>')
-    .replace(/\[h3\](.*?)\[\/h3\]/g, '<h5>$1</h5>')
-    .replace(/\[spoiler\](.*?)\[\/spoiler\]/g, '<details><summary>Spoiler</summary>$1</details>')
-    .replace(/\[code\](.*?)\[\/code\]/g, '<code>$1</code>')
-    .replace(/\[quote\](.*?)\[\/quote\]/g, '<blockquote>$1</blockquote>')
-    .replace(/\[img\](.*?)\[\/img\]/g, '')
-    .replace(/\n/g, '<br />');
-}
 
-export default function ModManager({ serverId, isOwner }: Props) {
+export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
   const [mods, setMods] = useState<Record<string, ModConfig>>({});
   const [modInfoCache, setModInfoCache] = useState<Record<string, ModInfo>>({});
-  const [expandedMods, setExpandedMods] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [installedModFilter, setInstalledModFilter] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ key: string; title: string } | null>(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [configureModal, setConfigureModal] = useState<{ key: string; title: string; options: Record<string, unknown> } | null>(null);
+  const [modConfigValues, setModConfigValues] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     const fetchMods = async () => {
@@ -64,22 +50,42 @@ export default function ModManager({ serverId, isOwner }: Props) {
       const data = await res.json();
       setMods(data);
       
-      // Fetch mod details for all installed mods
+      // Fetch mod details for all installed mods in parallel
       const modKeys = Object.keys(data);
       const workshopIds = modKeys.map(key => key.replace('workshop-', ''));
       
-      for (const workshopId of workshopIds) {
-        if (!modInfoCache[workshopId]) {
+      const detailPromises = workshopIds
+        .filter(workshopId => !modInfoCache[workshopId])
+        .map(async (workshopId) => {
           try {
             const detailRes = await api.get(`/mods/details/${workshopId}`);
             const details = await detailRes.json();
-            setModInfoCache(prev => ({ ...prev, [workshopId]: details }));
-          } catch {}
+            return { workshopId, details };
+          } catch {
+            return null;
+          }
+        });
+      
+      const results = await Promise.all(detailPromises);
+      const newCache: Record<string, ModInfo> = {};
+      results.forEach(result => {
+        if (result) {
+          newCache[result.workshopId] = result.details;
         }
+      });
+      
+      if (Object.keys(newCache).length > 0) {
+        setModInfoCache(prev => ({ ...prev, ...newCache }));
       }
     };
     fetchMods();
   }, [serverId]);
+  
+  useEffect(() => {
+    if (onSaveRef) {
+      onSaveRef.current = handleSave;
+    }
+  });
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -87,17 +93,57 @@ export default function ModManager({ serverId, isOwner }: Props) {
     try {
       const res = await api.get(`/mods/search?q=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
-      setSearchResults(Array.isArray(data) ? data : []);
+      const results = Array.isArray(data) ? data : [];
+      setSearchResults(results);
+      
+      // Fetch details for search results in parallel
+      const detailPromises = results
+        .filter(result => !modInfoCache[result.workshopId])
+        .map(async (result) => {
+          try {
+            const detailRes = await api.get(`/mods/details/${result.workshopId}`);
+            const details = await detailRes.json();
+            return { workshopId: result.workshopId, details };
+          } catch {
+            return null;
+          }
+        });
+      
+      const detailResults = await Promise.all(detailPromises);
+      const newCache: Record<string, ModInfo> = {};
+      detailResults.forEach(result => {
+        if (result) {
+          newCache[result.workshopId] = result.details;
+        }
+      });
+      
+      if (Object.keys(newCache).length > 0) {
+        setModInfoCache(prev => ({ ...prev, ...newCache }));
+      }
     } catch {
       setSearchResults([]);
     }
     setSearching(false);
   };
 
-  const addMod = (workshopId: string) => {
+  const addMod = async (workshopId: string) => {
     const key = `workshop-${workshopId}`;
     if (mods[key]) return;
-    setMods({ ...mods, [key]: { enabled: true, configuration_options: {} } });
+    
+    const newMods = { ...mods, [key]: { enabled: true, configuration_options: {} } };
+    setMods(newMods);
+    
+    // Auto-save after adding
+    const res = await api.put(`/mods/server/${serverId}`, newMods);
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error);
+      // Revert on error
+      setMods(mods);
+    } else {
+      setSuccess('Mod added!');
+      setTimeout(() => setSuccess(''), 2000);
+    }
   };
 
   const removeMod = (key: string) => {
@@ -111,16 +157,6 @@ export default function ModManager({ serverId, isOwner }: Props) {
       ...mods,
       [key]: { ...mods[key], enabled: !mods[key].enabled },
     });
-  };
-  
-  const toggleExpanded = (workshopId: string) => {
-    const newExpanded = new Set(expandedMods);
-    if (newExpanded.has(workshopId)) {
-      newExpanded.delete(workshopId);
-    } else {
-      newExpanded.add(workshopId);
-    }
-    setExpandedMods(newExpanded);
   };
 
   const handleSave = async () => {
@@ -138,72 +174,29 @@ export default function ModManager({ serverId, isOwner }: Props) {
 
   return (
     <>
-      {isOwner && (
-        <div className="card">
-          <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>
-            <img src="/images/button_icons/workshop_filter.png" alt="" style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            Search Steam Workshop
-          </h3>
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Search mods..."
-              style={{ flex: 1 }}
-            />
-            <button onClick={handleSearch} disabled={searching}>
-              {searching ? 'Searching...' : 'Search'}
-            </button>
-          </div>
-
-          {searchResults.length > 0 && (
-            <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-              {searchResults.map((result) => (
-                <div key={result.workshopId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div>
-                    <strong style={{ color: '#fff' }}>{result.title}</strong>
-                    <br />
-                    <small style={{ color: '#aaa' }}>ID: {result.workshopId}</small>
-                  </div>
-                  <button onClick={() => addMod(result.workshopId)} style={{ fontSize: '0.85rem' }}>Add</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <h3 style={{ color: '#fff', margin: 0 }}>
-            <img src="/images/button_icons/mods.png" alt="" style={{ width: 24, height: 24, verticalAlign: 'middle', marginRight: '0.5rem' }} />
+        <div className="mod-header">
+          <h3>
+            <img src="/images/button_icons/mods.png" alt="" className="mod-header-icon" />
             Installed Mods ({Object.keys(mods).length})
           </h3>
           {isOwner && (
-            <button onClick={handleSave} className="icon-btn" title="Save">
-              <img src="/images/button_icons/save.png" alt="Save" />
+            <button onClick={() => setShowSearchModal(true)} className="btn btn-primary">
+              Search Workshop
+              <img src="/images/button_icons/workshop_filter.png" alt="" />
             </button>
           )}
         </div>
         
         {Object.keys(mods).length > 0 && (
-          <div className="search-input-wrapper" style={{ marginBottom: '1rem', position: 'relative' }}>
-            <img src="/images/servericons/search.png" alt="" style={{ 
-              position: 'absolute', 
-              left: '10px', 
-              top: '50%', 
-              transform: 'translateY(-50%)',
-              width: '20px',
-              height: '20px',
-              pointerEvents: 'none'
-            }} />
+          <div className="search-input-wrapper">
+            <img src="/images/servericons/search_light.png" alt="" className="search-icon" />
             <input
               type="text"
               placeholder="Filter installed mods..."
               value={installedModFilter}
               onChange={(e) => setInstalledModFilter(e.target.value)}
-              style={{ width: '100%', paddingLeft: '40px' }}
+              className="search-input"
             />
           </div>
         )}
@@ -212,7 +205,7 @@ export default function ModManager({ serverId, isOwner }: Props) {
         {success && <p className="success-message">{success}</p>}
 
         {Object.keys(mods).length === 0 ? (
-          <p style={{ color: '#aaa' }}>No mods installed.</p>
+          <p className="empty-state">No mods installed.</p>
         ) : (
           Object.entries(mods)
             .filter(([key, mod]) => {
@@ -227,88 +220,161 @@ export default function ModManager({ serverId, isOwner }: Props) {
               );
             })
             .map(([key, mod]) => {
-            const workshopId = key.replace('workshop-', '');
-            const info = modInfoCache[workshopId];
-            
-            return (
-              <div key={key} className="mod-item">
-                <div className="mod-content">
-                  {info?.previewUrl && (
-                    <img src={info.previewUrl} alt="" className="mod-thumbnail" />
-                  )}
-                  <div className="mod-info">
-                    <div className="mod-header">
-                      <span className="mod-title">{info?.title || key}</span>
-                      {Object.keys(mod.configuration_options).length > 0 && (
-                        <small style={{ color: '#aaa', marginLeft: '0.5rem' }}>
-                          ({Object.keys(mod.configuration_options).length} options)
-                        </small>
-                      )}
-                    </div>
-                    {info?.description && (
-                      <>
-                        {expandedMods.has(workshopId) ? (
-                          <div 
-                            className="mod-description expanded" 
-                            dangerouslySetInnerHTML={{ __html: parseBBCode(info.description) }}
-                          />
-                        ) : (
-                          <p className="mod-description">{info.description.replace(/\[.*?\]/g, '').slice(0, 100)}...</p>
-                        )}
-                        <button 
-                          className="mod-expand-btn" 
-                          onClick={() => toggleExpanded(workshopId)}
-                        >
-                          {expandedMods.has(workshopId) ? 'Show Less' : 'Read More'}
-                        </button>
-                      </>
-                    )}
-                    <a 
-                      href={`https://steamcommunity.com/sharedfiles/filedetails/?id=${workshopId}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="mod-link"
-                    >
-                      View on Steam Workshop
-                    </a>
-                  </div>
-                </div>
-                {isOwner && (
-                  <div className="mod-actions">
-                    <button 
-                      onClick={() => removeMod(key)} 
-                      className="icon-btn mod-delete-btn"
-                      title="Remove"
-                    >
-                      <img src="/images/button_icons/delete.png" alt="Remove" />
-                    </button>
-                    {Object.keys(mod.configuration_options).length > 0 ? (
-                      <button 
-                        className="icon-btn"
-                        title="Configure"
-                      >
-                        <img src="/images/button_icons/configure_mod.png" alt="Configure" />
-                      </button>
-                    ) : (
-                      <div className="icon-btn-placeholder"></div>
-                    )}
-                    <button 
-                      onClick={() => toggleMod(key)} 
-                      className="icon-btn"
-                      title={mod.enabled ? 'Disable' : 'Enable'}
-                    >
-                      <img 
-                        src={mod.enabled ? '/images/button_icons/enabled_filter.png' : '/images/button_icons/disabled_filter.png'} 
-                        alt={mod.enabled ? 'Disable' : 'Enable'} 
-                      />
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })
+              const workshopId = key.replace('workshop-', '');
+              const info = modInfoCache[workshopId];
+              
+              return (
+                <ModListItem
+                  key={key}
+                  workshopId={workshopId}
+                  title={info?.title || key}
+                  description={info?.description || ''}
+                  previewUrl={info?.previewUrl || ''}
+                  configOptions={Object.keys(mod.configuration_options).length}
+                  isInstalled={true}
+                  isEnabled={mod.enabled}
+                  onToggle={() => toggleMod(key)}
+                  onConfigure={() => {
+                    setModConfigValues(mod.configuration_options);
+                    setConfigureModal({ 
+                      key, 
+                      title: info?.title || key,
+                      options: mod.configuration_options 
+                    });
+                  }}
+                  onRemove={() => setDeleteConfirm({ key, title: info?.title || key })}
+                  isOwner={isOwner}
+                />
+              );
+            })
         )}
       </div>
+
+      {/* Search Modal */}
+      <Modal
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
+        title="Browse Steam Workshop"
+      >
+        <div className="modal-body">
+          <div className="search-bar">
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Search mods..."
+              className="search-input"
+            />
+            <button onClick={handleSearch} disabled={searching}>
+              {searching ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              {searchResults.map((result) => {
+                const info = modInfoCache[result.workshopId] || result;
+                const isInstalled = `workshop-${result.workshopId}` in mods;
+                
+                return (
+                  <ModListItem
+                    key={result.workshopId}
+                    workshopId={result.workshopId}
+                    title={info.title}
+                    description={info.description}
+                    previewUrl={info.previewUrl}
+                    isInstalled={isInstalled}
+                    onAdd={() => {
+                      addMod(result.workshopId);
+                      setShowSearchModal(false);
+                    }}
+                    isOwner={isOwner}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Configuration Modal */}
+      <Modal
+        isOpen={configureModal !== null}
+        onClose={() => setConfigureModal(null)}
+        title={`Configure ${configureModal?.title}`}
+        footerJSX={
+          <div className="modal-actions">
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setConfigureModal(null)}
+            >
+              Cancel
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={() => {
+                // Save mod config
+                if (configureModal) {
+                  const modKey = configureModal.key;
+                  setMods(prev => ({
+                    ...prev,
+                    [modKey]: {
+                      ...prev[modKey],
+                      configuration_options: modConfigValues
+                    }
+                  }));
+                  setConfigureModal(null);
+                  setSuccess('Mod configuration updated');
+                }
+              }}
+            >
+              Save Config
+            </button>
+          </div>
+        }
+      >
+        <div className="mod-config-grid">
+          {configureModal && Object.entries(configureModal.options).map(([key, value]) => {
+            // Parse the option structure - typically has label, default, options array
+            const option = value as any;
+            const currentValue = modConfigValues[key] ?? option.default ?? option.options?.[0];
+            
+            // Only show options that have an options array (selectable values)
+            if (!option.options || !Array.isArray(option.options)) {
+              return null;
+            }
+            
+            return (
+              <SelectCycle
+                key={key}
+                label={option.label || key}
+                value={currentValue}
+                options={option.options}
+                onChange={(newValue) => {
+                  setModConfigValues(prev => ({
+                    ...prev,
+                    [key]: newValue
+                  }));
+                }}
+              />
+            );
+          })}
+        </div>
+      </Modal>
+      
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm !== null}
+        onCancel={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            removeMod(deleteConfirm.key);
+            setDeleteConfirm(null);
+          }
+        }}
+        title="Remove Mod?"
+        body={`Are you sure you want to remove "${deleteConfirm?.title}"?`}
+      />
     </>
   );
 }

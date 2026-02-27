@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
+import Tabs from './Tabs';
 
 interface Props {
   serverId: string;
@@ -7,14 +8,17 @@ interface Props {
 
 export default function LogViewer({ serverId }: Props) {
   const [shard, setShard] = useState<'Master' | 'Caves'>('Master');
-  const [log, setLog] = useState('');
+  const [logs, setLogs] = useState<{ Master: string; Caves: string }>({
+    Master: '',
+    Caves: ''
+  });
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchLog = async () => {
       const res = await api.get(`/logs/${serverId}/${shard}?lines=500`);
       const data = await res.json();
-      setLog(data.log || '');
+      setLogs(prev => ({ ...prev, [shard]: data.log || '' }));
     };
     fetchLog();
   }, [serverId, shard]);
@@ -25,40 +29,52 @@ export default function LogViewer({ serverId }: Props) {
 
     es.addEventListener('log', (e) => {
       const data = JSON.parse(e.data);
-      if (data.shard === shard) {
-        setLog((prev) => prev + data.data);
-      }
+      setLogs(prev => ({
+        ...prev,
+        [data.shard]: prev[data.shard] + data.data
+      }));
     });
 
     return () => es.close();
-  }, [serverId, shard]);
+  }, [serverId]);
 
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
-  }, [log]);
+  }, [logs, shard]);
 
   const handleClear = async () => {
     await api.delete(`/logs/${serverId}/${shard}`);
-    setLog('');
+    setLogs(prev => ({ ...prev, [shard]: '' }));
   };
 
+  const LogContent = ({ type }: { type: 'Master' | 'Caves' }) => (
+    <div className="log-viewer-wrapper">
+      <button 
+        onClick={handleClear} 
+        className="icon-btn log-clear-btn"
+        title="Clear logs"
+      >
+        <img src="/images/button_icons/clean_all.png" alt="Clear" />
+      </button>
+      <div className="log-viewer" ref={type === shard ? logRef : undefined}>
+        {logs[type] || 'No logs available.'}
+      </div>
+    </div>
+  );
+
   return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div className="tab-bar" style={{ marginBottom: 0 }}>
-          <button className={shard === 'Master' ? 'active' : ''} onClick={() => setShard('Master')}>Master</button>
-          <button className={shard === 'Caves' ? 'active' : ''} onClick={() => setShard('Caves')}>Caves</button>
-        </div>
-        <button onClick={handleClear} style={{ fontSize: '0.85rem' }}>
-          <img src="/images/button_icons/clean_all.png" alt="" style={{ width: 16, height: 16, verticalAlign: 'middle', marginRight: '0.25rem' }} />
-          Clear
-        </button>
-      </div>
-      <div className="log-viewer" ref={logRef}>
-        {log || 'No logs available.'}
-      </div>
-    </>
+    <Tabs
+      tabs={['Master', 'Caves']}
+      defaultActiveTab={shard === 'Master' ? 0 : 1}
+      onTabChange={(tabName) => setShard(tabName as 'Master' | 'Caves')}
+    >
+      {shard === 'Master' ? (
+        <LogContent type="Master" />
+      ) : (
+        <LogContent type="Caves" />
+      )}
+    </Tabs>
   );
 }

@@ -426,6 +426,13 @@ button.icon-btn, .icon-btn {
   }
 }
 
+// When two Tabs components are stacked, remove the gap
+.Tabs + .Tabs {
+  .Tabs__buttons {
+    margin-top: -1px;
+  }
+}
+
 .world-settings-header {
   display: flex;
   justify-content: space-between;
@@ -438,6 +445,10 @@ button.icon-btn, .icon-btn {
     flex-direction: column;
     gap: 0;
     flex: 1;
+    
+    > .Tabs + .Tabs {
+      margin-top: -1px;
+    }
   }
   
   .world-settings-actions {
@@ -447,7 +458,7 @@ button.icon-btn, .icon-btn {
 }
 
 .world-settings-groups {
-  padding: 1rem 0;
+  padding: 0 0 1rem 0;
   
   .settings-group {
     margin-bottom: 1.5rem;
@@ -521,25 +532,28 @@ button.icon-btn, .icon-btn {
       }
     }
     
-    .setting-label {
+    .setting-image-placeholder {
+      width: 140px;
+      height: 140px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+  
+  .world-setting-selector {
+    width: 100%;
+    padding: 0 0.5rem;
+    
+    .cycle-selector-label {
       font-size: 0.85rem;
       color: #fff;
-      margin: 0.25rem 0;
-      text-transform: capitalize;
-      word-break: break-word;
-      line-height: 1.2;
-      flex-shrink: 0;
-      font-weight: 500;
+      text-align: center;
+      margin-bottom: 0.25rem;
     }
     
-    .setting-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      width: 100%;
-      justify-content: space-between;
-      flex-shrink: 0;
-      padding: 0 0.5rem 0.5rem 0.5rem;
+    .cycle-selector-control {
+      background: transparent;
+      border: none;
+      padding: 0;
       
       .arrow-btn {
         background: transparent;
@@ -568,7 +582,7 @@ button.icon-btn, .icon-btn {
         }
       }
       
-      .setting-value {
+      .cycle-selector-value {
         flex: 1;
         min-width: 0;
         color: #fff;
@@ -971,19 +985,19 @@ button.icon-btn, .icon-btn {
   padding: 1rem 0;
 }
 
-.select-cycle {
+.cycle-selector {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   
-  .select-cycle-label {
+  .cycle-selector-label {
     color: $primary;
     font-weight: 500;
     font-size: 0.9rem;
     text-transform: capitalize;
   }
   
-  .select-cycle-control {
+  .cycle-selector-control {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -1016,7 +1030,7 @@ button.icon-btn, .icon-btn {
       }
     }
     
-    .select-cycle-value {
+    .cycle-selector-value {
       flex: 1;
       text-align: center;
       color: #fff;

@@ -1,37 +1,68 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api';
-import Settings from '../data/Settings.json';
 import { useWorldSettingsStore } from '../stores/WorldSettingsStore';
 import Tabs from './Tabs';
+import WorldSettingsContent from './WorldSettingsContent';
 
 interface Props {
   serverId: string;
   isOwner: boolean;
+  onSaveRef?: React.MutableRefObject<(() => void) | undefined>;
 }
 
-export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props & { onSaveRef?: React.MutableRefObject<(() => void) | undefined> }) {
+export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
   const navigate = useNavigate();
-  const { shard: urlShard, subtab: urlSubtab } = useParams<{ shard?: string; subtab?: string }>();
+  const location = useLocation();
+  const { loadFromMappings, getAllMappings } = useWorldSettingsStore();
   
-  // Use URL params or defaults
-  const shard = (urlShard === 'caves' ? 'Caves' : 'Master') as 'Master' | 'Caves';
-  const tab = (urlSubtab === 'generation' ? 'Generation' : 'Settings') as 'Settings' | 'Generation';
+  // Parse URL to get current state
+  const pathParts = location.pathname.split('/');
+  const worldIndex = pathParts.indexOf('world');
+  const currentShardPath = worldIndex >= 0 ? pathParts[worldIndex + 1] : 'forest';
+  const currentSubtab = worldIndex >= 0 ? pathParts[worldIndex + 2] : 'settings';
   
-  const { selections, cycleSelection, loadFromMappings, getAllMappings } = useWorldSettingsStore();
+  const [shard, setShard] = useState<'Master' | 'Caves'>(currentShardPath === 'caves' ? 'Caves' : 'Master');
+  const [tab, setTab] = useState<'Settings' | 'Generation'>(currentSubtab === 'generation' ? 'Generation' : 'Settings');
+  
+  // Track last tab for each shard - only initialize the current shard from URL
+  const initialShard = currentShardPath === 'caves' ? 'Caves' : 'Forest';
+  const lastTabRef = useRef<{ Forest: string; Caves: string }>({
+    Forest: initialShard === 'Forest' ? currentSubtab : 'settings',
+    Caves: initialShard === 'Caves' ? currentSubtab : 'settings'
+  });
+  
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  const setShard = (newShard: 'Master' | 'Caves') => {
+  const updateURL = (newShard: 'Master' | 'Caves', newTab: 'Settings' | 'Generation') => {
     const shardPath = newShard === 'Master' ? 'forest' : 'caves';
-    const tabPath = tab.toLowerCase();
-    navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`);
+    const tabPath = newTab.toLowerCase();
+    navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`, { replace: true });
+  };
+
+  const handleShardChange = (tabName: string) => {
+    const newShard = tabName === 'Forest' ? 'Master' : 'Caves';
+    const shardName = tabName as 'Forest' | 'Caves';
+    
+    // Get the last tab for this shard, default to settings
+    const lastTab = lastTabRef.current[shardName] || 'settings';
+    const newTab = lastTab === 'generation' ? 'Generation' : 'Settings';
+    
+    setShard(newShard);
+    setTab(newTab);
+    updateURL(newShard, newTab);
   };
   
-  const setTab = (newTab: 'Settings' | 'Generation') => {
-    const shardPath = shard === 'Master' ? 'forest' : 'caves';
-    const tabPath = newTab.toLowerCase();
-    navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`);
+  const handleTabChange = (tabName: string) => {
+    const newTab = tabName as 'Settings' | 'Generation';
+    const currentShardName = shard === 'Master' ? 'Forest' : 'Caves';
+    
+    // Remember this tab for this shard
+    lastTabRef.current[currentShardName] = newTab.toLowerCase();
+    
+    setTab(newTab);
+    updateURL(shard, newTab);
   };
 
   const handleSave = async () => {
@@ -65,107 +96,28 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props & 
     }
   });
 
-  // Get the appropriate config based on shard and tab
-  const shardName = shard === 'Master' ? 'Forest' : 'Caves';
-  const configSection = (Settings as any)[shardName]?.[tab] || {};
-  
-  // Group the settings based on the config
-  const groupedSettings = Object.entries(configSection).map(([groupName, settingsGroup]) => {
-    const settings = (settingsGroup as any[]).map((settingData, settingIndex) => {
-      const { label, override, icon, options } = settingData;
-      
-      // Create a unique key for React
-      const uniqueKey = `${shardName.toLowerCase()}_${tab.toLowerCase()}_${groupName.toLowerCase().replace(/ /g, '_')}_${settingIndex}_${override}`;
-      
-      return {
-        label,
-        override,
-        icon,
-        options,
-        uniqueKey
-      };
-    });
-    
-    return {
-      name: groupName,
-      settings
-    };
-  });
-
   return (
     <>
-      <div className="world-settings-header">
-        <div className="world-settings-tabs">
-          <Tabs
-            tabs={['Forest', 'Caves']}
-            defaultActiveTab={shard === 'Master' ? 0 : 1}
-            onTabChange={(tabName) => setShard(tabName === 'Forest' ? 'Master' : 'Caves')}
-          />
-          <Tabs
-            tabs={['Settings', 'Generation']}
-            defaultActiveTab={tab === 'Settings' ? 0 : 1}
-            onTabChange={(tabName) => setTab(tabName as 'Settings' | 'Generation')}
-          />
-        </div>
-      </div>
-
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
-
-      <div className="world-settings-groups">
-          {groupedSettings.map((group) => (
-            <div key={group.name} className="settings-group">
-              <h3 className="group-title">{group.name}</h3>
-              <div className="world-settings-grid">
-                {group.settings.map((settingData) => {
-                  const { label, override, icon, options, uniqueKey } = settingData;
-                  const currentOption = selections[override] || options.find((o: string) => o === 'Default') || options[0];
-                  
-                  return (
-                    <div key={uniqueKey} className="world-setting-item">
-                      <div className="setting-image">
-                        {icon ? (
-                          <img 
-                            src={`/images/world_settings/${icon}`} 
-                            alt={label}
-                            onError={(e) => {
-                              console.warn(`Missing icon for ${override}: ${icon}`);
-                              (e.target as HTMLImageElement).style.opacity = '0.3';
-                            }}
-                          />
-                        ) : (
-                          <div style={{ width: '140px', height: '140px', background: 'rgba(255,255,255,0.05)' }} />
-                        )}
-                      </div>
-                      <div className="setting-label">{label}</div>
-                      <div className="setting-controls">
-                        {isOwner && (
-                          <button
-                            className="arrow-btn left"
-                            onClick={() => cycleSelection(override, 'prev')}
-                            aria-label="Previous option"
-                          >
-                            ◀
-                          </button>
-                        )}
-                        <span className="setting-value">{currentOption}</span>
-                        {isOwner && (
-                          <button
-                            className="arrow-btn right"
-                            onClick={() => cycleSelection(override, 'next')}
-                            aria-label="Next option"
-                          >
-                            ▶
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-      </div>
+      
+      <Tabs
+        tabs={['Forest', 'Caves']}
+        defaultActiveTab={shard === 'Master' ? 0 : 1}
+        onTabChange={handleShardChange}
+      >
+        <Tabs
+          tabs={['Settings', 'Generation']}
+          defaultActiveTab={tab === 'Settings' ? 0 : 1}
+          onTabChange={handleTabChange}
+        >
+          <WorldSettingsContent 
+            shard={shard} 
+            tab={tab} 
+            isOwner={isOwner} 
+          />
+        </Tabs>
+      </Tabs>
     </>
   );
 }

@@ -3,7 +3,7 @@ import { api } from '../api';
 import ConfirmModal from './ConfirmModal';
 import Modal from './Modal';
 import ModListItem from './ModListItem';
-import SelectCycle from './SelectCycle';
+import CycleSelector from './CycleSelector';
 
 interface ModConfig {
   enabled: boolean;
@@ -345,7 +345,7 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             }
             
             return (
-              <SelectCycle
+              <CycleSelector
                 key={key}
                 label={option.label || key}
                 value={currentValue}
@@ -356,6 +356,7 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
                     [key]: newValue
                   }));
                 }}
+                disabled={!isOwner}
               />
             );
           })}

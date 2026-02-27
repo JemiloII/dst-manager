@@ -15,16 +15,12 @@ export default function Tabs({
   children,
 }: TabsProps) {
   const [activeTab, setActiveTab] = useState<number>(defaultActiveTab);
-  const [hasManuallySelected, setHasManuallySelected] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!hasManuallySelected) {
-      setActiveTab(defaultActiveTab);
-    }
+    setActiveTab(defaultActiveTab);
   }, [defaultActiveTab]);
 
   const showTab = (index: number) => {
-    setHasManuallySelected(true);
     setActiveTab(index);
     onTabChange(tabs[index]);
   };

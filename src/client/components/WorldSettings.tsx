@@ -38,7 +38,7 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
   const updateURL = (newShard: 'Master' | 'Caves', newTab: 'Settings' | 'Generation') => {
     const shardPath = newShard === 'Master' ? 'forest' : 'caves';
     const tabPath = newTab.toLowerCase();
-    navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`, { replace: true });
+    navigate(`/servers/${serverId}/world/${shardPath}/${tabPath}`);
   };
 
   const handleShardChange = (tabName: string) => {
@@ -80,6 +80,17 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
       setTimeout(() => setSuccess(''), 2000);
     }
   };
+
+  // Update state when URL changes (e.g., browser back/forward)
+  useEffect(() => {
+    const pathParts = location.pathname.split('/');
+    const worldIndex = pathParts.indexOf('world');
+    const shardPath = worldIndex >= 0 ? pathParts[worldIndex + 1] : 'forest';
+    const subtab = worldIndex >= 0 ? pathParts[worldIndex + 2] : 'settings';
+    
+    setShard(shardPath === 'caves' ? 'Caves' : 'Master');
+    setTab(subtab === 'generation' ? 'Generation' : 'Settings');
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -2,12 +2,13 @@ interface CycleSelectorProps {
   label: string;
   value: string | number | boolean;
   options: (string | number | boolean)[];
+  optionLabels?: Record<string | number, string>;
   onChange: (value: string | number | boolean) => void;
   className?: string;
   disabled?: boolean;
 }
 
-export default function CycleSelector({ label, value, options, onChange, className = '', disabled = false }: CycleSelectorProps) {
+export default function CycleSelector({ label, value, options, optionLabels, onChange, className = '', disabled = false }: CycleSelectorProps) {
   const currentIndex = options.indexOf(value);
   const validIndex = currentIndex >= 0 ? currentIndex : 0;
   
@@ -25,11 +26,15 @@ export default function CycleSelector({ label, value, options, onChange, classNa
     }
   };
   
+  const displayValue = optionLabels?.[String(value)] || String(value);
+  
   return (
     <div className={`cycle-selector ${className} ${disabled ? 'cycle-selector--disabled' : ''}`}>
-      <label className="cycle-selector-label">
-        {label}
-      </label>
+      {label && (
+        <label className="cycle-selector-label">
+          {label}
+        </label>
+      )}
       <div className="cycle-selector-control">
         {!disabled && (
           <button 
@@ -41,7 +46,7 @@ export default function CycleSelector({ label, value, options, onChange, classNa
           </button>
         )}
         <span className="cycle-selector-value">
-          {String(value)}
+          {displayValue}
         </span>
         {!disabled && (
           <button 

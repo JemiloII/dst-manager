@@ -1,0 +1,103 @@
+import { Hono } from 'hono';
+import { authMiddleware, requireRole, JwtPayload } from '../../middleware/auth';
+import { generateModOverrides } from '../../services/lua';
+import { updateModsSetup } from '../../services/dst';
+import * as modService from './mods.service';
+
+type Variables = {
+  user: JwtPayload;
+};
+
+const mods = new Hono<{ Variables: Variables }>();
+
+mods.use('*', authMiddleware());
+
+mods.get('/search', async (c) => {
+  const query = c.req.query('q');
+  if (!query) {
+    return c.json({ error: 'Search query required' }, 400);
+  }
+
+  try {
+    const results = await modService.searchWorkshop(query);
+    return c.json(results);
+  } catch {
+    return c.json({ error: 'Failed to search workshop' }, 500);
+  }
+});
+
+mods.get('/details/:workshopId', async (c) => {
+  const workshopId = c.req.param('workshopId');
+  const details = await modService.getWorkshopDetails(workshopId);
+  return c.json(details);
+});
+
+mods.get('/config/:workshopId', async (c) => {
+  const workshopId = c.req.param('workshopId');
+  const config = await modService.getModConfig(workshopId);
+  return c.json(config);
+});
+
+mods.get('/server/:serverId', async (c) => {
+  const user = c.get('user');
+  const serverId = c.req.param('serverId');
+
+  const server = await modService.getServerById(serverId);
+  if (!server) {
+    return c.json({ error: 'Server not found' }, 404);
+  }
+
+  if (user.role !== 'admin' && user.role !== 'guest' && server.user_id !== user.id) {
+    return c.json({ error: 'Forbidden' }, 403);
+  }
+
+  const parsed = await modService.getServerModOverrides(
+    server.kuid as string, 
+    server.share_code as string
+  );
+  
+  return c.json(parsed || {});
+});
+
+mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
+  const user = c.get('user');
+  const serverId = c.req.param('serverId');
+
+  const server = await modService.getServerById(serverId);
+  if (!server) {
+    return c.json({ error: 'Server not found' }, 404);
+  }
+
+  if (user.role !== 'admin' && server.user_id !== user.id) {
+    return c.json({ error: 'Forbidden' }, 403);
+  }
+
+  const body = await c.req.json();
+  const modsData = body as Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }>;
+
+  const content = generateModOverrides(modsData);
+  await modService.saveModOverrides(server.kuid as string, server.share_code as string, content);
+
+  // Collect all workshop IDs from all servers
+  const allServers = await modService.getAllServers();
+  const allWorkshopIds = new Set<string>();
+
+  for (const srv of allServers) {
+    const parsed = await modService.getServerModOverrides(
+      srv.kuid as string, 
+      srv.share_code as string
+    );
+    if (parsed) {
+      for (const key of Object.keys(parsed)) {
+        const workshopId = key.replace('workshop-', '');
+        allWorkshopIds.add(workshopId);
+      }
+    }
+  }
+
+  await updateModsSetup(Array.from(allWorkshopIds));
+
+  return c.json({ success: true });
+});
+
+export default mods;

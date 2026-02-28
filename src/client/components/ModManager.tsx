@@ -14,6 +14,8 @@ interface ModInfo {
   title: string;
   description: string;
   previewUrl: string;
+  version?: string;
+  configuration_options?: Record<string, any>;
 }
 
 interface SearchResult {
@@ -234,13 +236,42 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
                   isInstalled={true}
                   isEnabled={mod.enabled}
                   onToggle={() => toggleMod(key)}
-                  onConfigure={() => {
-                    setModConfigValues(mod.configuration_options);
-                    setConfigureModal({ 
-                      key, 
-                      title: info?.title || key,
-                      options: mod.configuration_options 
-                    });
+                  onConfigure={async () => {
+                    // Fetch mod config options from modinfo.lua
+                    try {
+                      const configRes = await api.get(`/mods/config/${workshopId}`);
+                      const configData = await configRes.json();
+                      
+                      if (configData.configuration_options && Object.keys(configData.configuration_options).length > 0) {
+                        // Update cache with config options
+                        setModInfoCache(prev => ({
+                          ...prev,
+                          [workshopId]: {
+                            ...prev[workshopId],
+                            version: configData.version,
+                            configuration_options: configData.configuration_options
+                          }
+                        }));
+                        
+                        // Set current values from saved config or defaults
+                        const currentConfig: Record<string, unknown> = {};
+                        for (const [optKey, optDef] of Object.entries(configData.configuration_options)) {
+                          const def = optDef as any;
+                          currentConfig[optKey] = mod.configuration_options[optKey] ?? def.default ?? def.options?.[0]?.data;
+                        }
+                        
+                        setModConfigValues(currentConfig);
+                        setConfigureModal({ 
+                          key, 
+                          title: info?.title || key,
+                          options: configData.configuration_options 
+                        });
+                      } else {
+                        setError('No configuration options available for this mod');
+                      }
+                    } catch {
+                      setError('Failed to load mod configuration');
+                    }
                   }}
                   onRemove={() => setDeleteConfirm({ key, title: info?.title || key })}
                   isOwner={isOwner}
@@ -303,15 +334,33 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
         onClose={() => setConfigureModal(null)}
         title={`Configure ${configureModal?.title}`}
         footerJSX={
-          <div className="modal-actions">
+          <div className="modal-actions" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button 
-              className="btn btn-secondary" 
-              onClick={() => setConfigureModal(null)}
+              className="icon-btn" 
+              onClick={() => {
+                // Reset to defaults
+                if (configureModal) {
+                  const defaultValues: Record<string, any> = {};
+                  Object.entries(configureModal.options).forEach(([key, value]) => {
+                    const option = value as any;
+                    defaultValues[key] = option.default !== undefined ? option.default : null;
+                  });
+                  setModConfigValues(defaultValues);
+                }
+              }}
+              title="Reset to Defaults"
             >
-              Cancel
+              <img src="/images/button_icons/undo.png" alt="Reset" />
             </button>
             <button 
-              className="btn btn-primary"
+              className="icon-btn" 
+              onClick={() => setConfigureModal(null)}
+              title="Cancel"
+            >
+              <img src="/images/button_icons/pinslot_unpin_button.png" alt="Cancel" />
+            </button>
+            <button 
+              className="icon-btn"
               onClick={() => {
                 // Save mod config
                 if (configureModal) {
@@ -327,39 +376,61 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
                   setSuccess('Mod configuration updated');
                 }
               }}
+              title="Save Configuration"
             >
-              Save Config
+              <img src="/images/button_icons/save.png" alt="Save" />
             </button>
           </div>
         }
       >
         <div className="mod-config-grid">
-          {configureModal && Object.entries(configureModal.options).map(([key, value]) => {
-            // Parse the option structure - typically has label, default, options array
-            const option = value as any;
-            const currentValue = modConfigValues[key] ?? option.default ?? option.options?.[0];
-            
-            // Only show options that have an options array (selectable values)
-            if (!option.options || !Array.isArray(option.options)) {
-              return null;
-            }
-            
-            return (
-              <CycleSelector
-                key={key}
-                label={option.label || key}
-                value={currentValue}
-                options={option.options}
-                onChange={(newValue) => {
-                  setModConfigValues(prev => ({
-                    ...prev,
-                    [key]: newValue
-                  }));
-                }}
-                disabled={!isOwner}
-              />
-            );
-          })}
+          {configureModal && Object.entries(configureModal.options).length === 0 ? (
+            <p className="empty-state">No configuration options available</p>
+          ) : (
+            configureModal && Object.entries(configureModal.options).map(([key, value]) => {
+              const option = value as any;
+              const currentValue = modConfigValues[key];
+              
+              // Only show options that have an options array (selectable values)
+              if (!option.options || !Array.isArray(option.options)) {
+                return null;
+              }
+              
+              // Format options for CycleSelector
+              const formattedOptions = option.options.map((opt: any) => ({
+                value: opt.data,
+                label: opt.description
+              }));
+              
+              return (
+                <div key={key} className="config-option">
+                  <div className="config-info">
+                    <label>{option.label || key}</label>
+                    {/* Show the option's description if it exists */}
+                    {option.description && (
+                      <p className="config-description">{option.description}</p>
+                    )}
+                  </div>
+                  <CycleSelector
+                    label=""
+                    value={currentValue}
+                    options={formattedOptions.map((opt: any) => opt.value)}
+                    optionLabels={formattedOptions.reduce((acc: any, opt: any) => {
+                      acc[opt.value] = opt.label;
+                      return acc;
+                    }, {})}
+                    onChange={(newValue) => {
+                      setModConfigValues(prev => ({
+                        ...prev,
+                        [key]: newValue
+                      }));
+                    }}
+                    disabled={!isOwner}
+                  />
+                </div>
+              );
+            })
+          )}
         </div>
       </Modal>
       

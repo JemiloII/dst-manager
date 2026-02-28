@@ -3,18 +3,18 @@ import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import bcrypt from 'bcrypt';
-import { initDb } from './db/schema.js';
-import db from './db/schema.js';
-import { env } from './env.js';
-import auth from './routes/auth.js';
-import servers from './routes/servers.js';
-import mods from './routes/mods.js';
-import world from './routes/world.js';
-import suggestions from './routes/suggestions.js';
-import tickets from './routes/tickets.js';
-import logs from './routes/logs.js';
-import admin from './routes/admin.js';
-import { startLobbyPoller } from './services/lobby.js';
+import { initDb } from './db/schema';
+import db from './db/schema';
+import { env } from './env';
+import auth from './routes/auth';
+import servers from './routes/servers';
+import { modsRouter } from './features/mods';
+import world from './routes/world';
+import suggestions from './routes/suggestions';
+import tickets from './routes/tickets';
+import logs from './routes/logs';
+import admin from './routes/admin';
+import { startLobbyPoller } from './services/lobby';
 
 const app = new Hono();
 
@@ -28,7 +28,7 @@ app.onError((err, c) => {
 
 app.route('/api/auth', auth);
 app.route('/api/servers', servers);
-app.route('/api/mods', mods);
+app.route('/api/mods', modsRouter);
 app.route('/api/world', world);
 app.route('/api/suggestions', suggestions);
 app.route('/api/tickets', tickets);

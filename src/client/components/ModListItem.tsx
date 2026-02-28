@@ -129,7 +129,6 @@ export default function ModListItem({
           ) : (
             <button 
               onClick={onAdd}
-              className="btn btn-primary"
               className="btn btn-primary mod-btn"
             >
               Add Mod

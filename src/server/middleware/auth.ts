@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono';
+import { createMiddleware } from 'hono/factory';
 import jwt from 'jsonwebtoken';
 import { env } from '../env.js';
 
@@ -8,8 +8,12 @@ export interface JwtPayload {
   role: 'admin' | 'user' | 'guest';
 }
 
+type Variables = {
+  user: JwtPayload;
+};
+
 export function authMiddleware() {
-  return async (c: Context, next: Next) => {
+  return createMiddleware<{ Variables: Variables }>(async (c, next) => {
     // Check Authorization header first
     const header = c.req.header('Authorization');
     let token: string | undefined;
@@ -35,17 +39,17 @@ export function authMiddleware() {
     } catch {
       return c.json({ error: 'Invalid token' }, 401);
     }
-  };
+  });
 }
 
 export function requireRole(...roles: string[]) {
-  return async (c: Context, next: Next) => {
-    const user = c.get('user') as JwtPayload;
+  return createMiddleware<{ Variables: Variables }>(async (c, next) => {
+    const user = c.get('user');
     if (!user || !roles.includes(user.role)) {
       return c.json({ error: 'Forbidden' }, 403);
     }
     await next();
-  };
+  });
 }
 
 export function generateTokens(payload: JwtPayload) {

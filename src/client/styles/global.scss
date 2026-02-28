@@ -347,6 +347,38 @@ button.icon-btn, .icon-btn {
   }
 }
 
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $primary;
+  padding: 5px;
+  transition: color 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    color: #ffaa33;
+    opacity: 0.8;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 .btn-full {
   width: 100%;
 }

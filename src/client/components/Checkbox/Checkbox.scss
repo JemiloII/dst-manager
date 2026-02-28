@@ -11,19 +11,16 @@
   }
   
   .checkbox-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 0.5rem;
     cursor: pointer;
-    width: 100%;
     
     .checkbox-text {
       color: #fff;
       font-size: 1.1rem;
       font-weight: 500;
       user-select: none;
-      flex: 1;
     }
     
     .checkbox-icon {

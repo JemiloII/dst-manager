@@ -377,32 +377,6 @@ button.icon-btn, .icon-btn {
   margin-bottom: 0.5rem;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  cursor: pointer;
-  white-space: nowrap;
-  width: 100%;
-  
-  input[type="checkbox"] {
-    margin: 0;
-    flex-shrink: 0;
-  }
-  
-  span {
-    user-select: none;
-    
-    &:first-child {
-      flex: 1;
-    }
-    
-    &:last-child {
-      flex: 1;
-    }
-  }
-}
 
 .create-server-container {
   max-width: 1200px;

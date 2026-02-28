@@ -161,7 +161,7 @@ export default function CreateServer() {
 
           <div className="form-group">
             <Checkbox
-              label="PvP Enabled"
+              label="PvP"
               checked={pvp}
               onChange={setPvp}
             />

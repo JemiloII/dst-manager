@@ -2,9 +2,11 @@ import { Hono } from 'hono';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import db from '../db/schema.js';
-import { env } from '../env.js';
-import { generateTokens, authMiddleware, JwtPayload } from '../middleware/auth.js';
+import Auth from './auth.queries.js';
+import Servers from '../servers/servers.queries.js';
+import { generateTokens, authMiddleware, JwtPayload } from '@server/middleware/auth.js';
+
+const { JWT_SECRET = '' } = process.env;
 
 const auth = new Hono();
 
@@ -15,30 +17,23 @@ auth.post('/register', async (c) => {
     return c.json({ error: 'Username and password required' }, 400);
   }
 
-  const existing = await db.execute({ sql: 'SELECT id FROM users WHERE username = ?', args: [username] });
-  if (existing.rows.length > 0) {
+  if (await Auth.checkUsername(username)) {
     return c.json({ error: 'Username already taken' }, 409);
   }
 
-  const userCount = await db.execute({ sql: 'SELECT COUNT(*) as count FROM users WHERE role != ?', args: ['guest'] });
-  const isFirst = (userCount.rows[0].count as number) === 0;
+  const userCount = await Auth.getUserCount('guest');
+  const isFirst = userCount === 0;
   const role = isFirst ? 'admin' : 'user';
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const result = await db.execute({
-    sql: 'INSERT INTO users (username, password_hash, role, display_name) VALUES (?, ?, ?, ?)',
-    args: [username, passwordHash, role, displayName || username],
-  });
+  const userId = await Auth.createUser(username, passwordHash, role, displayName || username);
 
-  const payload: JwtPayload = { id: Number(result.lastInsertRowid), username, role };
+  const payload: JwtPayload = { id: userId, username, role };
   const tokens = generateTokens(payload);
 
   const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  await db.execute({
-    sql: 'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
-    args: [Number(result.lastInsertRowid), refreshHash, expiresAt],
-  });
+  await Auth.createRefreshToken(userId, refreshHash, expiresAt);
 
   return c.json({ ...tokens, user: payload });
 });
@@ -50,30 +45,25 @@ auth.post('/login', async (c) => {
     return c.json({ error: 'Username and password required' }, 400);
   }
 
-  const result = await db.execute({ sql: 'SELECT * FROM users WHERE username = ?', args: [username] });
-  if (result.rows.length === 0) {
+  const user = await Auth.findUserByUsername(username);
+  if (!user) {
     return c.json({ error: 'Invalid credentials' }, 401);
   }
-
-  const user = result.rows[0];
   const valid = await bcrypt.compare(password, user.password_hash as string);
   if (!valid) {
     return c.json({ error: 'Invalid credentials' }, 401);
   }
 
   const payload: JwtPayload = {
-    id: user.id as number,
-    username: user.username as string,
+    id: user.id,
+    username: user.username,
     role: user.role as 'admin' | 'user' | 'guest',
   };
   const tokens = generateTokens(payload);
 
   const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  await db.execute({
-    sql: 'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
-    args: [user.id as number, refreshHash, expiresAt],
-  });
+  await Auth.createRefreshToken(user.id, refreshHash, expiresAt);
 
   return c.json({ ...tokens, user: payload });
 });
@@ -86,22 +76,14 @@ auth.post('/guest', async (c) => {
   }
 
   // Verify share code exists
-  const server = await db.execute({ 
-    sql: 'SELECT id FROM servers WHERE share_code = ?', 
-    args: [shareCode] 
-  });
+  const server = await Servers.findByShareCode(shareCode);
   
-  if (server.rows.length === 0) {
+  if (!server) {
     return c.json({ error: 'Invalid share code' }, 404);
   }
 
   // Check if display name is already taken by a real user
-  const existing = await db.execute({ 
-    sql: 'SELECT id FROM users WHERE username = ? OR display_name = ?', 
-    args: [displayName, displayName] 
-  });
-  
-  if (existing.rows.length > 0) {
+  if (await Auth.checkDisplayName(displayName)) {
     return c.json({ error: 'This name is already taken' }, 409);
   }
 
@@ -109,12 +91,9 @@ auth.post('/guest', async (c) => {
   const guestUsername = `guest_${displayName}`;
   const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
 
-  const result = await db.execute({
-    sql: 'INSERT INTO users (username, password_hash, role, display_name) VALUES (?, ?, ?, ?)',
-    args: [guestUsername, passwordHash, 'guest', displayName],
-  });
+  const userId = await Auth.createUser(guestUsername, passwordHash, 'guest', displayName);
 
-  const payload: JwtPayload = { id: Number(result.lastInsertRowid), username: displayName, role: 'guest' };
+  const payload: JwtPayload = { id: userId, username: displayName, role: 'guest' };
   const tokens = generateTokens(payload);
 
   return c.json({ ...tokens, user: { ...payload, displayName } });
@@ -128,22 +107,19 @@ auth.post('/refresh', async (c) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, env.JWT_SECRET) as JwtPayload & { type: string };
+    const decoded = jwt.verify(refreshToken, JWT_SECRET) as JwtPayload & { type: string };
     if (decoded.type !== 'refresh') {
       return c.json({ error: 'Invalid token type' }, 401);
     }
 
-    const stored = await db.execute({
-      sql: 'SELECT * FROM refresh_tokens WHERE user_id = ?',
-      args: [decoded.id],
-    });
+    const stored = await Auth.getRefreshTokens(decoded.id);
 
     let valid = false;
     let matchedTokenId: number | null = null;
-    for (const row of stored.rows) {
-      if (await bcrypt.compare(refreshToken, row.token_hash as string)) {
+    for (const row of stored) {
+      if (await bcrypt.compare(refreshToken, row.token_hash)) {
         valid = true;
-        matchedTokenId = row.id as number;
+        matchedTokenId = row.id;
         break;
       }
     }
@@ -152,17 +128,14 @@ auth.post('/refresh', async (c) => {
       return c.json({ error: 'Invalid refresh token' }, 401);
     }
 
-    await db.execute({ sql: 'DELETE FROM refresh_tokens WHERE id = ?', args: [matchedTokenId] });
+    await Auth.deleteRefreshToken(matchedTokenId);
 
     const payload: JwtPayload = { id: decoded.id, username: decoded.username, role: decoded.role };
     const tokens = generateTokens(payload);
 
     const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    await db.execute({
-      sql: 'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
-      args: [decoded.id, refreshHash, expiresAt],
-    });
+    await Auth.createRefreshToken(decoded.id, refreshHash, expiresAt);
 
     return c.json({ ...tokens, user: payload });
   } catch {
@@ -172,7 +145,7 @@ auth.post('/refresh', async (c) => {
 
 auth.post('/logout', authMiddleware(), async (c) => {
   const user = c.get('user') as JwtPayload;
-  await db.execute({ sql: 'DELETE FROM refresh_tokens WHERE user_id = ?', args: [user.id] });
+  await Auth.deleteAllRefreshTokens(user.id);
   return c.json({ success: true });
 });
 

@@ -1,13 +1,15 @@
 import { createClient } from '@libsql/client';
-import dotenv from 'dotenv';
 
-dotenv.config();
+const {
+  DATABASE_URL = 'file:data.db'
+} = process.env;
 
 const db = createClient({
-  url: process.env.DATABASE_URL || 'file:data.db',
+  url: DATABASE_URL,
 });
 
-export async function initDb() {
+export class Database {
+  static async init() {
   await db.batch([
     {
       sql: `CREATE TABLE IF NOT EXISTS users (
@@ -77,6 +79,7 @@ export async function initDb() {
       args: [],
     },
   ]);
+  }
 }
 
 export default db;

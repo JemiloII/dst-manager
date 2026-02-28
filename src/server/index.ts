@@ -3,11 +3,10 @@ import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import bcrypt from 'bcrypt';
-import { initDb } from './db/schema';
-import db from './db/schema';
-import { env } from './env';
-import auth from './routes/auth';
-import servers from './routes/servers';
+import { Database } from './db/schema';
+import Users from './features/users/users.queries.js';
+import { authRoutes } from './features/auth/index.js';
+import { serverRoutes, processService } from './features/servers/index.js';
 import { modsRouter } from './features/mods';
 import world from './routes/world';
 import suggestions from './routes/suggestions';
@@ -15,6 +14,15 @@ import tickets from './routes/tickets';
 import logs from './routes/logs';
 import admin from './routes/admin';
 import { startLobbyPoller } from './services/lobby';
+
+const {
+  ADMIN_USER = '',
+  ADMIN_PASS = '',
+  PORT = '7891',
+  NODE_ENV = 'development'
+} = process.env;
+
+const DEV = NODE_ENV === 'development';
 
 const app = new Hono();
 
@@ -26,8 +34,8 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal Server Error', message: err.message }, 500);
 });
 
-app.route('/api/auth', auth);
-app.route('/api/servers', servers);
+app.route('/api/auth', authRoutes);
+app.route('/api/servers', serverRoutes);
 app.route('/api/mods', modsRouter);
 app.route('/api/world', world);
 app.route('/api/suggestions', suggestions);
@@ -38,7 +46,7 @@ app.route('/api/admin', admin);
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
 // In production, serve the built frontend
-if (process.env.NODE_ENV === 'production') {
+if (NODE_ENV === 'production') {
   // Serve static files from Vite's build output
   app.use('/*', serveStatic({ root: './dist/client' }));
   
@@ -47,40 +55,37 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 async function seedAdmin() {
-  if (!env.ADMIN_USER || !env.ADMIN_PASS) return;
+  if (!ADMIN_USER || !ADMIN_PASS) return;
 
-  const existing = await db.execute({
-    sql: 'SELECT id FROM users WHERE username = ?',
-    args: [env.ADMIN_USER],
-  });
+  const existing = await Users.findByUsername(ADMIN_USER);
 
-  if (existing.rows.length === 0) {
-    const hash = await bcrypt.hash(env.ADMIN_PASS, 10);
-    await db.execute({
-      sql: 'INSERT INTO users (username, password_hash, role, display_name) VALUES (?, ?, ?, ?)',
-      args: [env.ADMIN_USER, hash, 'admin', env.ADMIN_USER],
-    });
-    console.log(`Admin user "${env.ADMIN_USER}" created`);
+  if (!existing) {
+    const hash = await bcrypt.hash(ADMIN_PASS, 10);
+    await Users.createAdmin(ADMIN_USER, hash);
+    console.log(`Admin user "${ADMIN_USER}" created`);
   }
 }
 
 async function start() {
   try {
-    await initDb();
+    await Database.init();
     await seedAdmin();
+    
+    // Check running servers on startup
+    await processService.checkAllServersOnStartup();
 
     startLobbyPoller();
 
     // Start server (Vite dev server plugin handles it in development)
-    if (!import.meta.env?.DEV) {
-      serve({ fetch: app.fetch, port: env.PORT }, () => {
-        console.log(`DST Server Manager running on port ${env.PORT}`);
+    if (!DEV) {
+      serve({ fetch: app.fetch, port: parseInt(PORT, 10) }, () => {
+        console.log(`DST Server Manager running on port ${PORT}`);
       });
     }
   } catch (error) {
     console.error('Failed to start server:', error);
     // Don't exit in development
-    if (!import.meta.env?.DEV) {
+    if (!DEV) {
       process.exit(1);
     }
   }

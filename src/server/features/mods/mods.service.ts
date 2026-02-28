@@ -5,7 +5,7 @@ import unzipper from 'unzipper';
 import { getClusterPath } from '../../services/dst';
 import { parseModOverrides } from '../../services/lua';
 import { ModConfig, WorkshopSearchResult } from './mods.types';
-import * as modRepository from './mods.repository';
+import Mods from './mods.queries';
 
 const { DST_WORKSHOP_DIR = '' } = process.env;
 
@@ -198,11 +198,11 @@ export async function getModConfig(workshopId: string): Promise<ModConfig> {
 }
 
 export async function getServerById(serverId: string) {
-  return modRepository.getServerById(serverId);
+  return Mods.getServerById(serverId);
 }
 
 export async function getAllServers() {
-  return modRepository.getAllServers();
+  return Mods.getAllServers();
 }
 
 export async function getServerModOverrides(kuid: string, shareCode: string) {

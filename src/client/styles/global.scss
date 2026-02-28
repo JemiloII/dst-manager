@@ -207,10 +207,26 @@ button.icon-btn, .icon-btn {
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s;
+  position: relative;
 
   img {
     width: 64px;
     height: 64px;
+    
+    &[src*="AFKstart"] {
+      filter: contrast(0.75);
+    }
+  }
+  
+  &.download-btn img {
+    transform: translateY(5px) scale(1.15);
+  }
+  
+  &.has-changes {
+    img {
+      filter: drop-shadow(0 0 4px rgba(255, 138, 0, 0.4));
+      animation: subtle-shimmer 3s ease-in-out infinite;
+    }
   }
 
   &:hover {
@@ -221,6 +237,15 @@ button.icon-btn, .icon-btn {
 
   &:active {
     transform: scale(0.9);
+  }
+}
+
+@keyframes subtle-shimmer {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 138, 0, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 138, 0, 0.6));
   }
 }
 

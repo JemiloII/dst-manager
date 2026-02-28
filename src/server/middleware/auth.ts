@@ -1,6 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 import jwt from 'jsonwebtoken';
-import { env } from '../env.js';
+
+const { JWT_SECRET = '' } = process.env;
 
 export interface JwtPayload {
   id: number;
@@ -33,7 +34,7 @@ export function authMiddleware() {
     }
     
     try {
-      const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+      const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
       c.set('user', payload);
       await next();
     } catch {
@@ -53,7 +54,7 @@ export function requireRole(...roles: string[]) {
 }
 
 export function generateTokens(payload: JwtPayload) {
-  const accessToken = jwt.sign(payload, env.JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, env.JWT_SECRET, { expiresIn: '7d' });
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, JWT_SECRET, { expiresIn: '7d' });
   return { accessToken, refreshToken };
 }

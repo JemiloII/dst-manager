@@ -1,21 +1,4 @@
 return {
-  ["workshop-1185229307"]={
-    configuration_options={
-      CAMERA=true,
-      CAPTURE=false,
-      DAMAGE_NUMBERS=true,
-      DAMAGE_RESISTANCE=true,
-      FRAME_PHASES=true,
-      GLOBAL=false,
-      GLOBAL_NUMBERS=false,
-      HEADER_CLIENT=false,
-      HEADER_SERVER=false,
-      HORIZONTAL_OFFSET=0,
-      TAG="EPIC",
-      WETNESS_METER=false 
-    },
-    enabled=true 
-  },
   ["workshop-1207269058"]={ configuration_options={  }, enabled=true },
   ["workshop-378160973"]={
     configuration_options={

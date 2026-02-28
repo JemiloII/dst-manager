@@ -87,22 +87,31 @@ export default function Config() {
       name: form.name,
       description: form.description,
       game_mode: form.gameMode,
-      max_players: form.maxPlayers,
+      max_players: Number(form.maxPlayers),
       pvp: form.pvp ? 1 : 0,
       password: form.password,
     };
-    const res = await api.put(`/servers/${code}`, body);
-    if (res.ok) {
-      const data = await res.json();
-      setServer(data);
-      setForm({
-        name: data.name,
-        description: data.description,
-        gameMode: data.game_mode,
-        maxPlayers: data.max_players,
-        pvp: !!data.pvp,
-        password: data.password,
-      });
+    console.log('Saving with body:', body);
+    try {
+      const res = await api.put(`/servers/${code}`, body);
+      if (res.ok) {
+        const data = await res.json();
+        setServer(data);
+        setForm({
+          name: data.name,
+          description: data.description,
+          gameMode: data.game_mode,
+          maxPlayers: data.max_players,
+          pvp: !!data.pvp,
+          password: data.password,
+        });
+        console.log('Save successful');
+      } else {
+        const error = await res.json();
+        console.error('Save failed:', error);
+      }
+    } catch (err) {
+      console.error('Save error:', err);
     }
   };
 
@@ -221,7 +230,7 @@ export default function Config() {
               min={1}
               max={64}
               value={form.maxPlayers}
-              onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value) })}
+              onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value, 10) || 1 })}
             />
           ) : (
             <p>{form.maxPlayers}</p>

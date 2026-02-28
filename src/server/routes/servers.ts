@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import fs from 'fs/promises';
 import path from 'path';
+import { createReadStream } from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { authMiddleware, requireRole, JwtPayload } from '../middleware/auth.js';
 import db from '../db/schema.js';
 import { env } from '../env.js';
@@ -15,6 +18,8 @@ import {
 import { startServer, stopServer, sendCommand } from '../services/process.js';
 import { sseHandler } from '../services/sse.js';
 import { checkPortRange } from '../utils/ports.js';
+
+const execAsync = promisify(exec);
 
 const servers = new Hono();
 
@@ -140,31 +145,39 @@ servers.get('/:code', async (c) => {
   return c.json(server);
 });
 
-servers.put('/:id', requireRole('admin', 'user'), async (c) => {
+servers.put('/:code', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
   const server = result.rows[0];
+  const id = server.id as number;
   if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
   const body = await c.req.json();
-  const { name, description, gameMode, maxPlayers, pvp, password } = body;
+  const { name, description, game_mode, max_players, pvp, password } = body;
 
   const maxAllowed = user.role === 'admin' ? 64 : 6;
-  const playerCount = Math.min(maxPlayers || (server.max_players as number), maxAllowed);
+  const playerCount = Math.min(max_players || (server.max_players as number), maxAllowed);
 
   await db.execute({
     sql: `UPDATE servers SET name = ?, description = ?, game_mode = ?, max_players = ?, pvp = ?, password = ? WHERE id = ?`,
     args: [
       name || server.name, description ?? server.description,
-      gameMode || server.game_mode, playerCount, pvp !== undefined ? (pvp ? 1 : 0) : server.pvp,
+      game_mode || server.game_mode, playerCount, pvp !== undefined ? (pvp ? 1 : 0) : server.pvp,
       password ?? server.password, id,
     ],
   });
@@ -172,25 +185,35 @@ servers.put('/:id', requireRole('admin', 'user'), async (c) => {
   await updateClusterIni(server.kuid as string, server.share_code as string, server.port_offset as number, {
     name: name || (server.name as string),
     description: (description ?? server.description) as string,
-    gameMode: gameMode || (server.game_mode as string),
+    gameMode: game_mode || (server.game_mode as string),
     maxPlayers: playerCount,
     pvp: pvp !== undefined ? !!pvp : !!(server.pvp as number),
     password: (password ?? server.password) as string,
   });
 
-  return c.json({ success: true });
+  // Return the updated server data
+  const updatedResult = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  return c.json(updatedResult.rows[0]);
 });
 
-servers.delete('/:id', requireRole('admin', 'user'), async (c) => {
+servers.delete('/:code', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
   const server = result.rows[0];
+  const id = server.id as number;
   if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
@@ -208,16 +231,24 @@ servers.delete('/:id', requireRole('admin', 'user'), async (c) => {
   return c.json({ success: true });
 });
 
-servers.post('/:id/start', requireRole('admin', 'user'), async (c) => {
+servers.post('/:code/start', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
   const server = result.rows[0];
+  const id = server.id as number;
   if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
@@ -241,16 +272,24 @@ servers.post('/:id/start', requireRole('admin', 'user'), async (c) => {
   }
 });
 
-servers.post('/:id/stop', requireRole('admin', 'user'), async (c) => {
+servers.post('/:code/stop', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
   const server = result.rows[0];
+  const id = server.id as number;
   if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
@@ -264,17 +303,25 @@ servers.post('/:id/stop', requireRole('admin', 'user'), async (c) => {
   }
 });
 
-servers.post('/:id/command', requireRole('admin', 'user'), async (c) => {
+servers.post('/:code/command', requireRole('admin', 'user'), async (c) => {
   const user = c.get('user') as JwtPayload;
-  const id = parseInt(c.req.param('id'));
+  const code = c.req.param('code');
   const { shard, command } = await c.req.json();
 
-  const result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [id] });
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
   if (result.rows.length === 0) {
     return c.json({ error: 'Server not found' }, 404);
   }
 
   const server = result.rows[0];
+  const id = server.id as number;
   if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
@@ -307,6 +354,50 @@ servers.get('/:code/events', authMiddleware(), async (c) => {
   
   const serverId = server.id as number;
   return sseHandler(serverId)(c);
+});
+
+servers.get('/:code/export', requireRole('admin', 'user'), async (c) => {
+  const user = c.get('user') as JwtPayload;
+  const code = c.req.param('code');
+
+  // Try to find by share code first
+  let result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [code] });
+  
+  // Fallback to ID for backwards compatibility (but only for admin)
+  if (result.rows.length === 0 && user.role === 'admin' && !isNaN(parseInt(code))) {
+    result = await db.execute({ sql: 'SELECT * FROM servers WHERE id = ?', args: [parseInt(code)] });
+  }
+  
+  if (result.rows.length === 0) {
+    return c.json({ error: 'Server not found' }, 404);
+  }
+
+  const server = result.rows[0];
+  if (user.role !== 'admin' && server.user_id !== user.id) {
+    return c.json({ error: 'Forbidden' }, 403);
+  }
+
+  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
+  const zipName = `Cluster_${server.share_code}.tar.gz`;
+  const zipPath = path.join('/tmp', zipName);
+
+  try {
+    await execAsync(`tar -czf "${zipPath}" -C "${path.dirname(clusterDir)}" "${path.basename(clusterDir)}"`);
+
+    const stat = await fs.stat(zipPath);
+    const fileStream = createReadStream(zipPath);
+
+    return new Response(fileStream as unknown as ReadableStream, {
+      headers: {
+        'Content-Type': 'application/gzip',
+        'Content-Disposition': `attachment; filename="${zipName}"`,
+        'Content-Length': stat.size.toString(),
+      },
+    });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Export failed';
+    return c.json({ error: msg }, 500);
+  }
 });
 
 export default servers;

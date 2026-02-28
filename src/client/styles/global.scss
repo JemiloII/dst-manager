@@ -77,9 +77,11 @@ body {
 button, .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   line-height: 1;
-  padding: 0.5rem 0.35rem 0.5rem 0.5rem;
+  padding: 0.5rem 1rem;
+  text-align: center;
   
   img {
     width: 27px;
@@ -95,7 +97,7 @@ button, .btn {
 }
 
 .btn-primary {
-  padding: 0.5rem 0.35rem 0.5rem 0.5rem;
+  padding: 0.5rem 1rem;
 }
 
 nav {
@@ -138,9 +140,9 @@ nav {
 }
 
 .card {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -321,6 +323,27 @@ button.icon-btn, .icon-btn {
   
   &:last-of-type {
     margin-bottom: 1.75rem;
+  }
+  
+  label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  input[type="range"] {
+    accent-color: $primary;
+    padding: 0;
+    
+    &:hover {
+      accent-color: #ffaa33;
+    }
+    
+    &:active {
+      accent-color: #ffaa33;
+    }
   }
 }
 

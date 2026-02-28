@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
 import Tabs from '../components/Tabs';
-import Checkbox from '../components/Checkbox';
+import Checkbox from '../components/Checkbox/Checkbox';
 import ConfirmModal from '../components/ConfirmModal';
+import PlayStyleSelector from '../components/PlayStyleSelector/PlayStyleSelector';
 
 interface Server {
   id: number;
@@ -25,7 +26,6 @@ export default function Config() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [server, setServer] = useState<Server | null>(null);
-  const [editing, setEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
   const [players, setPlayers] = useState<{ count: number; max: number; list: string[] }>({ count: 0, max: 0, list: [] });
@@ -95,7 +95,14 @@ export default function Config() {
     if (res.ok) {
       const data = await res.json();
       setServer(data);
-      setEditing(false);
+      setForm({
+        name: data.name,
+        description: data.description,
+        gameMode: data.game_mode,
+        maxPlayers: data.max_players,
+        pvp: !!data.pvp,
+        password: data.password,
+      });
     }
   };
 
@@ -136,6 +143,9 @@ export default function Config() {
                   <img src="/images/button_icons/AFKstop.png" alt="Stop" />
                 </button>
               )}
+              <button className="icon-btn" onClick={handleSave} title="Save">
+                <img src="/images/button_icons/save.png" alt="Save" />
+              </button>
               <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
                 <img src="/images/button_icons/delete.png" alt="Delete" />
               </button>
@@ -176,54 +186,63 @@ export default function Config() {
       />
 
       <div className="card">
-        {editing ? (
-          <>
-            <div className="form-group">
-              <label>Name</label>
-              <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <label>Description</label>
-              <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <label>Game Mode</label>
-              <select value={form.gameMode} onChange={(e) => setForm({ ...form, gameMode: e.target.value })}>
-                <option value="survival">Survival</option>
-                <option value="endless">Endless</option>
-                <option value="wilderness">Wilderness</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Max Players</label>
-              <input type="number" min={1} max={64} value={form.maxPlayers} onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value) })} />
-            </div>
-            <div className="form-group">
-              <Checkbox
-                label="PvP"
-                checked={form.pvp}
-                onChange={(checked) => setForm({ ...form, pvp: checked })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Password</label>
-              <input value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={handleSave}>Save</button>
-              <button onClick={() => setEditing(false)}>Cancel</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p><strong>Description:</strong> {server.description || 'No description'}</p>
-            <p><strong>Game Mode:</strong> {server.game_mode}</p>
-            <p><strong>Max Players:</strong> {server.max_players}</p>
-            <p><strong>PvP:</strong> {server.pvp ? 'Yes' : 'No'}</p>
-            <p><strong>Password:</strong> {server.password || 'No password'}</p>
-            {isOwner && <button onClick={() => setEditing(true)}>Edit Settings</button>}
-          </>
-        )}
+        <div className="form-group">
+          <label>Name</label>
+          <input 
+            value={form.name} 
+            onChange={(e) => setForm({ ...form, name: e.target.value })} 
+            disabled={!isOwner}
+          />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <input 
+            value={form.description} 
+            onChange={(e) => setForm({ ...form, description: e.target.value })} 
+            disabled={!isOwner}
+          />
+        </div>
+        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+          <label>Game Mode</label>
+          {isOwner ? (
+            <PlayStyleSelector 
+              value={form.gameMode} 
+              onChange={(value) => setForm({ ...form, gameMode: value })} 
+            />
+          ) : (
+            <p>{form.gameMode}</p>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Max Players: {form.maxPlayers}</label>
+          {isOwner ? (
+            <input
+              type="range"
+              min={1}
+              max={64}
+              value={form.maxPlayers}
+              onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value) })}
+            />
+          ) : (
+            <p>{form.maxPlayers}</p>
+          )}
+        </div>
+        <div className="form-group">
+          <Checkbox
+            label="PvP"
+            checked={form.pvp}
+            onChange={(checked) => setForm({ ...form, pvp: checked })}
+            disabled={!isOwner}
+          />
+        </div>
+        <div className="form-group">
+          <label>Password</label>
+          <input 
+            value={form.password} 
+            onChange={(e) => setForm({ ...form, password: e.target.value })} 
+            disabled={!isOwner}
+          />
+        </div>
       </div>
 
       <ConfirmModal

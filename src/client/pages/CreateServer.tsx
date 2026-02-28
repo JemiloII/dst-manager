@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
-import Checkbox from '../components/Checkbox';
+import Checkbox from '../components/Checkbox/Checkbox';
+import PlayStyleSelector from '../components/PlayStyleSelector/PlayStyleSelector';
 
 export default function CreateServer() {
   const navigate = useNavigate();
@@ -141,20 +142,16 @@ export default function CreateServer() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="gameMode">Game Mode</label>
-            <select id="gameMode" value={gameMode} onChange={(e) => setGameMode(e.target.value)}>
-              <option value="survival">Survival</option>
-              <option value="endless">Endless</option>
-              <option value="wilderness">Wilderness</option>
-            </select>
+          <div className="form-group" style={{ gridColumn: 'span 2' }}>
+            <label>Game Mode</label>
+            <PlayStyleSelector value={gameMode} onChange={setGameMode} />
           </div>
 
           <div className="form-group">
-            <label htmlFor="maxPlayers">Max Players</label>
+            <label htmlFor="maxPlayers">Max Players: {maxPlayers}</label>
             <input
               id="maxPlayers"
-              type="number"
+              type="range"
               min={1}
               max={64}
               value={maxPlayers}

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import Modal from '../Modal';
-import CycleSelector from '../CycleSelector/CycleSelector';
+import ConfigOption from './ConfigOption';
 
 interface Props {
   isOpen: boolean;
-  modKey: string;
   modTitle: string;
   options: Record<string, any>;
   currentValues: Record<string, unknown>;
@@ -15,7 +14,6 @@ interface Props {
 
 export default function ModConfig({
   isOpen,
-  modKey,
   modTitle,
   options,
   currentValues,
@@ -74,48 +72,18 @@ export default function ModConfig({
         {Object.entries(options).length === 0 ? (
           <p className="empty-state">No configuration options available</p>
         ) : (
-          Object.entries(options).map(([key, value]) => {
-            const option = value as any;
-            const currentValue = configValues[key];
-            
-            // Only show options that have an options array (selectable values)
-            if (!option.options || !Array.isArray(option.options)) {
-              return null;
-            }
-            
-            // Format options for CycleSelector
-            const formattedOptions = option.options.map((opt: any) => ({
-              value: opt.data,
-              label: opt.description
-            }));
-            
-            return (
-              <div key={key} className="config-option">
-                <div className="config-info">
-                  <label>{option.label || key}</label>
-                  {option.description && (
-                    <p className="config-description">{option.description}</p>
-                  )}
-                </div>
-                <CycleSelector
-                  label=""
-                  value={currentValue}
-                  options={formattedOptions.map((opt: any) => opt.value)}
-                  optionLabels={formattedOptions.reduce((acc: any, opt: any) => {
-                    acc[opt.value] = opt.label;
-                    return acc;
-                  }, {})}
-                  onChange={(newValue) => {
-                    setConfigValues(prev => ({
-                      ...prev,
-                      [key]: newValue
-                    }));
-                  }}
-                  disabled={!isOwner}
-                />
-              </div>
-            );
-          })
+          Object.entries(options).map(([key, value]) => (
+            <ConfigOption
+              key={key}
+              optionKey={key}
+              option={value}
+              value={configValues[key]}
+              onChange={(k, v) => {
+                setConfigValues(prev => ({ ...prev, [k]: v }));
+              }}
+              isOwner={isOwner}
+            />
+          ))
         )}
       </div>
     </Modal>

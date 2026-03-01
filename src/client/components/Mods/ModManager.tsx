@@ -298,7 +298,6 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
       {configureModal && (
         <ModConfig
           isOpen={configureModal !== null}
-          modKey={configureModal.key}
           modTitle={configureModal.title}
           options={configureModal.options}
           currentValues={configureModal.currentValues}

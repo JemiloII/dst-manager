@@ -148,17 +148,42 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     }
   };
 
-  const removeMod = (key: string) => {
+  const removeMod = async (key: string) => {
     const updated = { ...mods };
     delete updated[key];
     setMods(updated);
+    
+    // Auto-save after removing
+    const res = await api.put(`/mods/server/${serverId}`, updated);
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error);
+      // Revert on error
+      setMods(mods);
+    } else {
+      setSuccess('Mod removed!');
+      setTimeout(() => setSuccess(''), 2000);
+    }
   };
 
-  const toggleMod = (key: string) => {
-    setMods({
+  const toggleMod = async (key: string) => {
+    const updatedMods = {
       ...mods,
       [key]: { ...mods[key], enabled: !mods[key].enabled },
-    });
+    };
+    setMods(updatedMods);
+    
+    // Auto-save after toggling
+    const res = await api.put(`/mods/server/${serverId}`, updatedMods);
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error);
+      // Revert on error
+      setMods(mods);
+    } else {
+      setSuccess(mods[key].enabled ? 'Mod disabled!' : 'Mod enabled!');
+      setTimeout(() => setSuccess(''), 2000);
+    }
   };
 
   const handleSave = async () => {
@@ -361,19 +386,31 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             </button>
             <button 
               className="icon-btn"
-              onClick={() => {
+              onClick={async () => {
                 // Save mod config
                 if (configureModal) {
                   const modKey = configureModal.key;
-                  setMods(prev => ({
-                    ...prev,
+                  const updatedMods = {
+                    ...mods,
                     [modKey]: {
-                      ...prev[modKey],
+                      ...mods[modKey],
                       configuration_options: modConfigValues
                     }
-                  }));
-                  setConfigureModal(null);
-                  setSuccess('Mod configuration updated');
+                  };
+                  setMods(updatedMods);
+                  
+                  // Auto-save to server
+                  const res = await api.put(`/mods/server/${serverId}`, updatedMods);
+                  if (!res.ok) {
+                    const data = await res.json();
+                    setError(data.error);
+                    // Revert on error
+                    setMods(mods);
+                  } else {
+                    setConfigureModal(null);
+                    setSuccess('Mod configuration saved!');
+                    setTimeout(() => setSuccess(''), 2000);
+                  }
                 }
               }}
               title="Save Configuration"

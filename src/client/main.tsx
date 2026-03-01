@@ -17,7 +17,7 @@ import Admin from './pages/Admin';
 import ShareView from './pages/ShareView';
 import Terms from './pages/Terms';
 // import '@picocss/pico/css/pico.min.css';
-import './styles/global.scss';
+import './styles/styles.scss';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { isAuthenticated, user, isLoading } = useAuth();

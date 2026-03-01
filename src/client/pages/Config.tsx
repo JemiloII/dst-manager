@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../stores/Auth';
-import { useServerStore } from '../stores/ServerStore';
 import ServerLayout from '../components/ServerLayout';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PlayStyleSelector from '../components/PlayStyleSelector/PlayStyleSelector';
@@ -23,32 +21,11 @@ interface Server {
 
 export default function Config() {
   const { code } = useParams<{ code: string }>();
-  const { user } = useAuth();
-  const [server, setServer] = useState<Server | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
   const [originalForm, setOriginalForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
   const [hasChanges, setHasChanges] = useState(false);
-
-  useEffect(() => {
-    const fetchServer = async () => {
-      const res = await api.get(`/servers/${code}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setServer(data);
-      const formData = {
-        name: data.name,
-        description: data.description,
-        gameMode: data.game_mode,
-        maxPlayers: data.max_players,
-        pvp: !!data.pvp,
-        password: data.password,
-      };
-      setForm(formData);
-      setOriginalForm(formData);
-    };
-    fetchServer();
-  }, [code]);
+  const [serverData, setServerData] = useState<Server | null>(null);
 
   // Check if form has changed from original
   useEffect(() => {
@@ -74,7 +51,7 @@ export default function Config() {
       const res = await api.put(`/servers/${code}`, body);
       if (res.ok) {
         const data = await res.json();
-        setServer(data);
+        setServerData(data);
         setForm({
           name: data.name,
           description: data.description,
@@ -103,13 +80,28 @@ export default function Config() {
     }
   };
 
-  if (!server) return <div>Loading...</div>;
-
-  const isOwner = user?.id === server.user_id || user?.role === 'admin';
-
   return (
     <ServerLayout onSave={handleSave} onRevert={handleRevert} saveTitle="Save" hasChanges={hasChanges}>
-      <div className="card">
+      {(server, isOwner) => {
+        // Initialize form when server data comes from ServerLayout
+        if (server && !serverData) {
+          const formData = {
+            name: server.name,
+            description: server.description,
+            gameMode: server.game_mode,
+            maxPlayers: server.max_players,
+            pvp: !!server.pvp,
+            password: server.password,
+          };
+          setForm(formData);
+          setOriginalForm(formData);
+          setServerData(server);
+        }
+        
+        if (!server) return <div>Loading...</div>;
+        
+        return (
+          <div className="card">
         <div className="form-group">
           <label>Name</label>
           <input 
@@ -193,7 +185,9 @@ export default function Config() {
             )}
           </div>
         </div>
-      </div>
+          </div>
+        );
+      }}
     </ServerLayout>
   );
 }

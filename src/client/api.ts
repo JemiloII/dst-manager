@@ -66,7 +66,12 @@ export const api = {
   delete: (path: string) => apiFetch(path, { method: 'DELETE' }),
 };
 
-export function createSSE(path: string): EventSource {
-  const token = getToken();
-  return new EventSource(`${API_BASE}${path}${token ? `?token=${token}` : ''}`);
-}
+// TODO: Implement SSE with proper auth
+// EventSource doesn't support custom headers natively
+// Need to either:
+// 1. Use a polyfill that supports headers
+// 2. Implement auth via cookies instead of bearer tokens for SSE
+// 3. Use WebSockets instead of SSE
+// export function createSSE(path: string): EventSource {
+//   return new EventSource(`${API_BASE}${path}`);
+// }

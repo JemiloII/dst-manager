@@ -12,32 +12,33 @@ export default function Dashboard() {
     fetchServers();
   }, [fetchServers]);
 
-  useEffect(() => {
-    if (servers.length === 0) return;
+  // TODO: Implement server events endpoint with proper auth headers
+  // useEffect(() => {
+  //   if (servers.length === 0) return;
 
-    const eventSources: EventSource[] = [];
+  //   const eventSources: EventSource[] = [];
 
-    for (const server of servers) {
-      const token = localStorage.getItem('accessToken');
-      const es = new EventSource(`/api/servers/${server.id}/events${token ? `?token=${token}` : ''}`);
+  //   for (const server of servers) {
+  //     // EventSource doesn't support custom headers, need different approach
+  //     const es = new EventSource(`/api/servers/${server.id}/events`);
 
-      es.addEventListener('status', (e) => {
-        const data = JSON.parse(e.data);
-        updateStatus(server.id, data.data);
-      });
+  //     es.addEventListener('status', (e) => {
+  //       const data = JSON.parse(e.data);
+  //       updateStatus(server.id, data.data);
+  //     });
 
-      es.addEventListener('players', (e) => {
-        const data = JSON.parse(e.data);
-        updatePlayers(server.id, data.data);
-      });
+  //     es.addEventListener('players', (e) => {
+  //       const data = JSON.parse(e.data);
+  //       updatePlayers(server.id, data.data);
+  //     });
 
-      eventSources.push(es);
-    }
+  //     eventSources.push(es);
+  //   }
 
-    return () => {
-      eventSources.forEach((es) => es.close());
-    };
-  }, [servers.length, updateStatus, updatePlayers]);
+  //   return () => {
+  //     eventSources.forEach((es) => es.close());
+  //   };
+  // }, [servers.length, updateStatus, updatePlayers]);
 
   const handleStart = async (code: string) => {
     await api.post(`/servers/${code}/start`);

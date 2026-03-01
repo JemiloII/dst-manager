@@ -7,7 +7,9 @@ export default function Logs() {
 
   return (
     <ServerLayout>
-      {code && <LogViewer serverId={code} />}
+      {(server, isOwner) => (
+        code ? <LogViewer serverId={code} /> : null
+      )}
     </ServerLayout>
   );
 }

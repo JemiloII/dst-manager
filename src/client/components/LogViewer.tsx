@@ -23,20 +23,21 @@ export default function LogViewer({ serverId }: Props) {
     fetchLog();
   }, [serverId, shard]);
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const es = new EventSource(`/api/servers/${serverId}/events${token ? `?token=${token}` : ''}`);
+  // TODO: Implement log streaming endpoint with proper auth headers
+  // useEffect(() => {
+  //   // EventSource doesn't support custom headers, need different approach
+  //   const es = new EventSource(`/api/servers/${serverId}/events`);
 
-    es.addEventListener('log', (e) => {
-      const data = JSON.parse(e.data);
-      setLogs(prev => ({
-        ...prev,
-        [data.shard]: prev[data.shard] + data.data
-      }));
-    });
+  //   es.addEventListener('log', (e) => {
+  //     const data = JSON.parse(e.data);
+  //     setLogs(prev => ({
+  //       ...prev,
+  //       [data.shard]: prev[data.shard] + data.data
+  //     }));
+  //   });
 
-    return () => es.close();
-  }, [serverId]);
+  //   return () => es.close();
+  // }, [serverId]);
 
   useEffect(() => {
     if (logRef.current) {

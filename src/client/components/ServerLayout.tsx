@@ -20,7 +20,7 @@ interface Server {
 }
 
 interface Props {
-  children: ReactNode;
+  children: (server: Server | null, isOwner: boolean) => ReactNode;
   onSave?: () => Promise<void>;
   onRevert?: () => void;
   saveTitle?: string;
@@ -203,7 +203,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
         }}
       />
 
-      {children}
+      {children(server, isOwner)}
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

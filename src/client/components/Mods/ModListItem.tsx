@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import './ModListItem.scss';
 
 interface ModListItemProps {
   workshopId: string;
@@ -51,8 +51,6 @@ export default function ModListItem({
   onAdd,
   isOwner = true,
 }: ModListItemProps) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <div className="mod-item">
       <div className="mod-content">
@@ -66,22 +64,10 @@ export default function ModListItem({
             <span className="mod-title">{title}</span>
           </div>
           {description && (
-            <>
-              {expanded ? (
-                <div 
-                  className="mod-description expanded" 
-                  dangerouslySetInnerHTML={{ __html: parseBBCode(description) }}
-                />
-              ) : (
-                <p className="mod-description">{description.replace(/\[.*?\]/g, '').slice(0, 100)}...</p>
-              )}
-              <button 
-                className="mod-expand-btn" 
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? 'Show Less' : 'Read More'}
-              </button>
-            </>
+            <details>
+              <summary>Description</summary>
+              <div dangerouslySetInnerHTML={{ __html: parseBBCode(description) }} />
+            </details>
           )}
           <a 
             href={`https://steamcommunity.com/sharedfiles/filedetails/?id=${workshopId}`} 

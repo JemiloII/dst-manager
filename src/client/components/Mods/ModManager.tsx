@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api';
-import ConfirmModal from './ConfirmModal';
-import Modal from './Modal';
+import './ModManager.scss';
+import { api } from '../../api';
+import ConfirmModal from '../ConfirmModal';
+import Modal from '../Modal';
 import ModListItem from './ModListItem';
-import CycleSelector from './CycleSelector';
+import CycleSelector from '../CycleSelector';
 
 interface ModConfig {
   enabled: boolean;

@@ -111,7 +111,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
 
   if (!server) return <div>Loading...</div>;
 
-  const isOwner = user?.id === server.user_id || user?.role === 'admin';
+  const isOwner = user?.id === server.user_id || user?.role === 'admin' || user?.role === 'owner';
 
   // Determine active tab based on current path
   const getActiveTab = () => {
@@ -207,9 +207,9 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
+        onCancel={() => setShowDeleteConfirm(false)}
         onConfirm={handleDelete}
-        message="Are you sure you want to delete this server?"
+        body="Are you sure you want to delete this server?"
       />
     </div>
   );

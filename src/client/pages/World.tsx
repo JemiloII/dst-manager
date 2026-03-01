@@ -10,7 +10,7 @@ export default function World() {
   return (
     <ServerLayout onSave={handleSaveWorld} saveTitle="Save World Settings">
       {(server, isOwner) => (
-        server ? <WorldSettings serverId={server.share_code} /> : <div>Loading...</div>
+        server ? <WorldSettings serverId={server.share_code} isOwner={isOwner} /> : <div>Loading...</div>
       )}
     </ServerLayout>
   );

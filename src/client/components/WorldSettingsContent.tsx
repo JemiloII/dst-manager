@@ -1,6 +1,6 @@
 import Settings from '../data/Settings.json';
 import { useWorldSettingsStore } from '../stores/WorldSettingsStore';
-import CycleSelector from './CycleSelector';
+import CycleSelector from './CycleSelector/CycleSelector';
 
 interface Props {
   shard: 'Master' | 'Caves';

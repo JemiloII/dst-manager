@@ -37,6 +37,7 @@ export class Database {
         password TEXT DEFAULT '',
         port_offset INTEGER UNIQUE NOT NULL,
         status TEXT DEFAULT 'stopped' CHECK (status IN ('stopped', 'starting', 'running', 'paused')),
+        pids TEXT DEFAULT '{}',
         created_at TEXT DEFAULT (datetime('now')),
         FOREIGN KEY (user_id) REFERENCES users(id)
       )`,

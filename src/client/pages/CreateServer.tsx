@@ -36,7 +36,7 @@ export default function CreateServer() {
       return;
     }
 
-    navigate(`/servers/${data.id}`);
+    navigate(`/servers/${data.shareCode}`);
   };
 
   return (

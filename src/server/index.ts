@@ -6,14 +6,16 @@ import bcrypt from 'bcrypt';
 import { Database } from './db/schema';
 import Users from './features/users/users.queries.js';
 import { authRoutes } from './features/auth/index.js';
-import { serverRoutes, processService } from './features/servers/index.js';
+import { serverRoutes } from './features/servers/index.js';
+import { dockerProcessService } from './services/docker-process.js';
 import { modsRouter } from './features/mods';
+import { lobbiesRoutes } from './features/lobbies';
 import world from './routes/world';
 import suggestions from './routes/suggestions';
 import tickets from './routes/tickets';
 import logs from './routes/logs';
 import admin from './routes/admin';
-import { startLobbyPoller } from './services/lobby';
+import { Monitor } from './services/monitor';
 
 const {
   ADMIN_USER = '',
@@ -37,6 +39,7 @@ app.onError((err, c) => {
 app.route('/api/auth', authRoutes);
 app.route('/api/servers', serverRoutes);
 app.route('/api/mods', modsRouter);
+app.route('/api/lobbies', lobbiesRoutes);
 app.route('/api/world', world);
 app.route('/api/suggestions', suggestions);
 app.route('/api/tickets', tickets);
@@ -72,9 +75,18 @@ async function start() {
     await seedAdmin();
     
     // Check running servers on startup
-    await processService.checkAllServersOnStartup();
+    await dockerProcessService.checkAllServersOnStartup();
+    
+    // Build Docker image if it doesn't exist
+    console.log('Checking Docker image...');
+    const buildResult = await dockerProcessService.buildDockerImage();
+    if (!buildResult.success) {
+      console.error('Failed to build Docker image:', buildResult.message);
+    } else {
+      console.log('Docker image ready');
+    }
 
-    startLobbyPoller();
+    Monitor.start();
 
     // Start server (Vite dev server plugin handles it in development)
     if (!DEV) {

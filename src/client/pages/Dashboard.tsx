@@ -42,10 +42,14 @@ export default function Dashboard() {
 
   const handleStart = async (code: string) => {
     await api.post(`/servers/${code}/start`);
+    // Refresh servers to update status
+    await fetchServers();
   };
 
   const handleStop = async (code: string) => {
     await api.post(`/servers/${code}/stop`);
+    // Refresh servers to update status
+    await fetchServers();
   };
 
   if (loading) {

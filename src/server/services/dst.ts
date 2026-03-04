@@ -69,91 +69,83 @@ export async function ensureServerFiles(
   }
 ): Promise<void> {
   const clusterDir = getClusterPath(server.kuid, server.share_code);
-  
-  // Check if critical files exist
-  const filesExist = await Promise.all([
-    fs.access(path.join(clusterDir, 'cluster_token.txt')).then(() => true).catch(() => false),
-    fs.access(path.join(clusterDir, 'cluster.ini')).then(() => true).catch(() => false),
-    fs.access(path.join(clusterDir, 'Master', 'server.ini')).then(() => true).catch(() => false),
-    fs.access(path.join(clusterDir, 'Caves', 'server.ini')).then(() => true).catch(() => false),
-  ]);
-  
-  // If any critical file is missing, recreate all config files
-  if (filesExist.includes(false)) {
-    console.log(`Server ${server.share_code}: Missing config files, recreating...`);
-    
-    const ports = getPortsForServer(server.port_offset);
-    
-    // Ensure directories exist
-    await fs.mkdir(path.join(clusterDir, 'Master'), { recursive: true });
-    await fs.mkdir(path.join(clusterDir, 'Caves'), { recursive: true });
-    
-    // Create cluster_token.txt
-    await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), server.cluster_token.trim());
-    
-    // Create adminlist.txt
-    const adminList = [ADMIN_KUID, server.kuid].filter(Boolean).join('\n') + '\n';
-    await fs.writeFile(path.join(clusterDir, 'adminlist.txt'), adminList);
-    
-    // Create cluster.ini
-    const desc = server.description ? `${server.description}\n${SERVER_HOST}` : SERVER_HOST;
-    const clusterIni = dedent(`
-      [GAMEPLAY]
-      game_mode = ${server.game_mode}
-      max_players = ${server.max_players}
-      pvp = ${server.pvp ? 'true' : 'false'}
-      pause_when_empty = true
+  const ports = getPortsForServer(server.port_offset);
 
-      [NETWORK]
-      cluster_name = ${server.name}
-      cluster_description = ${desc}
-      cluster_password = ${server.password || ''}
-      cluster_intention = cooperative
-      autosaver_enabled = true
-      enable_vote_kick = true
+  await fs.mkdir(path.join(clusterDir, 'Master'), { recursive: true });
+  await fs.mkdir(path.join(clusterDir, 'Caves'), { recursive: true });
 
-      [MISC]
-      console_enabled = true
+  await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), server.cluster_token.trim());
 
-      [SHARD]
-      shard_enabled = true
-      bind_ip = 0.0.0.0
-      master_ip = 127.0.0.1
-      master_port = ${ports.masterPort}
-      cluster_key = dst-${server.share_code}-${server.port_offset}
-    `);
-    await fs.writeFile(path.join(clusterDir, 'cluster.ini'), clusterIni);
-    
-    // Create Master/server.ini
-    const masterIni = dedent(`
-      [NETWORK]
-      server_port = ${ports.masterServerPort}
+  const adminList = [ADMIN_KUID, server.kuid].filter(Boolean).join('\n') + '\n';
+  await fs.writeFile(path.join(clusterDir, 'adminlist.txt'), adminList);
 
-      [SHARD]
-      is_master = true
+  const desc = server.description ? `${server.description}\n${SERVER_HOST}` : SERVER_HOST;
+  const clusterIni = dedent(`
+    [GAMEPLAY]
+    game_mode = ${server.game_mode}
+    max_players = ${server.max_players}
+    pvp = ${server.pvp ? 'true' : 'false'}
+    pause_when_empty = true
 
-      [STEAM]
-      master_server_port = ${ports.masterSteamPort}
-      authentication_port = ${ports.masterAuthPort}
-    `);
-    await fs.writeFile(path.join(clusterDir, 'Master', 'server.ini'), masterIni);
-    
-    // Create Caves/server.ini
-    const cavesIni = dedent(`
-      [NETWORK]
-      server_port = ${ports.cavesServerPort}
+    [NETWORK]
+    cluster_name = ${server.name}
+    cluster_description = ${desc}
+    cluster_password = ${server.password || ''}
+    cluster_intention = cooperative
+    autosaver_enabled = true
+    enable_vote_kick = true
 
-      [SHARD]
-      is_master = false
-      name = Caves
+    [MISC]
+    console_enabled = true
 
-      [STEAM]
-      master_server_port = ${ports.cavesSteamPort}
-      authentication_port = ${ports.cavesAuthPort}
-    `);
-    await fs.writeFile(path.join(clusterDir, 'Caves', 'server.ini'), cavesIni);
+    [SHARD]
+    shard_enabled = true
+    bind_ip = 127.0.0.1
+    master_ip = 127.0.0.1
+    master_port = ${ports.masterPort}
+    cluster_key = dst-${server.share_code}-${server.port_offset}
+  `);
+  await fs.writeFile(path.join(clusterDir, 'cluster.ini'), clusterIni);
 
-    console.log(`Server ${server.share_code}: Config files recreated with ports - Game: ${ports.masterServerPort}/${ports.cavesServerPort}, Steam: ${ports.masterSteamPort}/${ports.cavesSteamPort}`);
+  const masterIni = dedent(`
+    [NETWORK]
+    server_port = ${ports.masterServerPort}
+
+    [SHARD]
+    is_master = true
+
+    [STEAM]
+    master_server_port = ${ports.masterSteamPort}
+    authentication_port = ${ports.masterAuthPort}
+  `);
+  await fs.writeFile(path.join(clusterDir, 'Master', 'server.ini'), masterIni);
+
+  const cavesIni = dedent(`
+    [NETWORK]
+    server_port = ${ports.cavesServerPort}
+
+    [SHARD]
+    is_master = false
+    name = Caves
+
+    [STEAM]
+    master_server_port = ${ports.cavesSteamPort}
+    authentication_port = ${ports.cavesAuthPort}
+  `);
+  await fs.writeFile(path.join(clusterDir, 'Caves', 'server.ini'), cavesIni);
+
+  const templateFiles = [
+    { src: path.join(DST_TEMPLATE_DIR, 'Master', 'leveldataoverride.lua'), dest: path.join(clusterDir, 'Master', 'leveldataoverride.lua') },
+    { src: path.join(DST_TEMPLATE_DIR, 'Caves', 'leveldataoverride.lua'), dest: path.join(clusterDir, 'Caves', 'leveldataoverride.lua') },
+    { src: path.join(DST_TEMPLATE_DIR, 'Master', 'modoverrides.lua'), dest: path.join(clusterDir, 'Master', 'modoverrides.lua') },
+    { src: path.join(DST_TEMPLATE_DIR, 'Caves', 'modoverrides.lua'), dest: path.join(clusterDir, 'Caves', 'modoverrides.lua') },
+  ];
+
+  for (const { src, dest } of templateFiles) {
+    const exists = await fs.access(dest).then(() => true).catch(() => false);
+    if (!exists) {
+      await fs.cp(src, dest).catch(() => {});
+    }
   }
 }
 

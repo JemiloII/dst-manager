@@ -1,19 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../api';
 import Tabs from './Tabs';
 
 interface Props {
   serverId: string;
+  serverStatus?: string;
 }
 
-export default function LogViewer({ serverId }: Props) {
+export default function LogViewer({ serverId, serverStatus }: Props) {
   const [shard, setShard] = useState<'Master' | 'Caves'>('Master');
   const [logs, setLogs] = useState<{ Master: string; Caves: string }>({
     Master: '',
     Caves: ''
   });
   const logRef = useRef<HTMLDivElement>(null);
+  const esRef = useRef<EventSource | null>(null);
 
+  // Fetch initial logs
   useEffect(() => {
     const fetchLog = async () => {
       const res = await api.get(`/logs/${serverId}/${shard}?lines=500`);
@@ -23,37 +26,49 @@ export default function LogViewer({ serverId }: Props) {
     fetchLog();
   }, [serverId, shard]);
 
-  // TODO: Implement log streaming endpoint with proper auth headers
-  // useEffect(() => {
-  //   // EventSource doesn't support custom headers, need different approach
-  //   const es = new EventSource(`/api/servers/${serverId}/events`);
+  // SSE streaming when server is running
+  useEffect(() => {
+    if (serverStatus !== 'running') return;
 
-  //   es.addEventListener('log', (e) => {
-  //     const data = JSON.parse(e.data);
-  //     setLogs(prev => ({
-  //       ...prev,
-  //       [data.shard]: prev[data.shard] + data.data
-  //     }));
-  //   });
+    const token = localStorage.getItem('accessToken');
+    const url = `/api/logs/${serverId}/${shard}/stream${token ? `?token=${token}` : ''}`;
+    const es = new EventSource(url);
+    esRef.current = es;
 
-  //   return () => es.close();
-  // }, [serverId]);
+    es.addEventListener('log', (e) => {
+      setLogs(prev => ({
+        ...prev,
+        [shard]: prev[shard as keyof typeof prev] + e.data
+      }));
+    });
 
+    es.onerror = () => {
+      es.close();
+      esRef.current = null;
+    };
+
+    return () => {
+      es.close();
+      esRef.current = null;
+    };
+  }, [serverId, shard, serverStatus]);
+
+  // Auto-scroll to bottom
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
   }, [logs, shard]);
 
-  const handleClear = async () => {
+  const handleClear = useCallback(async () => {
     await api.delete(`/logs/${serverId}/${shard}`);
     setLogs(prev => ({ ...prev, [shard]: '' }));
-  };
+  }, [serverId, shard]);
 
   const LogContent = ({ type }: { type: 'Master' | 'Caves' }) => (
     <div className="log-viewer-wrapper">
-      <button 
-        onClick={handleClear} 
+      <button
+        onClick={handleClear}
         className="icon-btn log-clear-btn"
         title="Clear logs"
       >

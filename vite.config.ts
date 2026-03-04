@@ -28,6 +28,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 7891,
     host: '0.0.0.0',
-    allowedHosts: ['localhost', 'dst.gg', '.dst.gg'],
+    allowedHosts: ['localhost', 'dst.gg', '.dst.gg', 'dontstarvetogether.gg', '.dontstarvetogether.gg'],
   },
 }));

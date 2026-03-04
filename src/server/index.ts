@@ -27,7 +27,9 @@ const DEV = NODE_ENV === 'development';
 
 const app = new Hono();
 
-app.use('*', cors());
+app.use('*', cors({
+  origin: ['https://dontstarvetogether.gg', 'https://dst.gg', 'http://localhost:7891'],
+}));
 
 // Error handling middleware
 app.onError((err, c) => {

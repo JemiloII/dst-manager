@@ -5,6 +5,7 @@ import { useAuth } from './stores/Auth';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import CreateServer from './pages/CreateServer';
 import Config from './pages/Config';
@@ -30,6 +31,12 @@ function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?
   return <>{children}</>;
 }
 
+function HomeOrDashboard() {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <div>Loading...</div>;
+  return isAuthenticated ? <Dashboard /> : <Home />;
+}
+
 function App() {
   const { loadFromStorage } = useAuth();
 
@@ -46,7 +53,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/s/:code" element={<ShareView />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/" element={<HomeOrDashboard />} />
           <Route path="/create" element={<ProtectedRoute roles={['admin', 'user']}><CreateServer /></ProtectedRoute>} />
           <Route path="/servers/:code" element={<ProtectedRoute><Config /></ProtectedRoute>} />
           <Route path="/servers/:code/config" element={<ProtectedRoute><Config /></ProtectedRoute>} />

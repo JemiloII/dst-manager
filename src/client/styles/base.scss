@@ -90,7 +90,7 @@ button, .btn {
   
   &.btn-small {
     padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 }
 
@@ -118,7 +118,7 @@ input, textarea, select {
 label {
   display: block;
   margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -193,7 +193,7 @@ table {
 .text-danger { color: #dc3545; }
 .text-success { color: #28a745; }
 .text-warning { color: #ffc107; }
-.text-small { font-size: 0.875rem; }
+.text-small { font-size: 1rem; }
 
 .loading {
   display: inline-block;

@@ -29,7 +29,7 @@ world.get('/:code/:shard', async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
+  const clusterDir = getClusterPath(server.share_code as string);
   const filePath = path.join(clusterDir, shard, 'leveldataoverride.lua');
 
   try {
@@ -82,7 +82,7 @@ world.put('/:code/:shard', requireRole('admin', 'user'), async (c) => {
   const preset = shard === 'Caves' ? 'DST_CAVE' : 'ENDLESS';
   const content = generateLevelDataOverride(preset, location, finalOverrides);
 
-  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
+  const clusterDir = getClusterPath(server.share_code as string);
   await fs.writeFile(path.join(clusterDir, shard, 'leveldataoverride.lua'), content);
 
   return c.json({ success: true });

@@ -21,20 +21,10 @@ export default function Layout() {
         <div className="nav-links">
           {isAuthenticated ? (
             <>
-              <Link to="/" className={isActive('/')}>Dashboard</Link>
-              {user?.role !== 'guest' && (
-                <Link to="/create" className={isActive('/create')}>Create Server</Link>
-              )}
+              <Link to="/" className={isActive('/')}>Servers</Link>
               <Link to="/support" className={isActive('/support')}>Support</Link>
-              {user?.role === 'admin' && (
-                <Link to="/admin" className={isActive('/admin')}>Admin</Link>
-              )}
-              <span style={{ color: '#aaa', fontSize: '0.85rem' }}>
-                {user?.username}
-              </span>
-              <button onClick={handleLogout} className="icon-btn" style={{ color: '#ccc', fontSize: '0.85rem' }}>
-                Logout
-              </button>
+              <span className="nav-username">{user?.username}</span>
+              <a onClick={handleLogout} className="nav-logout">Logout</a>
             </>
           ) : (
             <>
@@ -44,24 +34,15 @@ export default function Layout() {
           )}
         </div>
       </nav>
-      <div className="container" style={{ flex: '1' }}>
+      <div className="container main-content">
         <Outlet />
       </div>
-      <footer style={{ 
-        textAlign: 'center', 
-        padding: '2rem 1rem', 
-        borderTop: '1px solid #222', 
-        marginTop: 'auto',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        color: '#666',
-        fontSize: '0.8rem'
-      }}>
-        <p style={{ margin: 0 }}>
-          <Link to="/terms" style={{ color: '#888', transition: 'color 0.2s' }} 
-            onMouseEnter={(e) => e.currentTarget.style.color = '#FF8A00'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#888'}>
-            Terms of Service
-          </Link> | dst.gg © {new Date().getFullYear()}
+      <footer className="site-footer">
+        <p>
+          {user?.role === 'admin' && (
+            <><Link to="/admin" className="footer-link">Admin</Link> | </>
+          )}
+          <Link to="/terms" className="footer-link">Terms of Service</Link> | dst.gg © {new Date().getFullYear()}
         </p>
       </footer>
     </>

@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { authMiddleware, requireRole, JwtPayload } from '../../middleware/auth';
 import { generateModOverrides } from '../../services/lua';
 import { updateModsSetup } from '../../services/dst';
+import Servers from '../servers/servers.queries';
 import * as modService from './mods.service';
 
 type Variables = {
@@ -51,11 +52,8 @@ mods.get('/server/:serverId', async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const parsed = await modService.getServerModOverrides(
-    server.kuid as string, 
-    server.share_code as string
-  );
-  
+  const parsed = await modService.getServerModOverrides(server.share_code as string);
+
   return c.json(parsed || {});
 });
 
@@ -76,17 +74,17 @@ mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
   const modsData = body as Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }>;
 
   const content = generateModOverrides(modsData);
-  await modService.saveModOverrides(server.kuid as string, server.share_code as string, content);
+  await modService.saveModOverrides(server.share_code as string, content);
+
+  const enabledCount = Object.values(modsData).filter((m) => m.enabled).length;
+  await Servers.updateModCount(server.id as number, enabledCount);
 
   // Collect all workshop IDs from all servers
   const allServers = await modService.getAllServers();
   const allWorkshopIds = new Set<string>();
 
   for (const srv of allServers) {
-    const parsed = await modService.getServerModOverrides(
-      srv.kuid as string, 
-      srv.share_code as string
-    );
+    const parsed = await modService.getServerModOverrides(srv.share_code as string);
     if (parsed) {
       for (const key of Object.keys(parsed)) {
         const workshopId = key.replace('workshop-', '');

@@ -11,6 +11,7 @@ interface Server {
   share_code: string;
   max_players: number;
   game_mode: string;
+  mod_count: number;
   pvp: number;
   password: string;
   port_offset: number;

@@ -42,7 +42,7 @@ admin.get('/export/:serverId', requireRole('admin', 'user'), async (c) => {
     return c.json({ error: 'Forbidden' }, 403);
   }
 
-  const clusterDir = getClusterPath(server.kuid as string, server.share_code as string);
+  const clusterDir = getClusterPath(server.share_code as string);
   const zipName = `Cluster_${server.share_code}.tar.gz`;
   const zipPath = path.join('/tmp', zipName);
 

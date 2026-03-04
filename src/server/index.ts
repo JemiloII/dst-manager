@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 import { Database } from './db/schema';
 import Users from './features/users/users.queries.js';
 import { authRoutes } from './features/auth/index.js';
-import { serverRoutes, processService } from './features/servers/index.js';
+import { serverRoutes, processService, serverService } from './features/servers/index.js';
 import { modsRouter } from './features/mods';
 import { lobbiesRoutes } from './features/lobbies';
 import world from './routes/world';
@@ -73,8 +73,9 @@ async function start() {
     await Database.init();
     await seedAdmin();
     
-    // Check running servers on startup
+    // Check running servers and sync mod counts on startup
     await processService.checkAllServersOnStartup();
+    await serverService.syncModCounts();
 
     Monitor.start();
 

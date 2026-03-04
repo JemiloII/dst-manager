@@ -4,6 +4,8 @@ import { useServers } from '../stores/Servers';
 import { useAuth } from '../stores/Auth';
 import { api } from '../api';
 
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export default function Dashboard() {
   const { servers, players, loading, fetchServers, updateStatus, updatePlayers } = useServers();
   const { user } = useAuth();
@@ -58,57 +60,61 @@ export default function Dashboard() {
 
   return (
     <>
-      <h1 style={{ color: '#fff' }}>Servers</h1>
+      <div className="page-header">
+        <h1>Servers</h1>
+        {user?.role !== 'guest' && (
+          <Link to="/create" className="btn btn-primary"><img src="/images/servericons/dedicated.png" alt="" /> Create Server</Link>
+        )}
+      </div>
       {servers.length === 0 ? (
         <div className="card">
           <p>No servers yet.</p>
           {user?.role !== 'guest' && (
-            <Link to="/create">
-              <button>Create your first server</button>
-            </Link>
+            <Link to="/create" className="btn btn-primary">Create your first server</Link>
           )}
         </div>
       ) : (
         servers.map((server) => {
           const playerInfo = players[server.id];
           return (
-            <div key={server.id} className="server-card">
+            <Link key={server.id} to={`/servers/${server.share_code}`} className="server-card">
+              <div className="server-card-icon">
+                <img
+                  src={`/images/serverplaystyles/${server.game_mode}_small.png`}
+                  alt={capitalize(server.game_mode)}
+                  title={capitalize(server.game_mode)}
+                />
+              </div>
               <div className="server-info">
-                <h3>
-                  <Link to={`/servers/${server.share_code}`} style={{ color: '#fff', textDecoration: 'none' }}>
-                    {server.name}
-                  </Link>
-                </h3>
+                <h3>{server.name}</h3>
                 <div className="server-meta">
                   <span className={`status-badge ${server.status}`}>{server.status}</span>
-                  <span>{server.game_mode}</span>
+                  <span>{capitalize(server.game_mode)}</span>
+                  <span className="meta-divider">|</span>
+                  <span>Mods: {server.mod_count || 0}</span>
+                  <span className="meta-divider">|</span>
                   <span>
-                    {playerInfo ? `${playerInfo.count}/${playerInfo.max}` : `0/${server.max_players}`} players
+                    Players: {playerInfo ? `${playerInfo.count}/${playerInfo.max}` : `0/${server.max_players}`}
                   </span>
-                  {server.pvp ? <span>PvP</span> : null}
+                  {server.pvp ? <><span className="meta-divider">|</span><span>PvP</span></> : null}
                 </div>
               </div>
               <div className="server-actions">
                 {user?.role !== 'guest' && (
                   <>
                     {server.status === 'stopped' ? (
-                      <button className="icon-btn" onClick={() => handleStart(server.share_code)} title="Start">
+                      <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStart(server.share_code); }} title="Start">
                         <img src="/images/button_icons/AFKstart.png" alt="Start" />
                       </button>
                     ) : (
-                      <button className="icon-btn" onClick={() => handleStop(server.share_code)} title="Stop">
+                      <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStop(server.share_code); }} title="Stop">
                         <img src="/images/button_icons/AFKstop.png" alt="Stop" />
                       </button>
                     )}
                   </>
                 )}
-                <Link to={`/servers/${server.share_code}`}>
-                  <button className="icon-btn" title="Details">
-                    <img src="/images/button_icons/more_info.png" alt="Details" />
-                  </button>
-                </Link>
               </div>
-            </div>
+            </Link>
           );
         })
       )}

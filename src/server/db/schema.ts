@@ -33,6 +33,8 @@ export class Database {
         share_code TEXT UNIQUE NOT NULL,
         max_players INTEGER DEFAULT 6,
         game_mode TEXT DEFAULT 'survival',
+        server_intention TEXT DEFAULT 'cooperative',
+        mod_count INTEGER DEFAULT 0,
         pvp INTEGER DEFAULT 0,
         password TEXT DEFAULT '',
         port_offset INTEGER UNIQUE NOT NULL,
@@ -80,6 +82,17 @@ export class Database {
       args: [],
     },
   ]);
+
+  // Migrations for existing databases
+  await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN server_intention TEXT DEFAULT 'cooperative'`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN mod_count INTEGER DEFAULT 0`,
+    args: [],
+  }).catch(() => {});
   }
 }
 

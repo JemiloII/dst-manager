@@ -205,8 +205,8 @@ export async function getAllServers() {
   return Mods.getAllServers();
 }
 
-export async function getServerModOverrides(kuid: string, shareCode: string) {
-  const clusterDir = getClusterPath(kuid, shareCode);
+export async function getServerModOverrides(shareCode: string) {
+  const clusterDir = getClusterPath(shareCode);
   const modOverridesPath = path.join(clusterDir, 'Master', 'modoverrides.lua');
   
   try {
@@ -217,8 +217,8 @@ export async function getServerModOverrides(kuid: string, shareCode: string) {
   }
 }
 
-export async function saveModOverrides(kuid: string, shareCode: string, content: string) {
-  const clusterDir = getClusterPath(kuid, shareCode);
+export async function saveModOverrides(shareCode: string, content: string) {
+  const clusterDir = getClusterPath(shareCode);
   
   await fs.writeFile(path.join(clusterDir, 'Master', 'modoverrides.lua'), content);
   await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), content);

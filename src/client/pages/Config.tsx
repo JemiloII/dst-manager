@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { api } from '../api';
 import ServerLayout from '../components/ServerLayout';
 import Checkbox from '../components/Checkbox/Checkbox';
-import PlayStyleSelector from '../components/PlayStyleSelector/PlayStyleSelector';
+import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
 
 interface Server {
   id: number;
@@ -14,6 +14,7 @@ interface Server {
   share_code: string;
   max_players: number;
   game_mode: string;
+  server_intention: string;
   pvp: number;
   password: string;
   status: string;
@@ -22,8 +23,8 @@ interface Server {
 export default function Config() {
   const { code } = useParams<{ code: string }>();
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
-  const [originalForm, setOriginalForm] = useState({ name: '', description: '', gameMode: '', maxPlayers: 6, pvp: false, password: '' });
+  const [form, setForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '' });
+  const [originalForm, setOriginalForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '' });
   const [hasChanges, setHasChanges] = useState(false);
   const [serverData, setServerData] = useState<Server | null>(null);
 
@@ -42,6 +43,7 @@ export default function Config() {
       name: form.name,
       description: form.description,
       game_mode: form.gameMode,
+      server_intention: form.serverIntention,
       max_players: Number(form.maxPlayers),
       pvp: form.pvp ? 1 : 0,
       password: form.password,
@@ -56,6 +58,7 @@ export default function Config() {
           name: data.name,
           description: data.description,
           gameMode: data.game_mode,
+          serverIntention: data.server_intention || 'cooperative',
           maxPlayers: data.max_players,
           pvp: !!data.pvp,
           password: data.password,
@@ -66,6 +69,7 @@ export default function Config() {
           name: data.name,
           description: data.description,
           gameMode: data.game_mode,
+          serverIntention: data.server_intention || 'cooperative',
           maxPlayers: data.max_players,
           pvp: !!data.pvp,
           password: data.password,
@@ -89,6 +93,7 @@ export default function Config() {
             name: server.name,
             description: server.description,
             gameMode: server.game_mode,
+            serverIntention: server.server_intention || 'cooperative',
             maxPlayers: server.max_players,
             pvp: !!server.pvp,
             password: server.password,
@@ -118,15 +123,28 @@ export default function Config() {
             disabled={!isOwner}
           />
         </div>
-        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+        <div className="form-group form-group-full">
           <label>Game Mode</label>
           {isOwner ? (
-            <PlayStyleSelector 
-              value={form.gameMode} 
-              onChange={(value) => setForm({ ...form, gameMode: value })} 
+            <PlayStyleSelector
+              options={gameModeOptions}
+              value={form.gameMode}
+              onChange={(value) => setForm({ ...form, gameMode: value })}
             />
           ) : (
             <p>{form.gameMode}</p>
+          )}
+        </div>
+        <div className="form-group form-group-full">
+          <label>Server Intention</label>
+          {isOwner ? (
+            <PlayStyleSelector
+              options={serverIntentionOptions}
+              value={form.serverIntention}
+              onChange={(value) => setForm({ ...form, serverIntention: value })}
+            />
+          ) : (
+            <p>{form.serverIntention}</p>
           )}
         </div>
         <div className="form-group">
@@ -153,13 +171,13 @@ export default function Config() {
         </div>
         <div className="form-group">
           <label>Password</label>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <input 
+          <div className="password-field">
+            <input
               type={showPassword ? 'text' : 'password'}
-              value={form.password} 
-              onChange={(e) => setForm({ ...form, password: e.target.value })} 
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
               disabled={!isOwner}
-              style={{ paddingRight: '40px', flex: 1 }}
+              className="password-input"
             />
             {isOwner && (
               <button

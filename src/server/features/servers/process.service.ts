@@ -88,7 +88,7 @@ export class ProcessService {
       }
     }
 
-    const clusterDir = getClusterPath(kuid, shareCode);
+    const clusterDir = getClusterPath(shareCode);
     const binary = this.getDstBinary();
 
     // Update status to starting and clear old PIDs

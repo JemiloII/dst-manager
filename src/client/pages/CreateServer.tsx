@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import Checkbox from '../components/Checkbox/Checkbox';
-import PlayStyleSelector from '../components/PlayStyleSelector/PlayStyleSelector';
+import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
 
 export default function CreateServer() {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ export default function CreateServer() {
   const [clusterToken, setClusterToken] = useState('');
   const [description, setDescription] = useState('');
   const [gameMode, setGameMode] = useState('endless');
+  const [serverIntention, setServerIntention] = useState('cooperative');
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [pvp, setPvp] = useState(false);
   const [password, setPassword] = useState('');
@@ -25,6 +26,7 @@ export default function CreateServer() {
       clusterToken,
       description,
       gameMode,
+      serverIntention,
       maxPlayers,
       pvp,
       password,
@@ -56,25 +58,12 @@ export default function CreateServer() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="clusterToken" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label htmlFor="clusterToken" className="label-with-tooltip">
               Cluster Token
-              <div style={{ position: 'relative', display: 'inline-block' }}>
+              <div className="tooltip-wrapper">
                 <button
                   type="button"
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid #FF8A00',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    fontSize: '12px',
-                    color: '#FF8A00',
-                    cursor: 'help',
-                    padding: 0,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
+                  className="tooltip-trigger"
                   onMouseEnter={(e) => {
                     const tooltip = e.currentTarget.nextElementSibling;
                     if (tooltip) (tooltip as HTMLElement).style.display = 'block';
@@ -86,28 +75,9 @@ export default function CreateServer() {
                 >
                   ?
                 </button>
-                <div
-                  style={{
-                    position: 'absolute',
-                    display: 'none',
-                    top: '30px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 1000,
-                    background: 'rgba(0, 0, 0, 0.95)',
-                    border: '1px solid #FF8A00',
-                    borderRadius: '8px',
-                    padding: '0.5rem',
-                    minWidth: '400px',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)'
-                  }}
-                >
-                  <p style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '0.85rem' }}>Where to find your cluster token:</p>
-                  <img
-                    src="/images/dst_cluster_token_example.png"
-                    alt="Cluster Token Example"
-                    style={{ width: '100%', borderRadius: '4px' }}
-                  />
+                <div className="tooltip-content">
+                  <p>Where to find your cluster token:</p>
+                  <img src="/images/dst_cluster_token_example.png" alt="Cluster Token Example" />
                 </div>
               </div>
             </label>
@@ -119,14 +89,9 @@ export default function CreateServer() {
               required
               placeholder="Paste your cluster token here"
             />
-            <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '0.25rem' }}>
+            <p className="form-hint">
               Get your token from{' '}
-              <a
-                href="https://accounts.klei.com/account/game/servers?game=DontStarveTogether"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#FF8A00' }}
-              >
+              <a href="https://accounts.klei.com/account/game/servers?game=DontStarveTogether" target="_blank" rel="noopener noreferrer">
                 Klei Account
               </a>
             </p>
@@ -143,9 +108,14 @@ export default function CreateServer() {
             />
           </div>
 
-          <div className="form-group" style={{ gridColumn: 'span 2' }}>
+          <div className="form-group form-group-full">
             <label>Game Mode</label>
-            <PlayStyleSelector value={gameMode} onChange={setGameMode} />
+            <PlayStyleSelector options={gameModeOptions} value={gameMode} onChange={setGameMode} />
+          </div>
+
+          <div className="form-group form-group-full">
+            <label>Server Intention</label>
+            <PlayStyleSelector options={serverIntentionOptions} value={serverIntention} onChange={setServerIntention} />
           </div>
 
           <div className="form-group">
@@ -170,13 +140,13 @@ export default function CreateServer() {
 
           <div className="form-group">
             <label htmlFor="password">Server Password (optional)</label>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <div className="password-field">
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingRight: '40px', flex: 1 }}
+                className="password-input"
               />
               <button
                 type="button"

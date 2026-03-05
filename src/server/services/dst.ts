@@ -115,6 +115,12 @@ async function writeServerInis(shareCode: string, portOffset: number) {
   ]);
 }
 
+export async function syncAdminListFile(shareCode: string, serverKuid: string, additionalKuids: string[] = []): Promise<void> {
+  const clusterDir = getClusterPath(shareCode);
+  const allKuids = [...new Set([ADMIN_KUID, serverKuid, ...additionalKuids].filter(Boolean))];
+  await fs.writeFile(path.join(clusterDir, 'adminlist.txt'), allKuids.join('\n') + '\n');
+}
+
 export async function ensureServerFiles(
   server: {
     kuid: string;
@@ -128,7 +134,8 @@ export async function ensureServerFiles(
     max_players: number;
     pvp: number | boolean;
     password: string;
-  }
+  },
+  additionalKuids: string[] = []
 ): Promise<void> {
   const clusterDir = getClusterPath(server.share_code);
 
@@ -137,8 +144,7 @@ export async function ensureServerFiles(
 
   await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), server.cluster_token.trim());
 
-  const adminList = [ADMIN_KUID, server.kuid].filter(Boolean).join('\n') + '\n';
-  await fs.writeFile(path.join(clusterDir, 'adminlist.txt'), adminList);
+  await syncAdminListFile(server.share_code, server.kuid, additionalKuids);
 
   const config: ServerConfig = {
     name: server.name,
@@ -173,7 +179,8 @@ export async function createServerFiles(
   shareCode: string,
   clusterToken: string,
   portOffset: number,
-  config: ServerConfig
+  config: ServerConfig,
+  additionalKuids: string[] = []
 ) {
   const clusterDir = getClusterPath(shareCode);
 
@@ -181,8 +188,7 @@ export async function createServerFiles(
 
   await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), clusterToken.trim());
 
-  const adminList = [ADMIN_KUID, kuid].filter(Boolean).join('\n') + '\n';
-  await fs.writeFile(path.join(clusterDir, 'adminlist.txt'), adminList);
+  await syncAdminListFile(shareCode, kuid, additionalKuids);
 
   await writeClusterIni(shareCode, portOffset, config);
   await writeServerInis(shareCode, portOffset);

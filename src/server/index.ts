@@ -15,6 +15,7 @@ import tickets from './routes/tickets';
 import logs from './routes/logs';
 import admin from './routes/admin';
 import interactions from './routes/interactions';
+import { preferencesRoutes } from './features/preferences/index.js';
 import { Monitor } from './services/monitor';
 
 const {
@@ -48,6 +49,7 @@ app.route('/api/tickets', tickets);
 app.route('/api/logs', logs);
 app.route('/api/admin', admin);
 app.route('/api/interactions', interactions);
+app.route('/api/preferences', preferencesRoutes);
 
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 

@@ -16,6 +16,7 @@ interface Server {
   password: string;
   port_offset: number;
   status: 'stopped' | 'starting' | 'running' | 'paused';
+  started_at: string | null;
   created_at: string;
 }
 

@@ -94,6 +94,28 @@ export class Database {
       )`,
       args: [],
     },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS user_preferences (
+        user_id INTEGER NOT NULL,
+        key TEXT NOT NULL,
+        value TEXT NOT NULL,
+        PRIMARY KEY (user_id, key),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )`,
+      args: [],
+    },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS server_admins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        server_id INTEGER NOT NULL,
+        user_id INTEGER,
+        kuid TEXT DEFAULT '',
+        added_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )`,
+      args: [],
+    },
   ]);
 
   // Migrations for existing databases
@@ -104,6 +126,11 @@ export class Database {
 
   await db.execute({
     sql: `ALTER TABLE servers ADD COLUMN mod_count INTEGER DEFAULT 0`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN started_at TEXT DEFAULT NULL`,
     args: [],
   }).catch(() => {});
   }

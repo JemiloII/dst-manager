@@ -1,56 +1,96 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useServers } from '../stores/Servers';
 import { useAuth } from '../stores/Auth';
+import { usePreferences } from '../stores/Preferences';
 import { api } from '../api';
+import CycleSelector from '../components/CycleSelector/CycleSelector';
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+function formatRuntime(startedAt: string): string {
+  const ms = Date.now() - new Date(startedAt).getTime();
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days}d ${hours % 24}h`;
+  if (hours > 0) return `${hours}h ${minutes % 60}m`;
+  return `${Math.max(1, minutes)}m`;
+}
+
+const STATUS_OPTIONS = ['all', 'running', 'stopped'];
+const STATUS_LABELS: Record<string, string> = { all: 'All', running: 'Running', stopped: 'Stopped' };
+const ROLE_OPTIONS = ['all', 'owned', 'admin'];
+const ROLE_LABELS: Record<string, string> = { all: 'All', owned: 'Owned', admin: 'Admin' };
+const SORT_OPTIONS = ['az', 'players', 'runtime', 'status'];
+const SORT_LABELS: Record<string, string> = { az: 'A-Z', players: 'Players', runtime: 'Runtime', status: 'Status' };
+
 export default function Dashboard() {
-  const { servers, players, loading, fetchServers, updateStatus, updatePlayers } = useServers();
+  const { servers, players, loading, fetchServers } = useServers();
   const { user } = useAuth();
+  const { preferences, loaded: prefsLoaded, fetchPreferences, setPreference } = usePreferences();
 
   useEffect(() => {
     fetchServers();
   }, [fetchServers]);
 
-  // TODO: Implement server events endpoint with proper auth headers
-  // useEffect(() => {
-  //   if (servers.length === 0) return;
+  useEffect(() => {
+    if (!prefsLoaded) fetchPreferences();
+  }, [prefsLoaded, fetchPreferences]);
 
-  //   const eventSources: EventSource[] = [];
+  const [, setTick] = useState(0);
+  const hasRunning = servers.some((s) => s.started_at);
 
-  //   for (const server of servers) {
-  //     // EventSource doesn't support custom headers, need different approach
-  //     const es = new EventSource(`/api/servers/${server.id}/events`);
+  useEffect(() => {
+    if (!hasRunning) return;
+    const id = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(id);
+  }, [hasRunning]);
 
-  //     es.addEventListener('status', (e) => {
-  //       const data = JSON.parse(e.data);
-  //       updateStatus(server.id, data.data);
-  //     });
+  const statusFilter = preferences.dashboard_status || 'all';
+  const roleFilter = preferences.dashboard_role || 'all';
+  const sortBy = preferences.dashboard_sort || 'az';
 
-  //     es.addEventListener('players', (e) => {
-  //       const data = JSON.parse(e.data);
-  //       updatePlayers(server.id, data.data);
-  //     });
+  const filtered = useMemo(() => {
+    const statusOrder: Record<string, number> = { running: 0, starting: 1, paused: 2, stopped: 3 };
 
-  //     eventSources.push(es);
-  //   }
+    const list = servers.filter((server) => {
+      if (statusFilter === 'running' && server.status === 'stopped') return false;
+      if (statusFilter === 'stopped' && server.status !== 'stopped') return false;
+      if (user?.role !== 'admin') {
+        if (roleFilter === 'owned' && server.user_id !== user?.id) return false;
+        if (roleFilter === 'admin' && server.user_id === user?.id) return false;
+      }
+      return true;
+    });
 
-  //   return () => {
-  //     eventSources.forEach((es) => es.close());
-  //   };
-  // }, [servers.length, updateStatus, updatePlayers]);
+    const now = Date.now();
+    return [...list].sort((a, b) => {
+      if (sortBy === 'players') {
+        const aPlayers = players[a.id]?.count ?? 0;
+        const bPlayers = players[b.id]?.count ?? 0;
+        return bPlayers - aPlayers || a.name.localeCompare(b.name, undefined, { numeric: true });
+      }
+      if (sortBy === 'runtime') {
+        const aRuntime = a.started_at ? now - new Date(a.started_at).getTime() : 0;
+        const bRuntime = b.started_at ? now - new Date(b.started_at).getTime() : 0;
+        return bRuntime - aRuntime || a.name.localeCompare(b.name, undefined, { numeric: true });
+      }
+      if (sortBy === 'status') {
+        const diff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+        return diff || a.name.localeCompare(b.name, undefined, { numeric: true });
+      }
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
+    });
+  }, [servers, players, statusFilter, roleFilter, sortBy, user?.id, user?.role]);
 
   const handleStart = async (code: string) => {
     await api.post(`/servers/${code}/start`);
-    // Refresh servers to update status
     await fetchServers();
   };
 
   const handleStop = async (code: string) => {
     await api.post(`/servers/${code}/stop`);
-    // Refresh servers to update status
     await fetchServers();
   };
 
@@ -62,6 +102,31 @@ export default function Dashboard() {
     <>
       <div className="page-header">
         <h1>Servers</h1>
+        {servers.length > 0 && (
+          <div className="dashboard-filters">
+            <CycleSelector
+              label="Status"
+              value={statusFilter}
+              options={STATUS_OPTIONS}
+              optionLabels={STATUS_LABELS}
+              onChange={(v) => setPreference('dashboard_status', v as string)}
+            />
+            <CycleSelector
+              label="Role"
+              value={roleFilter}
+              options={ROLE_OPTIONS}
+              optionLabels={ROLE_LABELS}
+              onChange={(v) => setPreference('dashboard_role', v as string)}
+            />
+            <CycleSelector
+              label="Sort"
+              value={sortBy}
+              options={SORT_OPTIONS}
+              optionLabels={SORT_LABELS}
+              onChange={(v) => setPreference('dashboard_sort', v as string)}
+            />
+          </div>
+        )}
         {user?.role !== 'guest' && (
           <Link to="/create" className="btn btn-primary"><img src="/images/servericons/dedicated.png" alt="" /> Create Server</Link>
         )}
@@ -73,8 +138,12 @@ export default function Dashboard() {
             <Link to="/create" className="btn btn-primary">Create your first server</Link>
           )}
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="card">
+          <p>No servers match your filters.</p>
+        </div>
       ) : (
-        servers.map((server) => {
+        filtered.map((server) => {
           const playerInfo = players[server.id];
           const canControl = server.user_id === user?.id || user?.role === 'admin';
           return (
@@ -97,6 +166,7 @@ export default function Dashboard() {
                   <span>
                     Players: {playerInfo ? `${playerInfo.count}/${playerInfo.max}` : `0/${server.max_players}`}
                   </span>
+                  {server.started_at ? <><span className="meta-divider">|</span><span>{formatRuntime(server.started_at)}</span></> : null}
                   {server.pvp ? <><span className="meta-divider">|</span><span>PvP</span></> : null}
                 </div>
               </div>

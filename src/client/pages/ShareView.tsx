@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
+import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
+import { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
 
 interface SharedServer {
   id: number;
@@ -10,6 +12,7 @@ interface SharedServer {
   description: string;
   max_players: number;
   game_mode: string;
+  server_intention: string;
   pvp: number;
   status: string;
   share_code: string;
@@ -17,7 +20,6 @@ interface SharedServer {
 
 function GuestLogin({ shareCode }: { shareCode: string }) {
   const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [createAccount, setCreateAccount] = useState(false);
   const [error, setError] = useState('');
@@ -32,12 +34,12 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
 
     const body: Record<string, string> = { displayName, shareCode };
     if (createAccount) {
-      if (!username || !password) {
-        setError('Username and password required for account creation');
+      if (!password) {
+        setError('Password required for account creation');
         setLoading(false);
         return;
       }
-      body.username = username;
+      body.username = displayName;
       body.password = password;
     }
 
@@ -61,7 +63,14 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
 
   return (
     <div className="guest-login">
-      <h4 className="guest-login-title">Join as Guest</h4>
+      <div className="guest-login-header">
+        <h4 className="guest-login-title">Join as Guest</h4>
+        <Checkbox
+          label="Create an account"
+          checked={createAccount}
+          onChange={setCreateAccount}
+        />
+      </div>
       <p className="guest-login-desc">Enter a display name to suggest mods for this server</p>
       <form onSubmit={handleSubmit} className="guest-login-form">
         <input
@@ -72,23 +81,8 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
           required
         />
 
-        <label className="guest-account-toggle">
-          <input
-            type="checkbox"
-            checked={createAccount}
-            onChange={(e) => setCreateAccount(e.target.checked)}
-          />
-          Create an account (optional)
-        </label>
-
         {createAccount && (
           <div className="guest-account-fields">
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
             <PasswordInput
               placeholder="Password"
               value={password}
@@ -183,12 +177,40 @@ export default function ShareView() {
   return (
     <div className="share-view">
       <div className="card">
-        <h2 className="share-view-title">{server.name}</h2>
-        <span className={`status-badge ${server.status}`}>{server.status}</span>
+        <div className="share-view-header">
+          <h2 className="share-view-title">{server.name}</h2>
+          <span className={`status-badge ${server.status}`}>{server.status}</span>
+        </div>
+
+        <div className="share-view-styles">
+          {(() => {
+            const mode = gameModeOptions.find((o) => o.value === server.game_mode);
+            const intention = serverIntentionOptions.find((o) => o.value === server.server_intention);
+            return (
+              <>
+                {mode && (
+                  <div className="share-view-style-item">
+                    <div className="share-view-style-frame">
+                      <img src={mode.image} alt={mode.label} />
+                    </div>
+                    <span>{mode.label}</span>
+                  </div>
+                )}
+                {intention && (
+                  <div className="share-view-style-item">
+                    <div className="share-view-style-frame share-view-style-frame--intention">
+                      <img src={intention.image} alt={intention.label} />
+                    </div>
+                    <span>{intention.label}</span>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
 
         <div className="share-view-details">
-          <p><strong>Description:</strong> {server.description || 'None'}</p>
-          <p><strong>Game Mode:</strong> {server.game_mode}</p>
+          {server.description && <p>{server.description}</p>}
           <p><strong>Max Players:</strong> {server.max_players}</p>
           <p><strong>PvP:</strong> {server.pvp ? 'Yes' : 'No'}</p>
         </div>

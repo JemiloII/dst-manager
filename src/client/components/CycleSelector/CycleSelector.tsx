@@ -48,7 +48,11 @@ export default function CycleSelector({ label, value, options, optionLabels, onC
           </button>
         )}
         <span className="cycle-selector-value">
-          {displayValue}
+          {options.map((opt) => (
+            <span key={String(opt)} className={String(opt) === String(value) ? 'cycle-active' : 'cycle-hidden'} aria-hidden={String(opt) !== String(value)}>
+              {optionLabels?.[String(opt)] || String(opt)}
+            </span>
+          ))}
         </span>
         {!disabled && (
           <button 

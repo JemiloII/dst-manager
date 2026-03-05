@@ -99,6 +99,20 @@ export class Auth {
       args: [passwordHash, 'user', username, userId],
     });
   }
+
+  async searchUsers(query: string, excludeIds: number[] = []): Promise<{ id: number; username: string; display_name: string }[]> {
+    const placeholders = excludeIds.length > 0 ? excludeIds.map(() => '?').join(',') : '';
+    const excludeClause = excludeIds.length > 0 ? `AND id NOT IN (${placeholders})` : '';
+    const result = await db.execute({
+      sql: `SELECT id, username, display_name FROM users
+            WHERE role != 'guest'
+            AND (username LIKE ? OR display_name LIKE ?)
+            ${excludeClause}
+            LIMIT 10`,
+      args: [`%${query}%`, `%${query}%`, ...excludeIds],
+    });
+    return result.rows as any[];
+  }
 }
 
 export default new Auth();

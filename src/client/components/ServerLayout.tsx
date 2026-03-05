@@ -17,6 +17,7 @@ interface Server {
   pvp: number;
   password: string;
   status: string;
+  is_server_admin?: boolean;
 }
 
 interface Props {
@@ -112,7 +113,10 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
 
   if (!server) return <div>Loading...</div>;
 
-  const isOwner = user?.id === server.user_id || user?.role === 'admin';
+  const isTrueOwner = user?.id === server.user_id || user?.role === 'admin';
+  const isOwner = isTrueOwner || !!server.is_server_admin;
+
+  const tabs = ['Config', 'World', 'Mods', 'Logs', 'Suggestions', ...(isTrueOwner ? ['Admins'] : [])];
 
   // Determine active tab based on current path
   const getActiveTab = () => {
@@ -121,6 +125,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
     if (path.includes('/mods')) return 2;
     if (path.includes('/logs')) return 3;
     if (path.includes('/suggestions')) return 4;
+    if (path.includes('/admins')) return isTrueOwner ? 5 : 0;
     return 0; // Config
   };
 
@@ -168,9 +173,11 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
               <button className="icon-btn download-btn" onClick={handleExport} title="Download">
                 <img src="/images/button_icons/update.png" alt="Download" />
               </button>
-              <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
-                <img src="/images/button_icons/delete.png" alt="Delete" />
-              </button>
+              {isTrueOwner && (
+                <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
+                  <img src="/images/button_icons/delete.png" alt="Delete" />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -208,7 +215,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
       </div>
 
       <Tabs
-        tabs={['Config', 'World', 'Mods', 'Logs', 'Suggestions']}
+        tabs={tabs}
         defaultActiveTab={getActiveTab()}
         onTabChange={(tabName) => {
           const routes: { [key: string]: string } = {
@@ -216,7 +223,8 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
             'World': `/servers/${code}/world/forest/settings`,
             'Mods': `/servers/${code}/mods`,
             'Logs': `/servers/${code}/logs`,
-            'Suggestions': `/servers/${code}/suggestions`
+            'Suggestions': `/servers/${code}/suggestions`,
+            'Admins': `/servers/${code}/admins`,
           };
           navigate(routes[tabName]);
         }}

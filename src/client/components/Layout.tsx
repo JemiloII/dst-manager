@@ -69,6 +69,9 @@ export default function Layout() {
           )}
         </div>
       </nav>
+      <div className="beta-banner">
+        This site is in beta — servers may go down without notice as we continue development.
+      </div>
       <div className="container main-content">
         <Outlet />
       </div>

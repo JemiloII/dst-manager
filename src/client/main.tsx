@@ -13,6 +13,7 @@ import World from './pages/World';
 import Mods from './pages/Mods';
 import Logs from './pages/Logs';
 import Suggestions from './pages/Suggestions';
+import Admins from './pages/Admins';
 import Support from './pages/Support';
 import Admin from './pages/Admin';
 import ShareView from './pages/ShareView';
@@ -61,6 +62,7 @@ function App() {
           <Route path="/servers/:code/mods" element={<ProtectedRoute><Mods /></ProtectedRoute>} />
           <Route path="/servers/:code/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
           <Route path="/servers/:code/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+          <Route path="/servers/:code/admins" element={<ProtectedRoute><Admins /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Admin /></ProtectedRoute>} />
         </Route>

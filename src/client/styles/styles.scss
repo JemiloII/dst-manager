@@ -100,6 +100,15 @@ button, .btn {
   padding: 0.5rem 1rem;
 }
 
+.beta-banner {
+  background: rgba($primary, 0.15);
+  border-bottom: 1px solid rgba($primary, 0.3);
+  color: $primary;
+  text-align: center;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
+
 nav {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
@@ -161,7 +170,7 @@ nav {
   flex-wrap: wrap;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 
   &, &:hover, &:visited {
     text-decoration: none;
@@ -169,6 +178,7 @@ nav {
 
   &:hover {
     border-color: rgba($primary, 0.5);
+    background: rgba($primary, 0.08);
   }
 
   .server-card-icon {
@@ -635,15 +645,14 @@ button.icon-btn, .icon-btn {
   
   .world-setting-item {
     width: 200px;
-    height: 240px;
+    height: 260px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
-    padding: 0.75rem;
-    padding-top: 1rem;
+    padding: 1rem 0.75rem;
     border: 2px solid rgba(255, 138, 0, 0.2);
     transition: all 0.2s;
     justify-content: space-between;
@@ -868,6 +877,8 @@ button.icon-btn, .icon-btn {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
 
   h1 {
@@ -879,6 +890,34 @@ button.icon-btn, .icon-btn {
     font-size: 1.1rem;
     font-weight: bold;
     padding: 0.6rem 0.85rem 0.6rem 0.65rem;
+    white-space: nowrap;
+  }
+}
+
+.dashboard-filters {
+  display: flex;
+  gap: 1rem;
+
+  .cycle-selector {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+
+    .cycle-selector-label {
+      margin-bottom: 0;
+      white-space: nowrap;
+      font-size: 1.1rem;
+    }
+
+    .cycle-selector-control {
+      gap: 0.25rem;
+    }
+
+    .cycle-selector-value {
+      font-size: 1.1rem;
+      white-space: nowrap;
+    }
   }
 }
 
@@ -1140,17 +1179,92 @@ button.icon-btn, .icon-btn {
 .share-view {
   max-width: 600px;
   margin: 0 auto;
-  padding: 2rem 0;
+  padding: 3rem 0;
+}
+
+.share-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+
+  .status-badge {
+    font-size: 1rem;
+    padding: 0.3rem 0.75rem;
+  }
 }
 
 .share-view-title {
   color: #fff;
-  margin: 0 0 0.5rem;
+  margin: 0;
+}
+
+.share-view-styles {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+}
+
+.share-view-style-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  .share-view-style-frame {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #1a1410;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      background: url('/images/serverplaystyles/frame_hl.png') center/contain no-repeat;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    img {
+      position: absolute;
+      inset: 2%;
+      width: 96%;
+      height: 96%;
+      object-fit: cover;
+    }
+
+    &--intention {
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 2%;
+        background: url('/images/bg_spiral.png') center/cover no-repeat;
+        z-index: 0;
+      }
+
+      img {
+        z-index: 1;
+      }
+    }
+  }
+
+  span {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: bold;
+  }
 }
 
 .share-view-details {
   color: #ccc;
-  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 
   p {
     margin: 0 0 0.25rem;
@@ -1183,14 +1297,22 @@ button.icon-btn, .icon-btn {
   margin-bottom: 1rem;
 }
 
+.guest-login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
 .guest-login-title {
   color: $primary;
-  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  margin: 0;
 }
 
 .guest-login-desc {
   color: #aaa;
-  font-size: 0.85rem;
+  font-size: 1rem;
   margin: 0 0 1rem;
 }
 
@@ -1198,19 +1320,9 @@ button.icon-btn, .icon-btn {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
 
-.guest-account-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #ccc;
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    width: auto;
-    margin: 0;
+  input {
+    font-size: 1rem;
   }
 }
 
@@ -1221,7 +1333,7 @@ button.icon-btn, .icon-btn {
 }
 
 .guest-login-terms {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   color: #555;
   margin: 0;
 }
@@ -1238,4 +1350,173 @@ button.icon-btn, .icon-btn {
   color: #aaa;
   font-size: 0.95rem;
   margin: 0 0 1.5rem;
+}
+
+// Admin List
+.admin-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  h3 {
+    color: #fff;
+    margin: 0;
+  }
+}
+
+.admin-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-label {
+  color: #888;
+  font-weight: normal;
+  font-size: 1.1rem;
+}
+
+.admin-kuid {
+  color: #aaa;
+  font-family: monospace;
+  font-size: 1rem;
+}
+
+.admin-meta {
+  color: #888;
+  font-size: 1rem;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  background: rgba($primary, 0.2);
+  color: $primary;
+
+  &-ingame {
+    background: rgba(108, 117, 125, 0.3);
+    color: #aaa;
+  }
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.admin-empty {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.admin-hint {
+  color: #888;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.admin-modal-form {
+  .Modal__content {
+    overflow: visible;
+    padding: 2rem;
+    max-width: 500px;
+  }
+
+  .label-with-tooltip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tooltip-wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tooltip-trigger {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+
+  .tooltip-content {
+    z-index: 1001;
+  }
+}
+
+.admin-selected-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.admin-search-wrapper {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.admin-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(20, 20, 20, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.admin-search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba($primary, 0.15);
+  }
+}
+
+.admin-search-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.admin-search-username {
+  color: #888;
+  font-size: 1rem;
 }

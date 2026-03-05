@@ -81,6 +81,19 @@ export class Database {
       )`,
       args: [],
     },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS server_guests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        server_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        display_name TEXT NOT NULL,
+        joined_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE(server_id, user_id)
+      )`,
+      args: [],
+    },
   ]);
 
   // Migrations for existing databases

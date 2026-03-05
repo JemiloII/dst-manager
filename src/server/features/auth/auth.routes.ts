@@ -69,34 +69,84 @@ auth.post('/login', async (c) => {
 });
 
 auth.post('/guest', async (c) => {
-  const { displayName, shareCode } = await c.req.json();
+  const { displayName, shareCode, username, password } = await c.req.json();
 
   if (!displayName || !shareCode) {
     return c.json({ error: 'Display name and share code required' }, 400);
   }
 
-  // Verify share code exists
   const server = await Servers.findByShareCode(shareCode);
-  
   if (!server) {
     return c.json({ error: 'Invalid share code' }, 404);
   }
 
-  // Check if display name is already taken by a real user
-  if (await Auth.checkDisplayName(displayName)) {
-    return c.json({ error: 'This name is already taken' }, 409);
+  // Check display name against server owner
+  const owner = await Auth.findUserById(server.user_id);
+  if (owner && owner.display_name?.toLowerCase() === displayName.toLowerCase()) {
+    return c.json({ error: 'This name is already taken on this server' }, 409);
   }
 
-  // Use display name as username for guests (prefixed to avoid conflicts)
-  const guestUsername = `guest_${displayName}`;
-  const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+  // Per-server display name uniqueness
+  if (await Servers.checkDisplayNameOnServer(server.id, displayName)) {
+    return c.json({ error: 'This name is already taken on this server' }, 409);
+  }
 
-  const userId = await Auth.createUser(guestUsername, passwordHash, 'guest', displayName);
+  // If username+password provided, create as full user
+  const isUpgrade = username && password;
+  let role: 'user' | 'guest' = 'guest';
+  let guestUsername = `guest_${crypto.randomBytes(4).toString('hex')}`;
+  let passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
 
-  const payload: JwtPayload = { id: userId, username: displayName, role: 'guest' };
+  if (isUpgrade) {
+    if (await Auth.checkUsername(username)) {
+      return c.json({ error: 'Username already taken' }, 409);
+    }
+    guestUsername = username;
+    passwordHash = await bcrypt.hash(password, 10);
+    role = 'user';
+  }
+
+  const userId = await Auth.createUser(guestUsername, passwordHash, role, displayName);
+  await Servers.addGuest(server.id, userId, displayName);
+
+  const payload: JwtPayload = { id: userId, username: isUpgrade ? username : displayName, role };
   const tokens = generateTokens(payload);
 
+  const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  await Auth.createRefreshToken(userId, refreshHash, expiresAt);
+
   return c.json({ ...tokens, user: { ...payload, displayName } });
+});
+
+auth.post('/upgrade', authMiddleware(), async (c) => {
+  const user = c.get('user') as JwtPayload;
+
+  if (user.role !== 'guest') {
+    return c.json({ error: 'Only guest accounts can be upgraded' }, 400);
+  }
+
+  const { username, password } = await c.req.json();
+  if (!username || !password) {
+    return c.json({ error: 'Username and password required' }, 400);
+  }
+
+  if (await Auth.checkUsername(username)) {
+    return c.json({ error: 'Username already taken' }, 409);
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await Auth.updatePasswordAndRole(user.id, passwordHash, username);
+
+  const payload: JwtPayload = { id: user.id, username, role: 'user' };
+  const tokens = generateTokens(payload);
+
+  const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  await Auth.deleteAllRefreshTokens(user.id);
+  await Auth.createRefreshToken(user.id, refreshHash, expiresAt);
+
+  return c.json({ ...tokens, user: payload });
 });
 
 auth.post('/refresh', async (c) => {
@@ -130,7 +180,12 @@ auth.post('/refresh', async (c) => {
 
     await Auth.deleteRefreshToken(matchedTokenId);
 
-    const payload: JwtPayload = { id: decoded.id, username: decoded.username, role: decoded.role };
+    // Look up current role from DB (handles upgraded guests)
+    const dbUser = await Auth.findUserById(decoded.id);
+    const currentRole = (dbUser?.role as JwtPayload['role']) || decoded.role;
+    const currentUsername = dbUser?.username || decoded.username;
+
+    const payload: JwtPayload = { id: decoded.id, username: currentUsername, role: currentRole };
     const tokens = generateTokens(payload);
 
     const refreshHash = await bcrypt.hash(tokens.refreshToken, 10);

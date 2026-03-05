@@ -13,6 +13,7 @@ interface AuthState {
   isLoading: boolean;
   login: (user: User, accessToken: string, refreshToken: string) => void;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
   loadFromStorage: () => void;
 }
 
@@ -33,6 +34,15 @@ export const useAuth = create<AuthState>((set) => ({
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     set({ user: null, isAuthenticated: false, isLoading: false });
+  },
+
+  updateUser: (updates) => {
+    set((state) => {
+      if (!state.user) return state;
+      const updated = { ...state.user, ...updates };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return { user: updated };
+    });
   },
 
   loadFromStorage: () => {

@@ -1,0 +1,68 @@
+.cycle-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .cycle-selector-label {
+    font-size: 0.85rem;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+  
+  .cycle-selector-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    
+    .arrow-btn {
+      background: transparent;
+      border: none;
+      color: #FF8A00;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      padding: 0;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+      line-height: 1;
+      font-family: Arial, sans-serif;
+      
+      &:hover {
+        color: #ffaa33;
+        transform: scale(1.2);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+    
+    .cycle-selector-value {
+      flex: 1;
+      min-width: 0;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+  }
+}
+
+// World settings specific styling
+.world-setting-selector {
+  width: 100%;
+  padding: 0 0.5rem;
+}

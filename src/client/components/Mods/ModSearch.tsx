@@ -17,15 +17,17 @@ interface Props {
   modInfoCache: Record<string, any>;
   onAddMod: (workshopId: string) => void;
   isOwner: boolean;
+  addButtonLabel?: string;
 }
 
-export default function ModSearch({ 
-  isOpen, 
-  onClose, 
-  installedMods, 
-  modInfoCache, 
+export default function ModSearch({
+  isOpen,
+  onClose,
+  installedMods,
+  modInfoCache,
   onAddMod,
-  isOwner 
+  isOwner,
+  addButtonLabel,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -87,6 +89,7 @@ export default function ModSearch({
                   isInstalled={isInstalled}
                   onAdd={() => handleAdd(result.workshopId)}
                   isOwner={isOwner}
+                  addButtonLabel={addButtonLabel}
                 />
               );
             })}

@@ -79,9 +79,24 @@ export class Auth {
   }
 
   async deleteAllRefreshTokens(userId: number): Promise<void> {
-    await db.execute({ 
-      sql: 'DELETE FROM refresh_tokens WHERE user_id = ?', 
-      args: [userId] 
+    await db.execute({
+      sql: 'DELETE FROM refresh_tokens WHERE user_id = ?',
+      args: [userId]
+    });
+  }
+
+  async findUserById(userId: number): Promise<User | null> {
+    const result = await db.execute({
+      sql: 'SELECT * FROM users WHERE id = ?',
+      args: [userId],
+    });
+    return result.rows.length > 0 ? result.rows[0] as User : null;
+  }
+
+  async updatePasswordAndRole(userId: number, passwordHash: string, username: string): Promise<void> {
+    await db.execute({
+      sql: 'UPDATE users SET password_hash = ?, role = ?, username = ? WHERE id = ?',
+      args: [passwordHash, 'user', username, userId],
     });
   }
 }

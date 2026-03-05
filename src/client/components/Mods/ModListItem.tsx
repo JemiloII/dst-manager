@@ -13,6 +13,7 @@ interface ModListItemProps {
   onRemove?: () => void;
   onAdd?: () => void;
   isOwner?: boolean;
+  addButtonLabel?: string;
 }
 
 function parseBBCode(text: string): string {
@@ -50,6 +51,7 @@ export default function ModListItem({
   onRemove,
   onAdd,
   isOwner = true,
+  addButtonLabel = 'Add Mod',
 }: ModListItemProps) {
   return (
     <div className="mod-item">
@@ -113,11 +115,11 @@ export default function ModListItem({
               </button>
             </>
           ) : (
-            <button 
+            <button
               onClick={onAdd}
               className="btn btn-primary mod-btn"
             >
-              Add Mod
+              {addButtonLabel}
             </button>
           )}
         </div>

@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api';
-import { useAuth } from '../stores/Auth';
+import { api } from '@client/api';
+import { useAuth } from '@client/stores/Auth';
+import ModSearch from '@client/components/Mods/ModSearch';
+
+interface ModDetails {
+  title: string;
+  previewUrl: string;
+}
 
 interface Suggestion {
   id: number;
@@ -21,36 +27,55 @@ interface Props {
 export default function Suggestions({ serverId, isOwner }: Props) {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [workshopId, setWorkshopId] = useState('');
-  const [config, setConfig] = useState('');
+  const [modDetails, setModDetails] = useState<Record<string, ModDetails>>({});
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const fetchSuggestions = async () => {
+    const res = await api.get(`/suggestions/${serverId}`);
+    const data = await res.json();
+    const list: Suggestion[] = Array.isArray(data) ? data : [];
+    setSuggestions(list);
+    fetchModDetails(list);
+  };
+
+  const fetchModDetails = async (list: Suggestion[]) => {
+    const workshopIds = [...new Set(list.map((s) => s.workshop_id))];
+    const missing = workshopIds.filter((id) => !modDetails[id]);
+    if (missing.length === 0) return;
+
+    const results = await Promise.all(
+      missing.map(async (workshopId) => {
+        try {
+          const res = await api.get(`/mods/details/${workshopId}`);
+          const details = await res.json();
+          return { workshopId, details };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const newDetails: Record<string, ModDetails> = {};
+    for (const r of results) {
+      if (r) newDetails[r.workshopId] = r.details;
+    }
+
+    if (Object.keys(newDetails).length > 0) {
+      setModDetails((prev) => ({ ...prev, ...newDetails }));
+    }
+  };
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      const res = await api.get(`/suggestions/${serverId}`);
-      const data = await res.json();
-      setSuggestions(Array.isArray(data) ? data : []);
-    };
     fetchSuggestions();
   }, [serverId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSuggestMod = async (workshopId: string) => {
     setError('');
-
-    let parsedConfig = {};
-    if (config.trim()) {
-      try {
-        parsedConfig = JSON.parse(config);
-      } catch {
-        setError('Invalid JSON config');
-        return;
-      }
-    }
-
     const res = await api.post(`/suggestions/${serverId}`, {
       workshopId,
-      suggestedConfig: parsedConfig,
+      suggestedConfig: {},
     });
 
     if (!res.ok) {
@@ -59,81 +84,109 @@ export default function Suggestions({ serverId, isOwner }: Props) {
       return;
     }
 
-    setWorkshopId('');
-    setConfig('');
-
-    const updated = await api.get(`/suggestions/${serverId}`);
-    setSuggestions(await updated.json());
+    setSuccess('Mod suggested!');
+    setTimeout(() => setSuccess(''), 3000);
+    fetchSuggestions();
   };
 
   const handleAction = async (id: number, action: 'approve' | 'deny') => {
-    await api.put(`/suggestions/${id}/${action}`);
-    const updated = await api.get(`/suggestions/${serverId}`);
-    setSuggestions(await updated.json());
+    setError('');
+    const res = await api.put(`/suggestions/${id}/${action}`);
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error);
+      return;
+    }
+
+    if (action === 'approve') {
+      setSuccess('Mod approved and installed!');
+    } else {
+      setSuccess('Suggestion denied.');
+    }
+    setTimeout(() => setSuccess(''), 3000);
+    fetchSuggestions();
+  };
+
+  const canSuggest = !isOwner;
+
+  const statusClass = (status: string) => {
+    if (status === 'approved') return 'running';
+    if (status === 'denied') return 'stopped';
+    return 'starting';
   };
 
   return (
     <>
-      {user?.role === 'guest' && (
-        <div className="card">
-          <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>Suggest a Mod</h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Workshop ID</label>
-              <input
-                value={workshopId}
-                onChange={(e) => setWorkshopId(e.target.value)}
-                placeholder="e.g. 378160973"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Config (optional JSON)</label>
-              <textarea
-                value={config}
-                onChange={(e) => setConfig(e.target.value)}
-                rows={3}
-                placeholder='{"option": "value"}'
-              />
-            </div>
-            {error && <p className="error-message">{error}</p>}
-            <button type="submit">Submit Suggestion</button>
-          </form>
-        </div>
-      )}
-
       <div className="card">
-        <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>Mod Suggestions</h3>
+        <div className="suggestions-header">
+          <h3>Mod Suggestions ({suggestions.length})</h3>
+          {canSuggest && (
+            <button onClick={() => setShowSearchModal(true)} className="btn btn-primary">
+              Suggest a Mod
+              <img src="/images/button_icons/workshop_filter.png" alt="" />
+            </button>
+          )}
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+        {success && <p className="success-message">{success}</p>}
+
         {suggestions.length === 0 ? (
-          <p style={{ color: '#aaa' }}>No suggestions yet.</p>
+          <p className="empty-state">No suggestions yet.</p>
         ) : (
-          suggestions.map((s) => (
-            <div key={s.id} className="suggestion-card">
-              <div className="suggestion-info">
-                <strong style={{ color: '#fff' }}>workshop-{s.workshop_id}</strong>
-                <br />
-                <small style={{ color: '#aaa' }}>
-                  By {s.suggested_by} &middot; {new Date(s.created_at).toLocaleDateString()}
-                </small>
-                <br />
-                <span className={`status-badge ${s.status === 'approved' ? 'running' : s.status === 'denied' ? 'stopped' : 'starting'}`}>
-                  {s.status}
-                </span>
-              </div>
-              {isOwner && s.status === 'pending' && (
-                <div className="suggestion-actions">
-                  <button onClick={() => handleAction(s.id, 'approve')} style={{ background: '#28a745', fontSize: '0.85rem' }}>
-                    Approve
-                  </button>
-                  <button onClick={() => handleAction(s.id, 'deny')} style={{ background: '#dc3545', fontSize: '0.85rem' }}>
-                    Deny
-                  </button>
+          suggestions.map((s) => {
+            const info = modDetails[s.workshop_id];
+            return (
+              <div key={s.id} className="suggestion-item">
+                {info?.previewUrl ? (
+                  <img src={info.previewUrl} alt="" className="suggestion-thumbnail" />
+                ) : (
+                  <div className="suggestion-thumbnail-placeholder" />
+                )}
+                <div className="suggestion-info">
+                  <div className="suggestion-title">
+                    {info?.title || `Workshop-${s.workshop_id}`}
+                  </div>
+                  <div className="suggestion-meta">
+                    by {s.suggested_by} &middot; {new Date(s.created_at).toLocaleDateString()}
+                  </div>
+                  <span className={`status-badge ${statusClass(s.status)}`}>
+                    {s.status}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))
+                {isOwner && s.status === 'pending' && (
+                  <div className="suggestion-actions">
+                    <button
+                      onClick={() => handleAction(s.id, 'approve')}
+                      className="icon-btn"
+                      title="Approve"
+                    >
+                      <img src="/images/button_icons/enabled_filter.png" alt="Approve" />
+                    </button>
+                    <button
+                      onClick={() => handleAction(s.id, 'deny')}
+                      className="icon-btn"
+                      title="Deny"
+                    >
+                      <img src="/images/button_icons/delete.png" alt="Deny" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
+
+      <ModSearch
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
+        installedMods={{}}
+        modInfoCache={{}}
+        onAddMod={handleSuggestMod}
+        isOwner={true}
+        addButtonLabel="Suggest"
+      />
     </>
   );
 }

@@ -76,6 +76,7 @@ export default function Dashboard() {
       ) : (
         servers.map((server) => {
           const playerInfo = players[server.id];
+          const canControl = server.user_id === user?.id || user?.role === 'admin';
           return (
             <Link key={server.id} to={`/servers/${server.share_code}`} className="server-card">
               <div className="server-card-icon">
@@ -100,7 +101,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="server-actions">
-                {user?.role !== 'guest' && (
+                {canControl && (
                   <>
                     {server.status === 'stopped' ? (
                       <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStart(server.share_code); }} title="Start">

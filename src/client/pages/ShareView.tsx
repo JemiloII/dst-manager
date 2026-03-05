@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
+import PasswordInput from '../components/PasswordInput';
 
 interface SharedServer {
   id: number;
@@ -14,8 +15,11 @@ interface SharedServer {
   share_code: string;
 }
 
-function GuestLogin({ shareCode, serverId }: { shareCode: string; serverId: number }) {
+function GuestLogin({ shareCode }: { shareCode: string }) {
   const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [createAccount, setCreateAccount] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -26,47 +30,118 @@ function GuestLogin({ shareCode, serverId }: { shareCode: string; serverId: numb
     setError('');
     setLoading(true);
 
+    const body: Record<string, string> = { displayName, shareCode };
+    if (createAccount) {
+      if (!username || !password) {
+        setError('Username and password required for account creation');
+        setLoading(false);
+        return;
+      }
+      body.username = username;
+      body.password = password;
+    }
+
     const res = await fetch('/api/auth/guest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ displayName, shareCode }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
     setLoading(false);
-    
+
     if (!res.ok) {
       setError(data.error);
       return;
     }
 
     login({ ...data.user, displayName }, data.accessToken, data.refreshToken);
-    navigate(`/servers/${serverId}`);
+    navigate(`/servers/${shareCode}`);
   };
 
   return (
-    <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1rem' }}>
-      <h4 style={{ color: '#FF8A00', marginBottom: '0.5rem' }}>Join as Guest</h4>
-      <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '1rem' }}>
-        Enter a display name to suggest mods for this server
-      </p>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
+    <div className="guest-login">
+      <h4 className="guest-login-title">Join as Guest</h4>
+      <p className="guest-login-desc">Enter a display name to suggest mods for this server</p>
+      <form onSubmit={handleSubmit} className="guest-login-form">
         <input
           type="text"
           placeholder="Your name"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           required
-          style={{ flex: 1 }}
         />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Joining...' : 'Join'}
+
+        <label className="guest-account-toggle">
+          <input
+            type="checkbox"
+            checked={createAccount}
+            onChange={(e) => setCreateAccount(e.target.checked)}
+          />
+          Create an account (optional)
+        </label>
+
+        {createAccount && (
+          <div className="guest-account-fields">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <PasswordInput
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} className="btn btn-primary btn-full">
+          {loading ? 'Joining...' : createAccount ? 'Create Account & Join' : 'Join'}
         </button>
       </form>
-      {error && <p style={{ color: '#f44', fontSize: '0.85rem', marginTop: '0.5rem' }}>{error}</p>}
-      <p style={{ fontSize: '0.7rem', color: '#555', marginTop: '0.5rem' }}>
+      {error && <p className="error-message">{error}</p>}
+      <p className="guest-login-terms">
         By joining, you agree to our <Link to="/terms" target="_blank">Terms</Link>. Users must be 13+.
       </p>
+    </div>
+  );
+}
+
+function JoinButton({ shareCode }: { shareCode: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleJoin = async () => {
+    setLoading(true);
+    setError('');
+    const res = await api.post(`/servers/${shareCode}/join`);
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      // If already owner or member, just navigate
+      if (res.status === 400) {
+        navigate(`/servers/${shareCode}`);
+        return;
+      }
+      setError(data.error);
+      return;
+    }
+    navigate(`/servers/${shareCode}`);
+  };
+
+  return (
+    <div className="share-view-actions">
+      <button onClick={handleJoin} disabled={loading} className="btn btn-primary">
+        {loading ? 'Joining...' : 'Join Server'}
+      </button>
+      <Link to={`/servers/${shareCode}`} className="btn btn-secondary">
+        View Full Details
+      </Link>
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }
@@ -91,10 +166,12 @@ export default function ShareView() {
 
   if (notFound) {
     return (
-      <div className="card" style={{ textAlign: 'center', marginTop: '4rem' }}>
-        <h2 style={{ color: '#fff' }}>Server Not Found</h2>
-        <p style={{ color: '#aaa' }}>This share link is invalid or expired.</p>
-        <Link to="/">Go Home</Link>
+      <div className="share-view">
+        <div className="card share-view-not-found">
+          <h2>Server Not Found</h2>
+          <p>This share link is invalid or expired.</p>
+          <Link to="/">Go Home</Link>
+        </div>
       </div>
     );
   }
@@ -104,12 +181,12 @@ export default function ShareView() {
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '2rem auto' }}>
+    <div className="share-view">
       <div className="card">
-        <h2 style={{ color: '#fff', margin: '0 0 0.5rem' }}>{server.name}</h2>
+        <h2 className="share-view-title">{server.name}</h2>
         <span className={`status-badge ${server.status}`}>{server.status}</span>
 
-        <div style={{ marginTop: '1rem', color: '#ccc' }}>
+        <div className="share-view-details">
           <p><strong>Description:</strong> {server.description || 'None'}</p>
           <p><strong>Game Mode:</strong> {server.game_mode}</p>
           <p><strong>Max Players:</strong> {server.max_players}</p>
@@ -117,13 +194,9 @@ export default function ShareView() {
         </div>
 
         {user ? (
-          <div style={{ marginTop: '1rem' }}>
-            <Link to={`/servers/${server.id}`}>
-              <button>View Full Details</button>
-            </Link>
-          </div>
+          <JoinButton shareCode={code!} />
         ) : (
-          <GuestLogin shareCode={code!} serverId={server.id} />
+          <GuestLogin shareCode={code!} />
         )}
       </div>
     </div>

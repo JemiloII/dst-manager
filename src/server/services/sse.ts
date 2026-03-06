@@ -1,5 +1,4 @@
 import { Context } from 'hono';
-import { streamSSE } from 'hono/streaming';
 import { Monitor } from './monitor.js';
 
 interface SSEClient {
@@ -14,7 +13,7 @@ export function sseEmit(serverId: number, event: { type: string; [key: string]: 
   for (const client of clients) {
     if (client.serverId === null || client.serverId === serverId) {
       try {
-        const data = `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
+        const data = `event: ${event.type}\ndata: ${JSON.stringify({ ...event, serverId })}\n\n`;
         client.controller.enqueue(new TextEncoder().encode(data));
       } catch {
         clients.delete(client);

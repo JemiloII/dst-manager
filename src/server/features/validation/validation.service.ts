@@ -1,21 +1,21 @@
-import { spawn, ChildProcess } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import ValidationQueries from './validation.queries.js';
 import Auth from '@server/features/auth/auth.queries.js';
 import Users from '@server/features/users/users.queries.js';
+import Servers from '@server/features/servers/servers.queries.js';
+import { processService } from '@server/features/servers/process.service.js';
+import { extractKuid, createServerFiles, getClusterPath } from '@server/services/dst.js';
 
 const {
-  DST_INSTALL_DIR = '',
-  SERVERS_DIR = './servers',
   VALIDATION_CLUSTER_TOKEN = '',
+  DST_INSTALL_DIR = '',
 } = process.env;
 
-const VALIDATION_DIR = '__validation__';
+const VALIDATION_SHARE_CODE = 'validation';
 const VALIDATION_SERVER_NAME = 'DST Account Validation';
 const LOG_POLL_INTERVAL = 1500;
-const WATCHDOG_RESTART_DELAY = 30000;
 const CODE_EXPIRY_MINUTES = 10;
 const MAX_CODES_PER_HOUR = 3;
 
@@ -23,18 +23,19 @@ const MAX_CODES_PER_HOUR = 3;
 const CHAT_PATTERN = /\[Say\]\s+\(([^)]+)\)\s+([^:]+):\s+(.+)/;
 
 class ValidationService {
-  private process: ChildProcess | null = null;
-  private lastLogPosition = 0;
   private logWatcherInterval: ReturnType<typeof setInterval> | null = null;
-  private watchdogTimeout: ReturnType<typeof setTimeout> | null = null;
+  private lastLogPosition = 0;
   private enabled = false;
+  private serverId: number | null = null;
 
   isEnabled(): boolean {
     return this.enabled;
   }
 
-  isRunning(): boolean {
-    return this.process !== null;
+  async isRunning(): Promise<boolean> {
+    if (!this.serverId) return false;
+    const server = await Servers.findById(this.serverId);
+    return server?.status === 'running' || server?.status === 'starting';
   }
 
   getServerName(): string {
@@ -77,62 +78,43 @@ class ValidationService {
     return { isValidated: !!user.is_validated, ign: user.ign || null };
   }
 
-  async setupValidationServer(): Promise<void> {
-    const clusterDir = path.join(SERVERS_DIR, VALIDATION_DIR);
-    const masterDir = path.join(clusterDir, 'Master');
+  private async ensureDbEntry(): Promise<number> {
+    const existing = await Servers.findByShareCode(VALIDATION_SHARE_CODE);
+    if (existing) return existing.id;
 
-    await fs.mkdir(masterDir, { recursive: true });
+    const adminUser = await Auth.findUserByUsername(process.env.ADMIN_USER || '');
+    if (!adminUser) throw new Error('Admin user not found for validation server');
 
-    // Write cluster token
-    await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), VALIDATION_CLUSTER_TOKEN.trim());
+    const kuid = extractKuid(VALIDATION_CLUSTER_TOKEN) || '';
+    const maxOffset = await Servers.getMaxPortOffset();
+    const portOffset = maxOffset + 1;
 
-    // Write cluster.ini — lightweight single-shard validation server
-    const clusterIni = [
-      '[GAMEPLAY]',
-      'game_mode = survival',
-      'max_players = 6',
-      'pvp = false',
-      '',
-      '[NETWORK]',
-      `cluster_name = ${VALIDATION_SERVER_NAME}`,
-      'cluster_description = Type your validation code in chat to verify your account.',
-      'cluster_intention = cooperative',
-      'cluster_password = ',
-      'lan_only_cluster = false',
-      'offline_cluster = false',
-      '',
-      '[MISC]',
-      'console_enabled = true',
-      '',
-      '[SHARD]',
-      'shard_enabled = false',
-      'bind_ip = 127.0.0.1',
-      'master_ip = 127.0.0.1',
-      'master_port = 10997',
-      'cluster_key = dst-validation',
-    ].join('\n');
-    await fs.writeFile(path.join(clusterDir, 'cluster.ini'), clusterIni);
+    await createServerFiles(kuid, VALIDATION_SHARE_CODE, VALIDATION_CLUSTER_TOKEN, portOffset, {
+      name: VALIDATION_SERVER_NAME,
+      description: 'Type your validation code in chat to verify your account.',
+      gameMode: 'endless',
+      serverIntention: 'cooperative',
+      maxPlayers: 64,
+      pvp: false,
+      password: '',
+    });
 
-    // Write Master/server.ini
-    const serverIni = [
-      '[NETWORK]',
-      'server_port = 27015',
-      '',
-      '[STEAM]',
-      'master_server_port = 27016',
-      'authentication_port = 8765',
-    ].join('\n');
-    await fs.writeFile(path.join(masterDir, 'server.ini'), serverIni);
+    const serverId = await Servers.create({
+      userId: adminUser.id,
+      name: VALIDATION_SERVER_NAME,
+      description: 'Type your validation code in chat to verify your account.',
+      kuid,
+      shareCode: VALIDATION_SHARE_CODE,
+      clusterToken: VALIDATION_CLUSTER_TOKEN,
+      maxPlayers: 64,
+      gameMode: 'endless',
+      serverIntention: 'cooperative',
+      pvp: false,
+      password: '',
+      portOffset,
+    });
 
-    // Create agreements
-    const agreementsDir = path.join(clusterDir, 'Agreements', 'DoNotStarveTogether');
-    await fs.mkdir(agreementsDir, { recursive: true });
-    const agreementsFile = path.join(agreementsDir, 'agreements.ini');
-    try {
-      await fs.access(agreementsFile);
-    } catch {
-      await fs.writeFile(agreementsFile, '[agreements]\nprivacy_policy=accepted\neula=accepted\n');
-    }
+    return serverId;
   }
 
   async startValidationServer(): Promise<void> {
@@ -151,50 +133,21 @@ class ValidationService {
     this.enabled = true;
 
     try {
-      await this.setupValidationServer();
+      this.serverId = await this.ensureDbEntry();
     } catch (err) {
-      console.error('[Validation] Failed to set up validation server files:', err);
+      console.error('[Validation] Failed to set up validation server:', err);
       return;
     }
 
-    await this.spawnProcess();
-  }
+    const server = await Servers.findById(this.serverId);
+    if (!server) return;
 
-  private async spawnProcess(): Promise<void> {
-    if (this.process) return;
-
-    const clusterDir = path.join(SERVERS_DIR, VALIDATION_DIR);
-    const binary = path.join(DST_INSTALL_DIR, 'bin64', 'dontstarve_dedicated_server_nullrenderer_x64');
-
-    console.log('[Validation] Starting validation server...');
-
-    const proc = spawn(binary, [
-      '-console',
-      '-persistent_storage_root', clusterDir,
-      '-conf_dir', '.',
-      '-cluster', '.',
-      '-shard', 'Master',
-    ], {
-      cwd: path.join(DST_INSTALL_DIR, 'bin64'),
-      stdio: 'ignore',
-      detached: true,
-    });
-
-    proc.unref();
-    this.process = proc;
-    this.lastLogPosition = 0;
-
-    proc.on('exit', (code) => {
-      console.log(`[Validation] Validation server exited (code ${code})`);
-      this.process = null;
-      this.stopLogWatcher();
-
-      // Watchdog: auto-restart after delay
-      if (this.enabled) {
-        console.log(`[Validation] Will restart in ${WATCHDOG_RESTART_DELAY / 1000}s...`);
-        this.watchdogTimeout = setTimeout(() => this.spawnProcess(), WATCHDOG_RESTART_DELAY);
-      }
-    });
+    try {
+      await processService.startServer(this.serverId, server.kuid, VALIDATION_SHARE_CODE);
+      console.log('[Validation] Validation server started');
+    } catch (err) {
+      console.error('[Validation] Failed to start validation server:', err);
+    }
 
     this.startLogWatcher();
   }
@@ -202,7 +155,7 @@ class ValidationService {
   private startLogWatcher(): void {
     if (this.logWatcherInterval) return;
 
-    const logPath = path.join(SERVERS_DIR, VALIDATION_DIR, 'Master', 'server_chat_log.txt');
+    const logPath = path.join(getClusterPath(VALIDATION_SHARE_CODE), 'Master', 'server_chat_log.txt');
 
     this.logWatcherInterval = setInterval(async () => {
       try {
@@ -257,23 +210,15 @@ class ValidationService {
   }
 
   async stop(): Promise<void> {
-    this.enabled = false;
-
-    if (this.watchdogTimeout) {
-      clearTimeout(this.watchdogTimeout);
-      this.watchdogTimeout = null;
-    }
-
     this.stopLogWatcher();
-
-    if (this.process) {
+    if (this.serverId) {
       try {
-        this.process.kill('SIGTERM');
+        await processService.stopServer(this.serverId);
       } catch {
-        // Process may already be dead
+        // May not be running
       }
-      this.process = null;
     }
+    this.enabled = false;
   }
 }
 

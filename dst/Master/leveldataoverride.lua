@@ -1,11 +1,11 @@
 return {
-  desc="Hosted By Shibiko",
+  desc="The standard Don't Starve experience.",
   hideminimap=false,
-  id="ENDLESS",
+  id="SURVIVAL_TOGETHER",
   location="forest",
   max_playlist_position=999,
   min_playlist_position=0,
-  name="Endless",
+  name="Survival",
   numrandom_set_pieces=4,
   override_level_string=false,
   overrides={
@@ -15,7 +15,7 @@ return {
     autumn="default",
     balatro="default",
     bananabush_portalrate="default",
-    basicresource_regrowth="always",
+    basicresource_regrowth="none",
     bats_setting="default",
     bearger="default",
     beefalo="default",
@@ -60,7 +60,7 @@ return {
     frogs="default",
     fruitfly="default",
     ghostenabled="always",
-    ghostsanitydrain="none",
+    ghostsanitydrain="always",
     gnarwail="default",
     goosemoose="default",
     grass="default",
@@ -140,7 +140,7 @@ return {
     pirateraids="default",
     ponds="default",
     portal_spawnrate="default",
-    portalresurection="always",
+    portalresurection="none",
     powder_monkey_portalrate="default",
     prefabswaps_start="default",
     rabbits="default",
@@ -148,7 +148,7 @@ return {
     reeds="default",
     reeds_regrowth="default",
     regrowth="default",
-    resettime="none",
+    resettime="default",
     rifts_enabled="default",
     rifts_frequency="default",
     roads="default",
@@ -206,7 +206,7 @@ return {
     year_of_the_snake="default",
     year_of_the_varg="default" 
   },
-  playstyle="endless",
+  playstyle="survival",
   random_set_pieces={
     "Sculptures_2",
     "Sculptures_3",
@@ -230,14 +230,12 @@ return {
   },
   required_prefabs={ "multiplayer_portal" },
   required_setpieces={ "Sculptures_1", "Maxwell5" },
-  settings_desc="A never-ending Don't Starve sandbox.\
-Resurrection is always available via the Florid Postern.",
-  settings_id="ENDLESS",
-  settings_name="Endless",
+  settings_desc="The standard Don't Starve experience.",
+  settings_id="SURVIVAL_TOGETHER",
+  settings_name="Survival",
   substitutes={  },
   version=4,
-  worldgen_desc="A never-ending Don't Starve sandbox.\
-Resurrection is always available via the Florid Postern.",
-  worldgen_id="ENDLESS",
-  worldgen_name="Endless" 
+  worldgen_desc="The standard Don't Starve experience.",
+  worldgen_id="SURVIVAL_TOGETHER",
+  worldgen_name="Survival" 
 }

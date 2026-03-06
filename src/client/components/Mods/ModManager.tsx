@@ -5,6 +5,7 @@ import ConfirmModal from '../ConfirmModal';
 import ModListItem from './ModListItem';
 import ModSearch from './ModSearch';
 import ModConfig from './ModConfig';
+import ModCopy from './ModCopy';
 import { ModConfig as ModConfigType, ModInfo } from './types';
 
 interface Props {
@@ -21,23 +22,34 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
   const [success, setSuccess] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<{ key: string; title: string } | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [configureModal, setConfigureModal] = useState<{ 
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [hasConfigMap, setHasConfigMap] = useState<Record<string, boolean>>({});
+  const [configureModal, setConfigureModal] = useState<{
     key: string; 
     title: string; 
     options: Record<string, unknown>;
     currentValues: Record<string, unknown>;
   } | null>(null);
 
+  const fetchHasConfig = async (workshopIds: string[]) => {
+    if (workshopIds.length === 0) return;
+    try {
+      const res = await api.post('/mods/has-config', { workshopIds });
+      const data = await res.json();
+      setHasConfigMap(prev => ({ ...prev, ...data }));
+    } catch { /* ignore */ }
+  };
+
   useEffect(() => {
     const fetchMods = async () => {
       const res = await api.get(`/mods/server/${serverId}`);
       const data = await res.json();
       setMods(data);
-      
-      // Fetch mod details for all installed mods in parallel
+
       const modKeys = Object.keys(data);
       const workshopIds = modKeys.map(key => key.replace('workshop-', ''));
-      
+
+      // Fetch details and has-config in parallel
       const detailPromises = workshopIds
         .filter(workshopId => !modInfoCache[workshopId])
         .map(async (workshopId) => {
@@ -49,15 +61,19 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             return null;
           }
         });
-      
-      const results = await Promise.all(detailPromises);
+
+      const [results] = await Promise.all([
+        Promise.all(detailPromises),
+        fetchHasConfig(workshopIds),
+      ]);
+
       const newCache: Record<string, ModInfo> = {};
       results.forEach(result => {
         if (result) {
           newCache[result.workshopId] = result.details;
         }
       });
-      
+
       if (Object.keys(newCache).length > 0) {
         setModInfoCache(prev => ({ ...prev, ...newCache }));
       }
@@ -86,22 +102,27 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     }
   };
 
-  const addMod = async (workshopId: string) => {
+  const addMod = async (workshopId: string, info?: ModInfo) => {
     const key = `workshop-${workshopId}`;
     if (key in mods) {
       setError('Mod already installed');
       return;
     }
 
+    // Cache mod info immediately so it shows name/image right away
+    if (info && !modInfoCache[workshopId]) {
+      setModInfoCache(prev => ({ ...prev, [workshopId]: info }));
+    }
+
     const newMod: ModConfigType = {
       enabled: true,
       configuration_options: {}
     };
-    
+
     const updatedMods = { ...mods, [key]: newMod };
     setMods(updatedMods);
 
-    // Auto-save
+    // Auto-save (also triggers mod download on server)
     const res = await api.put(`/mods/server/${serverId}`, updatedMods);
     if (!res.ok) {
       setError('Failed to add mod');
@@ -213,7 +234,39 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     }
   };
 
-  const filteredMods = Object.entries(mods).filter(([key, mod]) => {
+  const handleCopyMods = async (copiedMods: Record<string, ModConfigType>) => {
+    const merged = { ...mods, ...copiedMods };
+    setMods(merged);
+
+    const res = await api.put(`/mods/server/${serverId}`, merged);
+    if (!res.ok) {
+      setError('Failed to copy mods');
+      setMods(mods);
+    } else {
+      // Fetch details for any new mods
+      const newKeys = Object.keys(copiedMods).filter((k) => !(k in mods));
+      const promises = newKeys.map(async (key) => {
+        const workshopId = key.replace('workshop-', '');
+        if (modInfoCache[workshopId]) return null;
+        try {
+          const r = await api.get(`/mods/details/${workshopId}`);
+          return { workshopId, details: await r.json() };
+        } catch { return null; }
+      });
+      const results = await Promise.all(promises);
+      const newCache: Record<string, ModInfo> = {};
+      for (const r of results) {
+        if (r) newCache[r.workshopId] = r.details;
+      }
+      if (Object.keys(newCache).length > 0) {
+        setModInfoCache((prev) => ({ ...prev, ...newCache }));
+      }
+      setSuccess('Mods copied successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    }
+  };
+
+  const filteredMods = Object.entries(mods).filter(([key]) => {
     if (!installedModFilter) return true;
     const workshopId = key.replace('workshop-', '');
     const info = modInfoCache[workshopId];
@@ -234,10 +287,15 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             Installed Mods ({Object.keys(mods).length})
           </h3>
           {isOwner && (
-            <button onClick={() => setShowSearchModal(true)} className="btn btn-primary">
-              Search Workshop
-              <img src="/images/button_icons/workshop_filter.png" alt="" />
-            </button>
+            <div className="mod-header-actions">
+              <button onClick={() => setShowCopyModal(true)} className="btn btn-secondary">
+                Copy From Server
+              </button>
+              <button onClick={() => setShowSearchModal(true)} className="btn btn-primary">
+                Search Workshop
+                <img src="/images/button_icons/workshop_filter.png" alt="" />
+              </button>
+            </div>
           )}
         </div>
         
@@ -271,7 +329,7 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
                 title={info?.title || key}
                 description={info?.description || ''}
                 previewUrl={info?.previewUrl || ''}
-                configOptions={Object.keys(mod.configuration_options).length}
+                hasConfig={hasConfigMap[workshopId]}
                 isInstalled={true}
                 isEnabled={mod.enabled}
                 onToggle={() => toggleMod(key)}
@@ -307,6 +365,14 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
         />
       )}
       
+      {/* Copy From Server Modal */}
+      <ModCopy
+        isOpen={showCopyModal}
+        onClose={() => setShowCopyModal(false)}
+        currentServerId={serverId}
+        onCopy={handleCopyMods}
+      />
+
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={deleteConfirm !== null}

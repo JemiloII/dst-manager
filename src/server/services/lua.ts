@@ -48,7 +48,8 @@ export function parseLuaOverrides(lua: string): Record<string, string | boolean 
 export function generateLevelDataOverride(
   preset: string,
   location: string,
-  overrides: Record<string, string | boolean | number>
+  overrides: Record<string, string | boolean | number>,
+  playstyle?: string
 ): string {
   const lines: string[] = ['return {'];
   lines.push(`  desc="",`);
@@ -75,7 +76,7 @@ export function generateLevelDataOverride(
   }
 
   lines.push(`  },`);
-  lines.push(`  playstyle="${preset.toLowerCase()}",`);
+  lines.push(`  playstyle="${playstyle || preset.toLowerCase()}",`);
   lines.push(`  version=4,`);
   lines.push(`}`);
 

@@ -1,0 +1,13 @@
+@use '../styles/variables' as *;
+
+.auth-container {
+  .label-with-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tooltip-trigger {
+    margin-bottom: 0;
+  }
+}

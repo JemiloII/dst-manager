@@ -37,6 +37,27 @@ export default function Dashboard() {
     }
   }, [fetchServers, user?.role]);
 
+  // SSE for real-time status updates
+  const { updateStatus, updatePlayers } = useServers();
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    const es = new EventSource(`/api/servers/events?token=${token}`);
+
+    es.addEventListener('status', (e) => {
+      const data = JSON.parse(e.data);
+      updateStatus(data.serverId, data.data);
+    });
+
+    es.addEventListener('players', (e) => {
+      const data = JSON.parse(e.data);
+      updatePlayers(data.serverId, data.data);
+    });
+
+    return () => es.close();
+  }, [updateStatus, updatePlayers]);
+
   useEffect(() => {
     if (!prefsLoaded) fetchPreferences();
   }, [prefsLoaded, fetchPreferences]);

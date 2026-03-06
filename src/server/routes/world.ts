@@ -5,6 +5,7 @@ import { authMiddleware, requireRole, JwtPayload } from '../middleware/auth.js';
 import db from '../db/schema.js';
 import { getClusterPath } from '../services/dst.js';
 import { parseLuaOverrides, generateLevelDataOverride } from '../services/lua.js';
+import { getPresetForShard } from '../services/presets.js';
 
 const world = new Hono();
 
@@ -78,9 +79,11 @@ world.put('/:code/:shard', requireRole('admin', 'user'), async (c) => {
     finalOverrides = overrides || {};
   }
 
+  const gameMode = server.game_mode as string;
   const location = shard === 'Caves' ? 'cave' : 'forest';
-  const preset = shard === 'Caves' ? 'DST_CAVE' : 'ENDLESS';
-  const content = generateLevelDataOverride(preset, location, finalOverrides);
+  const preset = getPresetForShard(gameMode, shard);
+  const playstyle = shard === 'Caves' ? undefined : gameMode;
+  const content = generateLevelDataOverride(preset, location, finalOverrides, playstyle);
 
   const clusterDir = getClusterPath(server.share_code as string);
   await fs.writeFile(path.join(clusterDir, shard, 'leveldataoverride.lua'), content);

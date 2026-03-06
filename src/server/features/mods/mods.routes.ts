@@ -39,6 +39,13 @@ mods.get('/config/:workshopId', async (c) => {
   return c.json(config);
 });
 
+mods.post('/has-config', async (c) => {
+  const { workshopIds } = await c.req.json<{ workshopIds: string[] }>();
+  if (!workshopIds?.length) return c.json({});
+  const result = await modService.batchHasConfig(workshopIds);
+  return c.json(result);
+});
+
 mods.get('/server/:serverId', async (c) => {
   const user = c.get('user');
   const serverId = c.req.param('serverId');
@@ -93,7 +100,11 @@ mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
     }
   }
 
-  await updateModsSetup(Array.from(allWorkshopIds));
+  const workshopIdArray = Array.from(allWorkshopIds);
+  await updateModsSetup(workshopIdArray);
+
+  // Download missing mods in background so config becomes available
+  modService.downloadMissingMods(workshopIdArray);
 
   return c.json({ success: true });
 });

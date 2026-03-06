@@ -40,12 +40,9 @@ function HomeOrDashboard() {
 }
 
 function App() {
-  const { loadFromStorage } = useAuth();
-
   useEffect(() => {
-    loadFromStorage();
     document.body.setAttribute('data-theme', 'dark');
-  }, [loadFromStorage]);
+  }, []);
 
   return (
     <BrowserRouter>

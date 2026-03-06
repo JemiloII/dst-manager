@@ -5,7 +5,7 @@ interface ModListItemProps {
   title: string;
   description: string;
   previewUrl: string;
-  configOptions?: number;
+  hasConfig?: boolean;
   isInstalled?: boolean;
   isEnabled?: boolean;
   onToggle?: () => void;
@@ -43,7 +43,7 @@ export default function ModListItem({
   title,
   description,
   previewUrl,
-  configOptions = 0,
+  hasConfig = false,
   isInstalled = false,
   isEnabled = false,
   onToggle,
@@ -92,7 +92,7 @@ export default function ModListItem({
               >
                 <img src="/images/button_icons/delete.png" alt="Remove" />
               </button>
-              {configOptions > 0 ? (
+              {hasConfig ? (
                 <button 
                   className="icon-btn"
                   title="Configure"

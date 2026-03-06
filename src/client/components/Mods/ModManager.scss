@@ -5,20 +5,64 @@
   margin-bottom: 0.75rem;
   flex-wrap: wrap;
   gap: 0.5rem;
-  
+
   h3 {
     color: #fff;
     margin: 0;
     display: flex;
     align-items: center;
   }
-  
+
   .mod-header-icon {
     width: 24px;
     height: 24px;
     vertical-align: middle;
     margin-right: 0.5rem;
   }
+}
+
+.mod-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.copy-mods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.copy-mods-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 138, 0, 0.15);
+    border-color: #FF8A00;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.copy-mods-name {
+  font-weight: 500;
+}
+
+.copy-mods-count {
+  color: #aaa;
+  font-size: 0.85rem;
 }
 
 .mod-config-grid {

@@ -2,6 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { renderIniTemplate } from '@server/utils/ini.js';
+import { generateLevelDataOverride } from '@server/services/lua.js';
+import { getPresetForShard, getPresetOverrides } from '@server/services/presets.js';
 
 const DST_TEMPLATE_DIR = './dst';
 
@@ -192,6 +194,24 @@ export async function createServerFiles(
 
   await writeClusterIni(shareCode, portOffset, config);
   await writeServerInis(shareCode, portOffset);
+  await writeLevelDataOverrides(shareCode, config.gameMode);
+}
+
+export async function writeLevelDataOverrides(shareCode: string, gameMode: string) {
+  const clusterDir = getClusterPath(shareCode);
+  const shards: Array<{ name: string; location: string }> = [
+    { name: 'Master', location: 'forest' },
+    { name: 'Caves', location: 'cave' },
+  ];
+
+  await Promise.all(shards.map(({ name, location }) => {
+    const shard = name as 'Master' | 'Caves';
+    const preset = getPresetForShard(gameMode, shard);
+    const overrides = shard === 'Caves' ? {} : getPresetOverrides(preset);
+    const playstyle = shard === 'Caves' ? undefined : gameMode;
+    const content = generateLevelDataOverride(preset, location, overrides, playstyle);
+    return fs.writeFile(path.join(clusterDir, name, 'leveldataoverride.lua'), content);
+  }));
 }
 
 export async function updateClusterIni(

@@ -2,20 +2,14 @@ import { useState } from 'react';
 import { api } from '../../api';
 import Modal from '../Modal';
 import ModListItem from './ModListItem';
-
-interface SearchResult {
-  workshopId: string;
-  title: string;
-  description: string;
-  previewUrl: string;
-}
+import { ModInfo, SearchResult } from './types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   installedMods: Record<string, any>;
   modInfoCache: Record<string, any>;
-  onAddMod: (workshopId: string) => void;
+  onAddMod: (workshopId: string, info: ModInfo) => void;
   isOwner: boolean;
   addButtonLabel?: string;
 }
@@ -48,8 +42,9 @@ export default function ModSearch({
     }
   };
 
-  const handleAdd = (workshopId: string) => {
-    onAddMod(workshopId);
+  const handleAdd = (result: SearchResult) => {
+    const info: ModInfo = { title: result.title, description: result.description, previewUrl: result.previewUrl };
+    onAddMod(result.workshopId, info);
     onClose();
   };
 
@@ -87,7 +82,7 @@ export default function ModSearch({
                   description={info.description}
                   previewUrl={info.previewUrl}
                   isInstalled={isInstalled}
-                  onAdd={() => handleAdd(result.workshopId)}
+                  onAdd={() => handleAdd(result)}
                   isOwner={isOwner}
                   addButtonLabel={addButtonLabel}
                 />

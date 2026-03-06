@@ -1,5 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { LuaFactory } from 'wasmoon';
 import unzipper from 'unzipper';
 import { getClusterPath } from '../../services/dst';
@@ -7,6 +9,7 @@ import { parseModOverrides } from '../../services/lua';
 import { ModConfig, WorkshopSearchResult } from './mods.types';
 import Mods from './mods.queries';
 
+const execAsync = promisify(exec);
 const { DST_WORKSHOP_DIR = '' } = process.env;
 
 // Detect if text contains Chinese characters
@@ -40,6 +43,40 @@ async function translateText(text: string): Promise<string> {
   return text;
 }
 
+async function batchGetDetails(workshopIds: string[]): Promise<Record<string, WorkshopSearchResult>> {
+  if (workshopIds.length === 0) return {};
+
+  const body = workshopIds
+    .map((id, i) => `publishedfileids[${i}]=${id}`)
+    .join('&');
+
+  const response = await fetch(
+    'https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `itemcount=${workshopIds.length}&${body}`
+    }
+  );
+
+  if (!response.ok) return {};
+
+  const data = await response.json();
+  const details = data.response?.publishedfiledetails || [];
+  const map: Record<string, WorkshopSearchResult> = {};
+  for (const d of details) {
+    if (d.publishedfileid) {
+      map[d.publishedfileid] = {
+        workshopId: d.publishedfileid,
+        title: d.title || `Workshop-${d.publishedfileid}`,
+        description: (d.description || '').slice(0, 200),
+        previewUrl: d.preview_url || ''
+      };
+    }
+  }
+  return map;
+}
+
 export async function searchWorkshop(query: string): Promise<WorkshopSearchResult[]> {
   const response = await fetch(
     `https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key=&search_text=${encodeURIComponent(query)}&appid=322330&return_metadata=true&numperpage=20&query_type=1`,
@@ -52,18 +89,22 @@ export async function searchWorkshop(query: string): Promise<WorkshopSearchResul
     );
     const html = await scrapeResponse.text();
 
-    const results: WorkshopSearchResult[] = [];
+    const scraped: { workshopId: string; title: string }[] = [];
     const itemPattern = /data-publishedfileid="(\d+)"[\s\S]*?<div class="workshopItemTitle ellipsis">([^<]+)<\/div>/g;
     let match;
     while ((match = itemPattern.exec(html)) !== null) {
-      results.push({
-        workshopId: match[1],
-        title: match[2].trim(),
-        description: '',
-        previewUrl: '',
-      });
+      scraped.push({ workshopId: match[1], title: match[2].trim() });
     }
-    return results;
+
+    // Batch fetch details to get preview URLs
+    const detailsMap = await batchGetDetails(scraped.map(s => s.workshopId));
+
+    return scraped.map(s => detailsMap[s.workshopId] || {
+      workshopId: s.workshopId,
+      title: s.title,
+      description: '',
+      previewUrl: '',
+    });
   }
 
   const data = await response.json();
@@ -77,31 +118,8 @@ export async function searchWorkshop(query: string): Promise<WorkshopSearchResul
 }
 
 export async function getWorkshopDetails(workshopId: string): Promise<WorkshopSearchResult> {
-  try {
-    const response = await fetch(
-      `https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `itemcount=1&publishedfileids[0]=${workshopId}`
-      }
-    );
-    
-    if (response.ok) {
-      const data = await response.json();
-      const details = data.response?.publishedfiledetails?.[0];
-      if (details) {
-        return {
-          workshopId: details.publishedfileid,
-          title: details.title || `Workshop-${workshopId}`,
-          description: details.description || '',
-          previewUrl: details.preview_url || ''
-        };
-      }
-    }
-  } catch {}
-  
-  return {
+  const map = await batchGetDetails([workshopId]);
+  return map[workshopId] || {
     workshopId,
     title: `Workshop-${workshopId}`,
     description: '',
@@ -197,6 +215,42 @@ export async function getModConfig(workshopId: string): Promise<ModConfig> {
   }
 }
 
+export async function hasConfigOptions(workshopId: string): Promise<boolean> {
+  const modId = workshopId.replace('workshop-', '');
+  const modPath = path.join(DST_WORKSHOP_DIR, modId);
+
+  let modinfoContent: string | null = null;
+
+  try {
+    try {
+      modinfoContent = await fs.readFile(path.join(modPath, 'modinfo.lua'), 'utf-8');
+    } catch {
+      const files = await fs.readdir(modPath);
+      const binFile = files.find(f => f.endsWith('.bin'));
+      if (binFile) {
+        const directory = await unzipper.Open.file(path.join(modPath, binFile));
+        const modinfoFile = directory.files.find(f => f.path === 'modinfo.lua');
+        if (modinfoFile) {
+          modinfoContent = (await modinfoFile.buffer()).toString('utf-8');
+        }
+      }
+    }
+    if (!modinfoContent) return false;
+    return /configuration_options\s*=/.test(modinfoContent);
+  } catch {
+    return false;
+  }
+}
+
+export async function batchHasConfig(workshopIds: string[]): Promise<Record<string, boolean>> {
+  const results = await Promise.all(
+    workshopIds.map(async (id) => ({ id, has: await hasConfigOptions(id) }))
+  );
+  const map: Record<string, boolean> = {};
+  for (const r of results) map[r.id] = r.has;
+  return map;
+}
+
 export async function getServerById(serverId: string) {
   return Mods.getServerById(serverId);
 }
@@ -219,7 +273,30 @@ export async function getServerModOverrides(shareCode: string) {
 
 export async function saveModOverrides(shareCode: string, content: string) {
   const clusterDir = getClusterPath(shareCode);
-  
+
   await fs.writeFile(path.join(clusterDir, 'Master', 'modoverrides.lua'), content);
   await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), content);
+}
+
+export async function downloadMissingMods(workshopIds: string[]): Promise<void> {
+  if (!DST_WORKSHOP_DIR || workshopIds.length === 0) return;
+
+  const missing: string[] = [];
+  for (const id of workshopIds) {
+    const modPath = path.join(DST_WORKSHOP_DIR, id);
+    const exists = await fs.access(modPath).then(() => true).catch(() => false);
+    if (!exists) missing.push(id);
+  }
+
+  if (missing.length === 0) return;
+
+  const downloadCmds = missing.map(id => `+workshop_download_item 322330 ${id}`).join(' ');
+  const cmd = `steamcmd +login anonymous ${downloadCmds} +quit`;
+
+  try {
+    await execAsync(cmd, { timeout: 120000 });
+    console.log(`Downloaded ${missing.length} mod(s): ${missing.join(', ')}`);
+  } catch (err) {
+    console.error('Failed to download mods via steamcmd:', err);
+  }
 }

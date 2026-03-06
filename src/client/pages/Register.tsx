@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
 import PasswordInput from '../components/PasswordInput';
+import './Register.scss';
 
 export default function Register() {
   const [username, setUsername] = useState('');

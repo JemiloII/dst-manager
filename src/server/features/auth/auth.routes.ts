@@ -44,7 +44,7 @@ auth.post('/register', async (c) => {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await Auth.createRefreshToken(userId, refreshHash, expiresAt);
 
-  return c.json({ ...tokens, user: { ...payload, isValidated: false, kuid: kuid || null } });
+  return c.json({ ...tokens, user: { ...payload, displayName: displayName || username, isValidated: false, kuid: kuid || null } });
 });
 
 auth.post('/login', async (c) => {
@@ -74,7 +74,7 @@ auth.post('/login', async (c) => {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await Auth.createRefreshToken(user.id, refreshHash, expiresAt);
 
-  return c.json({ ...tokens, user: { ...payload, isValidated: !!user.is_validated, kuid: user.kuid } });
+  return c.json({ ...tokens, user: { ...payload, displayName: user.display_name || user.username, isValidated: !!user.is_validated, kuid: user.kuid } });
 });
 
 auth.post('/guest', async (c) => {
@@ -211,7 +211,7 @@ auth.post('/refresh', async (c) => {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     await Auth.createRefreshToken(decoded.id, refreshHash, expiresAt);
 
-    return c.json({ ...tokens, user: { ...payload, isValidated: !!dbUser?.is_validated, kuid: dbUser?.kuid || null } });
+    return c.json({ ...tokens, user: { ...payload, displayName: dbUser?.display_name || currentUsername, isValidated: !!dbUser?.is_validated, kuid: dbUser?.kuid || null } });
   } catch {
     return c.json({ error: 'Invalid refresh token' }, 401);
   }

@@ -32,7 +32,7 @@ validationRoutes.get('/status', requireRole('admin', 'user'), async (c) => {
 validationRoutes.get('/server-info', requireRole('admin', 'user'), async (c) => {
   return c.json({
     enabled: validationService.isEnabled(),
-    running: validationService.isRunning(),
+    running: await validationService.isRunning(),
     serverName: validationService.getServerName(),
   });
 });

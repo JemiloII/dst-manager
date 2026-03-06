@@ -64,7 +64,7 @@ export default function Layout() {
               {user?.role === 'guest' && (
                 <a onClick={() => setShowUpgrade(true)} className="nav-upgrade">Create Account</a>
               )}
-              <span className="nav-username">{user?.username}</span>
+              <span className="nav-username">{user?.displayName || user?.username}</span>
               <a onClick={handleLogout} className="nav-logout">Logout</a>
             </>
           ) : (

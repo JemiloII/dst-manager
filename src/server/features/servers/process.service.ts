@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getClusterPath } from '@server/services/dst.js';
 import Servers from './servers.queries.js';
+import { sseEmit } from '@server/services/sse.js';
 
 const { DST_INSTALL_DIR } = process.env;
 
@@ -93,6 +94,7 @@ export class ProcessService {
 
     // Update status to starting and clear old PIDs
     await Servers.updateStatus(serverId, 'starting');
+    sseEmit(serverId, { type: 'status', data: 'starting' });
     await Servers.updatePids(serverId, null);
 
     // Create agreements file if it doesn't exist
@@ -137,6 +139,7 @@ export class ProcessService {
 
     // Update status to running and save PIDs to database
     await Servers.updateStatus(serverId, 'running');
+    sseEmit(serverId, { type: 'status', data: 'running' });
     await Servers.updatePids(serverId, {
       master: masterProcess.pid,
       caves: cavesProcess.pid
@@ -181,6 +184,7 @@ export class ProcessService {
     }
     
     await Servers.updateStatus(serverId, 'stopped');
+    sseEmit(serverId, { type: 'status', data: 'stopped' });
     await Servers.updatePids(serverId, null);
     this.processes.delete(serverId);
   }

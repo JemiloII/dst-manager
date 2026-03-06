@@ -32,12 +32,20 @@ export class Auth {
     return result.rows[0].count as number;
   }
 
-  async createUser(username: string, passwordHash: string, role: string, displayName: string): Promise<number> {
+  async createUser(username: string, passwordHash: string, role: string, displayName: string, kuid?: string): Promise<number> {
     const result = await db.execute({
-      sql: 'INSERT INTO users (username, password_hash, role, display_name) VALUES (?, ?, ?, ?)',
-      args: [username, passwordHash, role, displayName],
+      sql: 'INSERT INTO users (username, password_hash, role, display_name, kuid) VALUES (?, ?, ?, ?, ?)',
+      args: [username, passwordHash, role, displayName, kuid || null],
     });
     return Number(result.lastInsertRowid);
+  }
+
+  async checkKuid(kuid: string): Promise<boolean> {
+    const result = await db.execute({
+      sql: 'SELECT id FROM users WHERE kuid = ?',
+      args: [kuid],
+    });
+    return result.rows.length > 0;
   }
 
   async findUserByUsername(username: string): Promise<User | null> {
@@ -45,7 +53,7 @@ export class Auth {
       sql: 'SELECT * FROM users WHERE username = ?', 
       args: [username] 
     });
-    return result.rows.length > 0 ? result.rows[0] as User : null;
+    return result.rows.length > 0 ? result.rows[0] as unknown as User : null;
   }
 
   async checkDisplayName(displayName: string): Promise<boolean> {
@@ -68,7 +76,7 @@ export class Auth {
       sql: 'SELECT * FROM refresh_tokens WHERE user_id = ?',
       args: [userId],
     });
-    return result.rows as RefreshToken[];
+    return result.rows as unknown as RefreshToken[];
   }
 
   async deleteRefreshToken(id: number): Promise<void> {
@@ -90,7 +98,7 @@ export class Auth {
       sql: 'SELECT * FROM users WHERE id = ?',
       args: [userId],
     });
-    return result.rows.length > 0 ? result.rows[0] as User : null;
+    return result.rows.length > 0 ? result.rows[0] as unknown as User : null;
   }
 
   async updatePasswordAndRole(userId: number, passwordHash: string, username: string): Promise<void> {

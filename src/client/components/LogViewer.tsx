@@ -8,10 +8,11 @@ interface Props {
 }
 
 export default function LogViewer({ serverId, serverStatus }: Props) {
-  const [shard, setShard] = useState<'Master' | 'Caves'>('Master');
-  const [logs, setLogs] = useState<{ Master: string; Caves: string }>({
+  const [shard, setShard] = useState<'Master' | 'Caves' | 'Chat'>('Master');
+  const [logs, setLogs] = useState<{ Master: string; Caves: string; Chat: string }>({
     Master: '',
-    Caves: ''
+    Caves: '',
+    Chat: ''
   });
   const logRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
@@ -65,7 +66,7 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
     setLogs(prev => ({ ...prev, [shard]: '' }));
   }, [serverId, shard]);
 
-  const LogContent = ({ type }: { type: 'Master' | 'Caves' }) => (
+  const LogContent = ({ type }: { type: 'Master' | 'Caves' | 'Chat' }) => (
     <div className="log-viewer-wrapper">
       <button
         onClick={handleClear}
@@ -82,15 +83,11 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
 
   return (
     <Tabs
-      tabs={['Master', 'Caves']}
-      defaultActiveTab={shard === 'Master' ? 0 : 1}
-      onTabChange={(tabName) => setShard(tabName as 'Master' | 'Caves')}
+      tabs={['Master', 'Caves', 'Chat']}
+      defaultActiveTab={['Master', 'Caves', 'Chat'].indexOf(shard)}
+      onTabChange={(tabName) => setShard(tabName as 'Master' | 'Caves' | 'Chat')}
     >
-      {shard === 'Master' ? (
-        <LogContent type="Master" />
-      ) : (
-        <LogContent type="Caves" />
-      )}
+      <LogContent type={shard} />
     </Tabs>
   );
 }

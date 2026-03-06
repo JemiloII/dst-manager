@@ -18,6 +18,7 @@ import Support from './pages/Support';
 import Admin from './pages/Admin';
 import ShareView from './pages/ShareView';
 import Terms from './pages/Terms';
+import Validation from './pages/Validation';
 // import '@picocss/pico/css/pico.min.css';
 import './styles/styles.scss';
 
@@ -63,6 +64,7 @@ function App() {
           <Route path="/servers/:code/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
           <Route path="/servers/:code/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
           <Route path="/servers/:code/admins" element={<ProtectedRoute><Admins /></ProtectedRoute>} />
+          <Route path="/validate" element={<ProtectedRoute roles={['admin', 'user']}><Validation /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Admin /></ProtectedRoute>} />
         </Route>

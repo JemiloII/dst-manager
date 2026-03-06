@@ -7,10 +7,11 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [kuid, setKuid] = useState('');
   const [error, setError] = useState('');
   const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       navigate('/');
@@ -21,10 +22,15 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
+    if (kuid && !/^KU_[A-Za-z0-9_-]+$/.test(kuid)) {
+      setError('Invalid KUID format. Must start with KU_ followed by alphanumeric characters.');
+      return;
+    }
+
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, displayName: displayName || username }),
+      body: JSON.stringify({ username, password, displayName: displayName || username, kuid: kuid || undefined }),
     });
 
     const data = await res.json();
@@ -59,6 +65,24 @@ export default function Register() {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="kuid" className="label-with-tooltip">
+              KUID
+              <span className="tooltip-wrapper">
+                <button type="button" className="tooltip-trigger" onMouseEnter={(e) => { const el = e.currentTarget.nextElementSibling as HTMLElement; if (el) el.style.display = 'block'; }} onMouseLeave={(e) => { const el = e.currentTarget.nextElementSibling as HTMLElement; if (el) el.style.display = 'none'; }}>?</button>
+                <span className="tooltip-content">
+                  <p>Find your KUID at <a href="https://accounts.klei.com" target="_blank" rel="noreferrer">accounts.klei.com</a></p>
+                </span>
+              </span>
+            </label>
+            <input
+              id="kuid"
+              type="text"
+              value={kuid}
+              onChange={(e) => setKuid(e.target.value)}
+              placeholder="KU_xxxxxxxx"
             />
           </div>
           <div className="form-group">

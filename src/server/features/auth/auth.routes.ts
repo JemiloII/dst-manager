@@ -11,10 +11,19 @@ const { JWT_SECRET = '' } = process.env;
 const auth = new Hono();
 
 auth.post('/register', async (c) => {
-  const { username, password, displayName } = await c.req.json();
+  const { username, password, displayName, kuid } = await c.req.json();
 
   if (!username || !password) {
     return c.json({ error: 'Username and password required' }, 400);
+  }
+
+  if (kuid) {
+    if (!/^KU_[A-Za-z0-9_-]+$/.test(kuid)) {
+      return c.json({ error: 'Invalid KUID format. Must start with KU_ followed by alphanumeric characters.' }, 400);
+    }
+    if (await Auth.checkKuid(kuid)) {
+      return c.json({ error: 'This KUID is already registered to another account' }, 409);
+    }
   }
 
   if (await Auth.checkUsername(username)) {
@@ -26,7 +35,7 @@ auth.post('/register', async (c) => {
   const role = isFirst ? 'admin' : 'user';
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const userId = await Auth.createUser(username, passwordHash, role, displayName || username);
+  const userId = await Auth.createUser(username, passwordHash, role, displayName || username, kuid);
 
   const payload: JwtPayload = { id: userId, username, role };
   const tokens = generateTokens(payload);
@@ -35,7 +44,7 @@ auth.post('/register', async (c) => {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await Auth.createRefreshToken(userId, refreshHash, expiresAt);
 
-  return c.json({ ...tokens, user: payload });
+  return c.json({ ...tokens, user: { ...payload, isValidated: false, kuid: kuid || null } });
 });
 
 auth.post('/login', async (c) => {
@@ -65,11 +74,11 @@ auth.post('/login', async (c) => {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await Auth.createRefreshToken(user.id, refreshHash, expiresAt);
 
-  return c.json({ ...tokens, user: payload });
+  return c.json({ ...tokens, user: { ...payload, isValidated: !!user.is_validated, kuid: user.kuid } });
 });
 
 auth.post('/guest', async (c) => {
-  const { displayName, shareCode, username, password } = await c.req.json();
+  const { displayName, shareCode, username, password, kuid } = await c.req.json();
 
   if (!displayName || !shareCode) {
     return c.json({ error: 'Display name and share code required' }, 400);
@@ -96,17 +105,27 @@ auth.post('/guest', async (c) => {
   let role: 'user' | 'guest' = 'guest';
   let guestUsername = `guest_${crypto.randomBytes(4).toString('hex')}`;
   let passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+  let validatedKuid: string | undefined;
 
   if (isUpgrade) {
     if (await Auth.checkUsername(username)) {
       return c.json({ error: 'Username already taken' }, 409);
+    }
+    if (kuid) {
+      if (!/^KU_[A-Za-z0-9_-]+$/.test(kuid)) {
+        return c.json({ error: 'Invalid KUID format' }, 400);
+      }
+      if (await Auth.checkKuid(kuid)) {
+        return c.json({ error: 'This KUID is already registered to another account' }, 409);
+      }
+      validatedKuid = kuid;
     }
     guestUsername = username;
     passwordHash = await bcrypt.hash(password, 10);
     role = 'user';
   }
 
-  const userId = await Auth.createUser(guestUsername, passwordHash, role, displayName);
+  const userId = await Auth.createUser(guestUsername, passwordHash, role, displayName, validatedKuid);
   await Servers.addGuest(server.id, userId, displayName);
 
   const payload: JwtPayload = { id: userId, username: isUpgrade ? username : displayName, role };
@@ -116,7 +135,7 @@ auth.post('/guest', async (c) => {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await Auth.createRefreshToken(userId, refreshHash, expiresAt);
 
-  return c.json({ ...tokens, user: { ...payload, displayName } });
+  return c.json({ ...tokens, user: { ...payload, displayName, isValidated: false, kuid: validatedKuid || null } });
 });
 
 auth.post('/upgrade', authMiddleware(), async (c) => {
@@ -192,7 +211,7 @@ auth.post('/refresh', async (c) => {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     await Auth.createRefreshToken(decoded.id, refreshHash, expiresAt);
 
-    return c.json({ ...tokens, user: payload });
+    return c.json({ ...tokens, user: { ...payload, isValidated: !!dbUser?.is_validated, kuid: dbUser?.kuid || null } });
   } catch {
     return c.json({ error: 'Invalid refresh token' }, 401);
   }

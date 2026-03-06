@@ -16,11 +16,13 @@ import logs from './routes/logs';
 import admin from './routes/admin';
 import interactions from './routes/interactions';
 import { preferencesRoutes } from './features/preferences/index.js';
+import { validationRoutes, validationService } from './features/validation/index.js';
 import { Monitor } from './services/monitor';
 
 const {
   ADMIN_USER = '',
   ADMIN_PASS = '',
+  ADMIN_KUID = '',
   PORT = '7891',
   NODE_ENV = 'development'
 } = process.env;
@@ -50,6 +52,7 @@ app.route('/api/logs', logs);
 app.route('/api/admin', admin);
 app.route('/api/interactions', interactions);
 app.route('/api/preferences', preferencesRoutes);
+app.route('/api/validation', validationRoutes);
 
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
@@ -69,8 +72,12 @@ async function seedAdmin() {
 
   if (!existing) {
     const hash = await bcrypt.hash(ADMIN_PASS, 10);
-    await Users.createAdmin(ADMIN_USER, hash);
+    await Users.createAdmin(ADMIN_USER, hash, ADMIN_KUID || undefined);
     console.log(`Admin user "${ADMIN_USER}" created`);
+  } else if (ADMIN_KUID && !existing.kuid) {
+    await Users.updateKuid(existing.id, ADMIN_KUID);
+    await Users.updateValidation(existing.id, ADMIN_USER);
+    console.log(`Admin user "${ADMIN_USER}" KUID updated`);
   }
 }
 
@@ -84,6 +91,9 @@ async function start() {
     await serverService.syncModCounts();
 
     Monitor.start();
+
+    // Start validation server (if configured)
+    await validationService.startValidationServer();
 
     // Start server (Vite dev server plugin handles it in development)
     if (!DEV) {

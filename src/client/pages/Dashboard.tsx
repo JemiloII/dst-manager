@@ -5,18 +5,7 @@ import { useAuth } from '../stores/Auth';
 import { usePreferences } from '../stores/Preferences';
 import { api } from '../api';
 import CycleSelector from '../components/CycleSelector/CycleSelector';
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-function formatRuntime(startedAt: string): string {
-  const ms = Date.now() - new Date(startedAt).getTime();
-  const minutes = Math.floor(ms / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ${hours % 24}h`;
-  if (hours > 0) return `${hours}h ${minutes % 60}m`;
-  return `${Math.max(1, minutes)}m`;
-}
+import { formatRuntime, capitalize } from '../utils/formatRuntime';
 
 const STATUS_OPTIONS = ['all', 'running', 'stopped'];
 const STATUS_LABELS: Record<string, string> = { all: 'All', running: 'Running', stopped: 'Stopped' };
@@ -25,14 +14,28 @@ const ROLE_LABELS: Record<string, string> = { all: 'All', owned: 'Owned', admin:
 const SORT_OPTIONS = ['az', 'players', 'runtime', 'status'];
 const SORT_LABELS: Record<string, string> = { az: 'A-Z', players: 'Players', runtime: 'Runtime', status: 'Status' };
 
+interface ServerLimits {
+  maxServers: number;
+  maxRunning: number;
+  ownedCount: number;
+  runningCount: number;
+  isValidated: boolean;
+  kuid: string | null;
+}
+
 export default function Dashboard() {
   const { servers, players, loading, fetchServers } = useServers();
   const { user } = useAuth();
   const { preferences, loaded: prefsLoaded, fetchPreferences, setPreference } = usePreferences();
+  const [limits, setLimits] = useState<ServerLimits | null>(null);
+  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
     fetchServers();
-  }, [fetchServers]);
+    if (user?.role !== 'guest') {
+      api.get('/servers/limits').then((r) => r.json()).then(setLimits).catch(() => {});
+    }
+  }, [fetchServers, user?.role]);
 
   useEffect(() => {
     if (!prefsLoaded) fetchPreferences();
@@ -85,11 +88,18 @@ export default function Dashboard() {
   }, [servers, players, statusFilter, roleFilter, sortBy, user?.id, user?.role]);
 
   const handleStart = async (code: string) => {
-    await api.post(`/servers/${code}/start`);
+    setActionError('');
+    const res = await api.post(`/servers/${code}/start`);
+    if (!res.ok) {
+      const data = await res.json();
+      setActionError(data.error || 'Failed to start server');
+      return;
+    }
     await fetchServers();
   };
 
   const handleStop = async (code: string) => {
+    setActionError('');
     await api.post(`/servers/${code}/stop`);
     await fetchServers();
   };
@@ -128,9 +138,26 @@ export default function Dashboard() {
           </div>
         )}
         {user?.role !== 'guest' && (
-          <Link to="/create" className="btn btn-primary"><img src="/images/servericons/dedicated.png" alt="" /> Create Server</Link>
+          <div className="dashboard-header-actions">
+            {limits && limits.maxServers !== -1 && (
+              <span className="server-count-badge">Servers: {limits.ownedCount}/{limits.maxServers}</span>
+            )}
+            {limits && limits.maxServers !== -1 && limits.ownedCount >= limits.maxServers ? (
+              <span className="btn btn-secondary btn-disabled">Server Limit Reached</span>
+            ) : (
+              <Link to="/create" className="btn btn-primary"><img src="/images/servericons/dedicated.png" alt="" /> Create Server</Link>
+            )}
+          </div>
         )}
       </div>
+      {actionError && <div className="card error-banner"><p className="error-message">{actionError}</p></div>}
+      {limits && !limits.isValidated && user?.role !== 'admin' && (
+        <div className="card validation-banner">
+          <p>
+            <Link to="/validate">Validate your account</Link> to create more servers and run more simultaneously.
+          </p>
+        </div>
+      )}
       {servers.length === 0 ? (
         <div className="card">
           <p>No servers yet.</p>

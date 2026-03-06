@@ -11,7 +11,7 @@ const logs = new Hono();
 logs.use('*', authMiddleware());
 
 async function getServerLogPath(userId: number, userRole: string, serverId: string, shard: string) {
-  if (shard !== 'Master' && shard !== 'Caves') return null;
+  if (shard !== 'Master' && shard !== 'Caves' && shard !== 'Chat') return null;
 
   const result = await db.execute({ sql: 'SELECT * FROM servers WHERE share_code = ?', args: [serverId] });
   if (result.rows.length === 0) return null;
@@ -19,7 +19,9 @@ async function getServerLogPath(userId: number, userRole: string, serverId: stri
   const server = result.rows[0];
   if (userRole !== 'admin' && server.user_id !== userId) return null;
 
-  return path.join(getClusterPath(server.share_code as string), shard, 'server_log.txt');
+  const clusterPath = getClusterPath(server.share_code as string);
+  if (shard === 'Chat') return path.join(clusterPath, 'Master', 'server_chat_log.txt');
+  return path.join(clusterPath, shard, 'server_log.txt');
 }
 
 logs.get('/:serverId/:shard', requireRole('admin', 'user'), async (c) => {

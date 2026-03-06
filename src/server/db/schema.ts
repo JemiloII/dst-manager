@@ -116,6 +116,18 @@ export class Database {
       )`,
       args: [],
     },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS validation_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        code TEXT UNIQUE NOT NULL,
+        expires_at TEXT NOT NULL,
+        used INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )`,
+      args: [],
+    },
   ]);
 
   // Migrations for existing databases
@@ -131,6 +143,26 @@ export class Database {
 
   await db.execute({
     sql: `ALTER TABLE servers ADD COLUMN started_at TEXT DEFAULT NULL`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `ALTER TABLE users ADD COLUMN kuid TEXT DEFAULT NULL`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `ALTER TABLE users ADD COLUMN ign TEXT DEFAULT NULL`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `ALTER TABLE users ADD COLUMN is_validated INTEGER DEFAULT 0`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
+    sql: `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_kuid ON users(kuid) WHERE kuid IS NOT NULL`,
     args: [],
   }).catch(() => {});
   }

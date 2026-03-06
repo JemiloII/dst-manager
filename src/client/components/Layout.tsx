@@ -55,6 +55,12 @@ export default function Layout() {
             <>
               <Link to="/" className={isActive('/')}>Servers</Link>
               <Link to="/support" className={isActive('/support')}>Support</Link>
+              {user?.role !== 'guest' && user?.role !== 'admin' && !user?.isValidated && (
+                <Link to="/validate" className="nav-validate">Validate</Link>
+              )}
+              {user?.isValidated && user?.role !== 'admin' && (
+                <span className="nav-validated">✓ Verified</span>
+              )}
               {user?.role === 'guest' && (
                 <a onClick={() => setShowUpgrade(true)} className="nav-upgrade">Create Account</a>
               )}

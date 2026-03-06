@@ -1,7 +1,8 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useRef, ReactNode } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
+import { formatRuntime, capitalize } from '../utils/formatRuntime';
 import Tabs from './Tabs';
 import ConfirmModal from './ConfirmModal';
 
@@ -14,9 +15,12 @@ interface Server {
   share_code: string;
   max_players: number;
   game_mode: string;
+  server_intention: string;
+  mod_count: number;
   pvp: number;
   password: string;
   status: string;
+  started_at: string | null;
   is_server_admin?: boolean;
 }
 
@@ -37,45 +41,78 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [players, setPlayers] = useState<{ count: number; max: number; list: string[] }>({ count: 0, max: 0, list: [] });
   const [copied, setCopied] = useState(false);
+  const [, setTick] = useState(0);
+  const prevStatusRef = useRef<string | null>(null);
+
+  const fetchServer = async () => {
+    const res = await api.get(`/servers/${code}`);
+    if (!res.ok) {
+      navigate('/');
+      return;
+    }
+    const data = await res.json();
+    setServer(data);
+  };
 
   useEffect(() => {
-    const fetchServer = async () => {
-      const res = await api.get(`/servers/${code}`);
-      if (!res.ok) {
-        navigate('/');
-        return;
-      }
-      const data = await res.json();
-      setServer(data);
-    };
     fetchServer();
   }, [code, navigate]);
 
-  // Commented out - events endpoint not implemented yet
-  // useEffect(() => {
-  //   if (!code) return;
-  //   const token = localStorage.getItem('accessToken');
-  //   const es = new EventSource(`/api/servers/${code}/events${token ? `?token=${token}` : ''}`);
+  // SSE for real-time status + player updates
+  useEffect(() => {
+    if (!server?.id) return;
 
-  //   es.addEventListener('status', (e) => {
-  //     const data = JSON.parse(e.data);
-  //     setServer((prev) => prev ? { ...prev, status: data.data } : null);
-  //   });
+    const token = localStorage.getItem('accessToken');
+    const es = new EventSource(`/api/servers/${code}/events${token ? `?token=${token}` : ''}`);
 
-  //   es.addEventListener('players', (e) => {
-  //     const data = JSON.parse(e.data);
-  //     setPlayers(data.data);
-  //   });
+    es.addEventListener('status', (e) => {
+      const parsed = JSON.parse(e.data);
+      const newStatus = parsed.data;
+      if (newStatus === 'running' || newStatus === 'paused') {
+        fetchServer();
+      } else {
+        setServer((prev) => prev ? { ...prev, status: newStatus } : null);
+      }
+    });
 
-  //   return () => es.close();
-  // }, [code]);
+    es.addEventListener('players', (e) => {
+      const parsed = JSON.parse(e.data);
+      setPlayers(parsed.data);
+    });
+
+    es.onerror = () => {
+      es.close();
+    };
+
+    return () => es.close();
+  }, [server?.id]);
+
+  // Runtime tick — update every 60s when server has started_at
+  useEffect(() => {
+    if (!server?.started_at) return;
+    const id = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(id);
+  }, [server?.started_at]);
 
   const handleStart = async () => {
-    await api.post(`/servers/${code}/start`);
+    prevStatusRef.current = server?.status ?? null;
+    setServer((prev) => prev ? { ...prev, status: 'starting' } : null);
+    try {
+      await api.post(`/servers/${code}/start`);
+    } catch {
+      setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'stopped' } : null);
+    }
   };
 
   const handleStop = async () => {
-    await api.post(`/servers/${code}/stop`);
+    prevStatusRef.current = server?.status ?? null;
+    setServer((prev) => prev ? { ...prev, status: 'stopped', started_at: null } : null);
+    setPlayers({ count: 0, max: 0, list: [] });
+    try {
+      await api.post(`/servers/${code}/stop`);
+    } catch {
+      setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'running' } : null);
+    }
   };
 
   const handleDelete = async () => {
@@ -84,14 +121,11 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
   };
 
   const handleExport = async () => {
-    // Use fetch with Authorization header instead of token in URL
     const token = localStorage.getItem('accessToken');
     const res = await fetch(`/api/servers/${code}/export`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-    
+
     if (res.ok) {
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -118,7 +152,6 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
 
   const tabs = ['Config', 'World', 'Mods', 'Logs', 'Suggestions', ...(isTrueOwner ? ['Admins'] : [])];
 
-  // Determine active tab based on current path
   const getActiveTab = () => {
     const path = location.pathname;
     if (path.includes('/world')) return 1;
@@ -126,29 +159,28 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
     if (path.includes('/logs')) return 3;
     if (path.includes('/suggestions')) return 4;
     if (path.includes('/admins')) return isTrueOwner ? 5 : 0;
-    return 0; // Config
+    return 0;
   };
 
   return (
     <div className="container">
-      <div style={{ borderBottom: '1px solid #333', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-          <div>
+      <div className="server-detail-header">
+        <div className="server-detail-top">
+          <div className="server-detail-name">
             <h1>{server.name}</h1>
-            <span style={{
-              padding: '0.25rem 0.5rem',
-              borderRadius: '4px',
-              fontSize: '0.75rem',
-              backgroundColor: server.status === 'running' ? '#0C8' : '#C33'
-            }}>
-              {server.status === 'running' ? 'Online' : 'Offline'}
-            </span>
-            <span style={{ color: '#aaa', marginLeft: '1rem', fontSize: '0.85rem' }}>
-              {players.count}/{server.max_players} players
-            </span>
+            <div className="server-meta">
+              <span className={`status-badge ${server.status}`}>{server.status}</span>
+              <span>{capitalize(server.game_mode)}</span>
+              <span className="meta-divider">|</span>
+              <span>Mods: {server.mod_count || 0}</span>
+              <span className="meta-divider">|</span>
+              <span>Players: {players.count}/{server.max_players}</span>
+              {server.started_at ? <><span className="meta-divider">|</span><span>{formatRuntime(server.started_at)}</span></> : null}
+              {server.pvp ? <><span className="meta-divider">|</span><span>PvP</span></> : null}
+            </div>
           </div>
           {isOwner && (
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div className="server-detail-actions">
               {server.status === 'stopped' ? (
                 <button className="icon-btn" onClick={handleStart} title="Start">
                   <img src="/images/button_icons/AFKstart.png" alt="Start" />
@@ -163,9 +195,9 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
                   <img src="/images/button_icons/undo.png" alt="Revert" />
                 </button>
               )}
-              <button 
+              <button
                 className={`icon-btn ${hasChanges ? 'has-changes' : ''}`}
-                onClick={handleSave} 
+                onClick={handleSave}
                 title={hasChanges ? "Save Changes" : "Save"}
               >
                 <img src="/images/button_icons/save.png" alt="Save" />
@@ -183,11 +215,9 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
         </div>
 
         {players.list.length > 0 && (
-          <div style={{ marginTop: '0.75rem' }}>
-            <strong style={{ color: '#aaa', fontSize: '0.85rem' }}>Players:</strong>
-            <span style={{ color: '#fff', fontSize: '0.85rem', marginLeft: '0.5rem' }}>
-              {players.list.join(', ')}
-            </span>
+          <div className="server-detail-players">
+            <strong>Players:</strong>
+            <span>{players.list.join(', ')}</span>
           </div>
         )}
 

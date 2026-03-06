@@ -1,5 +1,6 @@
 @use 'variables' as *;
 @use 'base';
+@use 'validation';
 
 :root {
   --pico-primary: #{$primary};
@@ -202,19 +203,6 @@ nav {
       color: #fff;
       font-size: 1.4rem;
     }
-
-    .server-meta {
-      color: #aaa;
-      font-size: 1.15rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      align-items: center;
-
-      .meta-divider {
-        color: rgba(255, 255, 255, 0.2);
-      }
-    }
   }
 
   .server-actions {
@@ -223,6 +211,61 @@ nav {
     flex-wrap: wrap;
     min-width: 80px;
     justify-content: flex-end;
+  }
+}
+
+.server-meta {
+  color: #aaa;
+  font-size: 1.15rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.meta-divider {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.server-detail-header {
+  border-bottom: 1px solid #333;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.server-detail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.server-detail-name {
+  h1 {
+    margin: 0 0 0.5rem;
+  }
+}
+
+.server-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.server-detail-players {
+  margin-bottom: 0.75rem;
+  color: #aaa;
+  font-size: 0.85rem;
+
+  strong {
+    color: #aaa;
+  }
+
+  span {
+    color: #fff;
+    margin-left: 0.5rem;
   }
 }
 

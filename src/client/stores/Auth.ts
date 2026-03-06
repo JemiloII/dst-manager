@@ -5,6 +5,9 @@ interface User {
   username: string;
   role: 'admin' | 'user' | 'guest';
   displayName?: string;
+  isValidated?: boolean;
+  kuid?: string | null;
+  ign?: string | null;
 }
 
 interface AuthState {

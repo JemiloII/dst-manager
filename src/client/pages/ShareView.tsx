@@ -5,6 +5,7 @@ import { useAuth } from '../stores/Auth';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
+import { toast } from '../utils/toast';
 
 interface SharedServer {
   id: number;
@@ -22,20 +23,18 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [createAccount, setCreateAccount] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     const body: Record<string, string> = { displayName, shareCode };
     if (createAccount) {
       if (!password) {
-        setError('Password required for account creation');
+        toast.error('Password required for account creation');
         setLoading(false);
         return;
       }
@@ -53,7 +52,7 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
     setLoading(false);
 
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -95,7 +94,6 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
           {loading ? 'Joining...' : createAccount ? 'Create Account & Join' : 'Join'}
         </button>
       </form>
-      {error && <p className="error-message">{error}</p>}
       <p className="guest-login-terms">
         By joining, you agree to our <Link to="/terms" target="_blank">Terms</Link>. Users must be 13+.
       </p>
@@ -105,23 +103,20 @@ function GuestLogin({ shareCode }: { shareCode: string }) {
 
 function JoinButton({ shareCode }: { shareCode: string }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleJoin = async () => {
     setLoading(true);
-    setError('');
     const res = await api.post(`/servers/${shareCode}/join`);
     const data = await res.json();
     setLoading(false);
 
     if (!res.ok) {
-      // If already owner or member, just navigate
       if (res.status === 400) {
         navigate(`/servers/${shareCode}`);
         return;
       }
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
     navigate(`/servers/${shareCode}`);
@@ -135,7 +130,6 @@ function JoinButton({ shareCode }: { shareCode: string }) {
       <Link to={`/servers/${shareCode}`} className="btn btn-secondary">
         View Full Details
       </Link>
-      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }

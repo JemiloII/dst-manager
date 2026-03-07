@@ -21,12 +21,6 @@ export function authMiddleware() {
     
     if (header?.startsWith('Bearer ')) {
       token = header.slice(7);
-    } else {
-      // For SSE, check query parameter
-      const queryToken = c.req.query('token');
-      if (queryToken) {
-        token = queryToken;
-      }
     }
     
     if (!token) {

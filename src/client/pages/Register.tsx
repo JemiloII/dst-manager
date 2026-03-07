@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
 import PasswordInput from '../components/PasswordInput';
+import { toast } from '../utils/toast';
 import './Register.scss';
 
 export default function Register() {
@@ -9,7 +10,6 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [kuid, setKuid] = useState('');
-  const [error, setError] = useState('');
   const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -21,10 +21,9 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (kuid && !/^KU_[A-Za-z0-9_-]+$/.test(kuid)) {
-      setError('Invalid KUID format. Must start with KU_ followed by alphanumeric characters.');
+      toast.error('Invalid KUID format. Must start with KU_ followed by alphanumeric characters.');
       return;
     }
 
@@ -36,7 +35,7 @@ export default function Register() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -95,7 +94,6 @@ export default function Register() {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
           <button type="submit" className="btn-full">Register</button>
         </form>
         <p className="auth-footer-text">

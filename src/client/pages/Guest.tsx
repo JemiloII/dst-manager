@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
+import { toast } from '../utils/toast';
 
 export default function Guest() {
   const [displayName, setDisplayName] = useState('');
-  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     const res = await fetch('/api/auth/guest', {
       method: 'POST',
@@ -20,7 +19,7 @@ export default function Guest() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -46,7 +45,6 @@ export default function Guest() {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
           <button type="submit">Enter</button>
         </form>
       </div>

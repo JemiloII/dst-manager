@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../Modal';
 import { api } from '../../api';
+import { toast } from '../../utils/toast';
 import { ModConfig } from './types';
 
 interface Server {
@@ -27,7 +28,7 @@ export default function ModCopy({ isOpen, onClose, currentServerId, onCopy }: Pr
     api.get('/servers')
       .then((r) => r.json())
       .then((data: Server[]) => {
-        setServers(data.filter((s) => String(s.id) !== currentServerId));
+        setServers(data.filter((s) => s.share_code !== currentServerId));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -35,12 +36,16 @@ export default function ModCopy({ isOpen, onClose, currentServerId, onCopy }: Pr
 
   const handleSelect = async (server: Server) => {
     try {
-      const res = await api.get(`/mods/server/${server.id}`);
+      const res = await api.get(`/mods/server/${server.share_code}`);
+      if (!res.ok) {
+        toast.error('Failed to load mods from that server');
+        return;
+      }
       const mods = await res.json();
       onCopy(mods);
       onClose();
     } catch {
-      // Error handled by parent
+      toast.error('Failed to load mods from that server');
     }
   };
 

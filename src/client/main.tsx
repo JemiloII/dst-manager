@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SnackbarProvider } from 'notistack';
 import { useAuth } from './stores/Auth';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -21,6 +22,7 @@ import Terms from './pages/Terms';
 import Validation from './pages/Validation';
 // import '@picocss/pico/css/pico.min.css';
 import './styles/styles.scss';
+import './styles/toast.scss';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -45,28 +47,30 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/s/:code" element={<ShareView />} />
-          <Route path="/" element={<HomeOrDashboard />} />
-          <Route path="/create" element={<ProtectedRoute roles={['admin', 'user']}><CreateServer /></ProtectedRoute>} />
-          <Route path="/servers/:code" element={<ProtectedRoute><Config /></ProtectedRoute>} />
-          <Route path="/servers/:code/config" element={<ProtectedRoute><Config /></ProtectedRoute>} />
-          <Route path="/servers/:code/world/:shard/:subtab" element={<ProtectedRoute><World /></ProtectedRoute>} />
-          <Route path="/servers/:code/mods" element={<ProtectedRoute><Mods /></ProtectedRoute>} />
-          <Route path="/servers/:code/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
-          <Route path="/servers/:code/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
-          <Route path="/servers/:code/admins" element={<ProtectedRoute><Admins /></ProtectedRoute>} />
-          <Route path="/validate" element={<ProtectedRoute roles={['admin', 'user']}><Validation /></ProtectedRoute>} />
-          <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Admin /></ProtectedRoute>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <SnackbarProvider maxSnack={3} autoHideDuration={3000} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/s/:code" element={<ShareView />} />
+            <Route path="/" element={<HomeOrDashboard />} />
+            <Route path="/create" element={<ProtectedRoute roles={['admin', 'user']}><CreateServer /></ProtectedRoute>} />
+            <Route path="/servers/:code" element={<ProtectedRoute><Config /></ProtectedRoute>} />
+            <Route path="/servers/:code/config" element={<ProtectedRoute><Config /></ProtectedRoute>} />
+            <Route path="/servers/:code/world/:shard/:subtab" element={<ProtectedRoute><World /></ProtectedRoute>} />
+            <Route path="/servers/:code/mods" element={<ProtectedRoute><Mods /></ProtectedRoute>} />
+            <Route path="/servers/:code/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
+            <Route path="/servers/:code/suggestions" element={<ProtectedRoute><Suggestions /></ProtectedRoute>} />
+            <Route path="/servers/:code/admins" element={<ProtectedRoute><Admins /></ProtectedRoute>} />
+            <Route path="/validate" element={<ProtectedRoute roles={['admin', 'user']}><Validation /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute roles={['admin']}><Admin /></ProtectedRoute>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </SnackbarProvider>
   );
 }
 

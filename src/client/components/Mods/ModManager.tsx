@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './ModManager.scss';
 import { api } from '../../api';
+import { toast } from '../../utils/toast';
 import ConfirmModal from '../ConfirmModal';
 import ModListItem from './ModListItem';
 import ModSearch from './ModSearch';
@@ -18,8 +19,6 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
   const [mods, setMods] = useState<Record<string, ModConfigType>>({});
   const [modInfoCache, setModInfoCache] = useState<Record<string, ModInfo>>({});
   const [installedModFilter, setInstalledModFilter] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<{ key: string; title: string } | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -92,24 +91,22 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
       const res = await api.put(`/mods/server/${serverId}`, mods);
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error);
+        toast.error(data.error);
       } else {
-        setSuccess('Mods saved successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        toast.success('Mods saved!');
       }
     } catch {
-      setError('Failed to save mods');
+      toast.error('Failed to save mods');
     }
   };
 
   const addMod = async (workshopId: string, info?: ModInfo) => {
     const key = `workshop-${workshopId}`;
     if (key in mods) {
-      setError('Mod already installed');
+      toast.error('Mod already installed');
       return;
     }
 
-    // Cache mod info immediately so it shows name/image right away
     if (info && !modInfoCache[workshopId]) {
       setModInfoCache(prev => ({ ...prev, [workshopId]: info }));
     }
@@ -122,14 +119,12 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     const updatedMods = { ...mods, [key]: newMod };
     setMods(updatedMods);
 
-    // Auto-save (also triggers mod download on server)
     const res = await api.put(`/mods/server/${serverId}`, updatedMods);
     if (!res.ok) {
-      setError('Failed to add mod');
-      setMods(mods); // Revert
+      toast.error('Failed to add mod');
+      setMods(mods);
     } else {
-      setSuccess('Mod added successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Mod added!');
     }
   };
 
@@ -143,11 +138,10 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     };
     setMods(updatedMods);
 
-    // Auto-save
     const res = await api.put(`/mods/server/${serverId}`, updatedMods);
     if (!res.ok) {
-      setError('Failed to toggle mod');
-      setMods(mods); // Revert
+      toast.error('Failed to toggle mod');
+      setMods(mods);
     }
   };
 
@@ -156,14 +150,12 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     delete updatedMods[key];
     setMods(updatedMods);
 
-    // Auto-save
     const res = await api.put(`/mods/server/${serverId}`, updatedMods);
     if (!res.ok) {
-      setError('Failed to remove mod');
-      setMods(mods); // Revert
+      toast.error('Failed to remove mod');
+      setMods(mods);
     } else {
-      setSuccess('Mod removed successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Mod removed!');
     }
   };
 
@@ -171,13 +163,12 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     const workshopId = key.replace('workshop-', '');
     const info = modInfoCache[workshopId];
     const mod = mods[key];
-    
+
     try {
       const configRes = await api.get(`/mods/config/${workshopId}`);
       const configData = await configRes.json();
-      
+
       if (configData.configuration_options && Object.keys(configData.configuration_options).length > 0) {
-        // Update cache with config options
         setModInfoCache(prev => ({
           ...prev,
           [workshopId]: {
@@ -186,31 +177,30 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             configuration_options: configData.configuration_options
           }
         }));
-        
-        // Set current values from saved config or defaults
+
         const currentConfig: Record<string, unknown> = {};
         for (const [optKey, optDef] of Object.entries(configData.configuration_options)) {
           const def = optDef as any;
           currentConfig[optKey] = mod.configuration_options[optKey] ?? def.default ?? def.options?.[0]?.data;
         }
-        
-        setConfigureModal({ 
-          key, 
+
+        setConfigureModal({
+          key,
           title: info?.title || key,
           options: configData.configuration_options,
           currentValues: currentConfig
         });
       } else {
-        setError('No configuration options available for this mod');
+        toast.info('No configuration options available for this mod');
       }
     } catch {
-      setError('Failed to load mod configuration');
+      toast.error('Failed to load mod configuration');
     }
   };
 
   const handleConfigSave = async (values: Record<string, unknown>) => {
     if (!configureModal) return;
-    
+
     const modKey = configureModal.key;
     const updatedMods = {
       ...mods,
@@ -220,17 +210,14 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
       }
     };
     setMods(updatedMods);
-    
-    // Auto-save to server
+
     const res = await api.put(`/mods/server/${serverId}`, updatedMods);
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error);
-      // Revert on error
+      toast.error(data.error);
       setMods(mods);
     } else {
-      setSuccess('Mod configuration saved!');
-      setTimeout(() => setSuccess(''), 2000);
+      toast.success('Mod configuration saved!');
     }
   };
 
@@ -240,10 +227,9 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
 
     const res = await api.put(`/mods/server/${serverId}`, merged);
     if (!res.ok) {
-      setError('Failed to copy mods');
+      toast.error('Failed to copy mods');
       setMods(mods);
     } else {
-      // Fetch details for any new mods
       const newKeys = Object.keys(copiedMods).filter((k) => !(k in mods));
       const promises = newKeys.map(async (key) => {
         const workshopId = key.replace('workshop-', '');
@@ -261,8 +247,7 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
       if (Object.keys(newCache).length > 0) {
         setModInfoCache((prev) => ({ ...prev, ...newCache }));
       }
-      setSuccess('Mods copied successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Mods copied!');
     }
   };
 
@@ -311,9 +296,6 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
             />
           </div>
         )}
-
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
 
         {Object.keys(mods).length === 0 ? (
           <p className="empty-state">No mods installed.</p>

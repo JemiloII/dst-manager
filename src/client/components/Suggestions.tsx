@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@client/api';
 import { useAuth } from '@client/stores/Auth';
+import { toast } from '@client/utils/toast';
 import ModSearch from '@client/components/Mods/ModSearch';
 
 interface ModDetails {
@@ -29,8 +30,6 @@ export default function Suggestions({ serverId, isOwner }: Props) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [modDetails, setModDetails] = useState<Record<string, ModDetails>>({});
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const fetchSuggestions = async () => {
     const res = await api.get(`/suggestions/${serverId}`);
@@ -72,7 +71,6 @@ export default function Suggestions({ serverId, isOwner }: Props) {
   }, [serverId]);
 
   const handleSuggestMod = async (workshopId: string) => {
-    setError('');
     const res = await api.post(`/suggestions/${serverId}`, {
       workshopId,
       suggestedConfig: {},
@@ -80,30 +78,23 @@ export default function Suggestions({ serverId, isOwner }: Props) {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
-    setSuccess('Mod suggested!');
-    setTimeout(() => setSuccess(''), 3000);
+    toast.success('Mod suggested!');
     fetchSuggestions();
   };
 
   const handleAction = async (id: number, action: 'approve' | 'deny') => {
-    setError('');
     const res = await api.put(`/suggestions/${id}/${action}`);
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
-    if (action === 'approve') {
-      setSuccess('Mod approved and installed!');
-    } else {
-      setSuccess('Suggestion denied.');
-    }
-    setTimeout(() => setSuccess(''), 3000);
+    toast.success(action === 'approve' ? 'Mod approved and installed!' : 'Suggestion denied.');
     fetchSuggestions();
   };
 
@@ -127,9 +118,6 @@ export default function Suggestions({ serverId, isOwner }: Props) {
             </button>
           )}
         </div>
-
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
 
         {suggestions.length === 0 ? (
           <p className="empty-state">No suggestions yet.</p>

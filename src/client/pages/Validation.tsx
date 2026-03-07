@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
 import { api } from '../api';
+import { toast } from '../utils/toast';
 
 interface ValidationState {
   code: string | null;
@@ -22,7 +23,6 @@ export default function Validation() {
   const [isValidated, setIsValidated] = useState(user?.isValidated || false);
   const [ign, setIgn] = useState(user?.ign || null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -81,18 +81,17 @@ export default function Validation() {
   }, [state.code, isValidated, updateUser]);
 
   const handleRequest = async () => {
-    setError('');
     setLoading(true);
     try {
       const res = await api.post('/validation/request');
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error);
+        toast.error(data.error);
         return;
       }
       setState({ code: data.code, expiresAt: data.expiresAt, serverName: data.serverName });
     } catch {
-      setError('Failed to request validation code');
+      toast.error('Failed to request validation code');
     } finally {
       setLoading(false);
     }
@@ -105,7 +104,7 @@ export default function Validation() {
           <h2>Account Validated</h2>
           <p className="validation-ign">In-Game Name: <strong>{ign}</strong></p>
           <p className="validation-kuid">KUID: <code>{user?.kuid}</code></p>
-          <p className="success-message">Your account is verified. You have access to higher server limits.</p>
+          <p className="validation-verified-text">Your account is verified. You have access to higher server limits.</p>
           <Link to="/" className="btn btn-primary">Back to Dashboard</Link>
         </div>
       </div>
@@ -118,13 +117,13 @@ export default function Validation() {
       <div className="card">
         <p>Validate your account by proving you own your Klei/Steam account. This unlocks higher server limits.</p>
         {!user?.kuid && (
-          <p className="error-message">You need to register a KUID before you can validate. Re-register or contact support.</p>
+          <p className="validation-warning">You need to register a KUID before you can validate. Re-register or contact support.</p>
         )}
         {serverInfo && !serverInfo.enabled && (
-          <p className="error-message">Validation system is currently unavailable.</p>
+          <p className="validation-warning">Validation system is currently unavailable.</p>
         )}
         {serverInfo && serverInfo.enabled && !serverInfo.running && (
-          <p className="error-message">Validation server is starting up. Please try again in a minute.</p>
+          <p className="validation-warning">Validation server is starting up. Please try again in a minute.</p>
         )}
 
         {!state.code ? (
@@ -153,7 +152,6 @@ export default function Validation() {
           </div>
         )}
 
-        {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );

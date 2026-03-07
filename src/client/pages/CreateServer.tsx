@@ -4,6 +4,7 @@ import { api } from '../api';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
+import { toast } from '../utils/toast';
 
 export default function CreateServer() {
   const navigate = useNavigate();
@@ -15,11 +16,9 @@ export default function CreateServer() {
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [pvp, setPvp] = useState(false);
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     const res = await api.post('/servers', {
       name,
@@ -34,7 +33,7 @@ export default function CreateServer() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -147,7 +146,6 @@ export default function CreateServer() {
             />
           </div>
 
-          {error && <p className="error-message">{error}</p>}
           <button type="submit">Create Server</button>
         </form>
       </div>

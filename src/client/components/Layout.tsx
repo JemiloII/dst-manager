@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
 import { api } from '../api';
+import { toast } from '../utils/toast';
 import Modal from './Modal';
 
 export default function Layout() {
@@ -11,7 +12,6 @@ export default function Layout() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeUsername, setUpgradeUsername] = useState('');
   const [upgradePassword, setUpgradePassword] = useState('');
-  const [upgradeError, setUpgradeError] = useState('');
   const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const handleLogout = () => {
@@ -21,7 +21,6 @@ export default function Layout() {
 
   const handleUpgrade = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUpgradeError('');
     setUpgradeLoading(true);
 
     const res = await api.post('/auth/upgrade', {
@@ -33,7 +32,7 @@ export default function Layout() {
     setUpgradeLoading(false);
 
     if (!res.ok) {
-      setUpgradeError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -92,7 +91,7 @@ export default function Layout() {
 
       <Modal
         isOpen={showUpgrade}
-        onClose={() => { setShowUpgrade(false); setUpgradeError(''); }}
+        onClose={() => setShowUpgrade(false)}
         title="Create Account"
       >
         <p className="upgrade-modal-desc">
@@ -117,7 +116,6 @@ export default function Layout() {
               required
             />
           </div>
-          {upgradeError && <p className="error-message">{upgradeError}</p>}
           <button type="submit" disabled={upgradeLoading} className="btn btn-primary btn-full">
             {upgradeLoading ? 'Creating...' : 'Create Account'}
           </button>

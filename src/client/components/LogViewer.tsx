@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { api } from '../api';
+import { api, createSSE, SSEConnection } from '../api';
 import Tabs from './Tabs';
 
 interface Props {
@@ -15,7 +15,7 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
     Chat: ''
   });
   const logRef = useRef<HTMLDivElement>(null);
-  const esRef = useRef<EventSource | null>(null);
+  const esRef = useRef<SSEConnection | null>(null);
 
   // Fetch initial logs
   useEffect(() => {
@@ -31,9 +31,7 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
   useEffect(() => {
     if (serverStatus !== 'running') return;
 
-    const token = localStorage.getItem('accessToken');
-    const url = `/api/logs/${serverId}/${shard}/stream${token ? `?token=${token}` : ''}`;
-    const es = new EventSource(url);
+    const es = createSSE(`/logs/${serverId}/${shard}/stream`);
     esRef.current = es;
 
     es.addEventListener('log', (e) => {

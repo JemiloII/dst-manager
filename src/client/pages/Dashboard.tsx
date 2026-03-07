@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { useServers } from '../stores/Servers';
 import { useAuth } from '../stores/Auth';
 import { usePreferences } from '../stores/Preferences';
-import { api } from '../api';
+import { api, createSSE } from '../api';
 import CycleSelector from '../components/CycleSelector/CycleSelector';
 import { formatRuntime, capitalize } from '../utils/formatRuntime';
+import { toast } from '../utils/toast';
 
 const STATUS_OPTIONS = ['all', 'running', 'stopped'];
 const STATUS_LABELS: Record<string, string> = { all: 'All', running: 'Running', stopped: 'Stopped' };
@@ -28,7 +29,6 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { preferences, loaded: prefsLoaded, fetchPreferences, setPreference } = usePreferences();
   const [limits, setLimits] = useState<ServerLimits | null>(null);
-  const [actionError, setActionError] = useState('');
 
   useEffect(() => {
     fetchServers();
@@ -40,10 +40,7 @@ export default function Dashboard() {
   // SSE for real-time status updates
   const { updateStatus, updatePlayers } = useServers();
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-
-    const es = new EventSource(`/api/servers/events?token=${token}`);
+    const es = createSSE('/servers/events');
 
     es.addEventListener('status', (e) => {
       const data = JSON.parse(e.data);
@@ -109,18 +106,16 @@ export default function Dashboard() {
   }, [servers, players, statusFilter, roleFilter, sortBy, user?.id, user?.role]);
 
   const handleStart = async (code: string) => {
-    setActionError('');
     const res = await api.post(`/servers/${code}/start`);
     if (!res.ok) {
       const data = await res.json();
-      setActionError(data.error || 'Failed to start server');
+      toast.error(data.error || 'Failed to start server');
       return;
     }
     await fetchServers();
   };
 
   const handleStop = async (code: string) => {
-    setActionError('');
     await api.post(`/servers/${code}/stop`);
     await fetchServers();
   };
@@ -171,7 +166,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-      {actionError && <div className="card error-banner"><p className="error-message">{actionError}</p></div>}
       {limits && !limits.isValidated && user?.role !== 'admin' && (
         <div className="card validation-banner">
           <p>

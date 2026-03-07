@@ -5,6 +5,7 @@ import ServerLayout from '../components/ServerLayout';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
+import { toast } from '../utils/toast';
 
 interface Server {
   id: number;
@@ -48,23 +49,11 @@ export default function Config() {
       pvp: form.pvp ? 1 : 0,
       password: form.password,
     };
-    console.log('Saving with body:', body);
     try {
       const res = await api.put(`/servers/${code}`, body);
       if (res.ok) {
         const data = await res.json();
         setServerData(data);
-        setForm({
-          name: data.name,
-          description: data.description,
-          gameMode: data.game_mode,
-          serverIntention: data.server_intention || 'cooperative',
-          maxPlayers: data.max_players,
-          pvp: !!data.pvp,
-          password: data.password,
-        });
-        console.log('Save successful');
-        // Update original form with new saved values
         const updatedForm = {
           name: data.name,
           description: data.description,
@@ -74,13 +63,15 @@ export default function Config() {
           pvp: !!data.pvp,
           password: data.password,
         };
+        setForm(updatedForm);
         setOriginalForm(updatedForm);
+        toast.success('Config saved');
       } else {
-        const error = await res.json();
-        console.error('Save failed:', error);
+        const data = await res.json();
+        toast.error(data.error || 'Failed to save config');
       }
-    } catch (err) {
-      console.error('Save error:', err);
+    } catch {
+      toast.error('Failed to save config');
     }
   };
 

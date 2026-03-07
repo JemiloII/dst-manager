@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { api } from '../api';
+import { toast } from '../utils/toast';
 
 export default function Admin() {
   const [updating, setUpdating] = useState(false);
   const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
 
   const handleUpdate = async () => {
     setUpdating(true);
     setOutput('');
-    setError('');
 
     const res = await api.post('/admin/update-dst');
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
     } else {
       setOutput(data.output);
+      toast.success('DST server updated');
     }
     setUpdating(false);
   };
@@ -37,7 +37,6 @@ export default function Admin() {
         <button onClick={handleUpdate} disabled={updating}>
           {updating ? 'Updating...' : 'Update Now'}
         </button>
-        {error && <p className="error-message" style={{ marginTop: '0.5rem' }}>{error}</p>}
         {output && (
           <div className="log-viewer" style={{ marginTop: '0.75rem' }}>
             {output}

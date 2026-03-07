@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '@client/api';
+import { toast } from '@client/utils/toast';
 import Modal from './Modal';
 import ConfirmModal from './ConfirmModal';
 
@@ -38,8 +39,6 @@ export default function AdminList({ shareCode }: Props) {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [kuidInput, setKuidInput] = useState('');
   const [selectedUser, setSelectedUser] = useState<SearchResult | null>(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [removeTarget, setRemoveTarget] = useState<ServerAdmin | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -82,11 +81,9 @@ export default function AdminList({ shareCode }: Props) {
     setKuidInput('');
     setSearchQuery('');
     setSearchResults([]);
-    setError('');
   };
 
   const handleAdd = async () => {
-    setError('');
     if (!selectedUser && !kuidInput.trim()) return;
 
     const body: any = {};
@@ -95,26 +92,23 @@ export default function AdminList({ shareCode }: Props) {
 
     const res = await api.post(`/servers/${shareCode}/admins`, body);
     if (!res.ok) {
-      setError((await res.json()).error);
+      toast.error((await res.json()).error);
       return;
     }
 
-    setSuccess('Admin added!');
-    setTimeout(() => setSuccess(''), 3000);
+    toast.success('Admin added!');
     closeAddModal();
     fetchAdmins();
   };
 
   const handleRemove = async () => {
     if (!removeTarget) return;
-    setError('');
 
     const res = await api.delete(`/servers/${shareCode}/admins/${removeTarget.id}`);
     if (!res.ok) {
-      setError((await res.json()).error);
+      toast.error((await res.json()).error);
     } else {
-      setSuccess('Admin removed.');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Admin removed');
     }
 
     setRemoveTarget(null);
@@ -137,8 +131,6 @@ export default function AdminList({ shareCode }: Props) {
             Add Admin
           </button>
         </div>
-
-        {success && <p className="success-message">{success}</p>}
 
         {permanent.map((entry, i) => (
           <div key={`perm-${i}`} className="admin-item">
@@ -180,8 +172,6 @@ export default function AdminList({ shareCode }: Props) {
       </div>
 
       <Modal isOpen={showAddModal} onClose={closeAddModal} title="Add Admin" className="admin-modal-form">
-        {error && <p className="error-message">{error}</p>}
-
         <div className="form-group">
           <label className="label-with-tooltip">
             User

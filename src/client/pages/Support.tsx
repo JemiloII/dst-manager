@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api';
 import { useAuth } from '../stores/Auth';
+import { toast } from '../utils/toast';
 
 interface Ticket {
   id: number;
@@ -17,8 +18,6 @@ export default function Support() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -33,21 +32,18 @@ export default function Support() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     const res = await api.post('/tickets', { subject, message });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
     setSubject('');
     setMessage('');
-    setSuccess('Ticket submitted!');
     setShowModal(false);
-    setTimeout(() => setSuccess(''), 2000);
+    toast.success('Ticket submitted!');
     fetchTickets();
   };
 
@@ -64,12 +60,6 @@ export default function Support() {
           New Ticket
         </button>
       </div>
-
-      {success && (
-        <div className="card success-banner">
-          <p className="success-message">{success}</p>
-        </div>
-      )}
 
       <div className="card">
         <h3 style={{ color: '#fff', margin: '0 0 0.75rem' }}>
@@ -128,7 +118,6 @@ export default function Support() {
                   required
                 />
               </div>
-              {error && <p className="error-message">{error}</p>}
               <div className="modal-actions">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
                   Cancel

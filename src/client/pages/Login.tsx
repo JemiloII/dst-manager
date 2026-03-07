@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../stores/Auth';
 import PasswordInput from '../components/PasswordInput';
+import { toast } from '../utils/toast';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       navigate('/');
@@ -18,7 +18,6 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -28,7 +27,7 @@ export default function Login() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error);
       return;
     }
 
@@ -60,7 +59,6 @@ export default function Login() {
               required
             />
           </div>
-          {error && <p className="error-message">{error}</p>}
           <button type="submit" className="btn-full">Login</button>
         </form>
         <p className="auth-footer-text">

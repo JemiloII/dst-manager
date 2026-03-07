@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api';
 import { useWorldSettingsStore } from '../stores/WorldSettingsStore';
+import { toast } from '../utils/toast';
 import Tabs from './Tabs';
 import WorldSettingsContent from './WorldSettingsContent';
 
@@ -31,9 +32,6 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
     Forest: initialShard === 'Forest' ? currentSubtab : 'settings',
     Caves: initialShard === 'Caves' ? currentSubtab : 'settings'
   });
-  
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   
   const updateURL = (newShard: 'Master' | 'Caves', newTab: 'Settings' | 'Generation') => {
     const shardPath = newShard === 'Master' ? 'forest' : 'caves';
@@ -66,18 +64,14 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
   };
 
   const handleSave = async () => {
-    setError('');
-    setSuccess('');
-
     const body = { overrides: getAllMappings() };
     const res = await api.put(`/world/${serverId}/${shard}`, body);
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error);
+      toast.error(data.error || 'Failed to save world settings');
     } else {
-      setSuccess('Saved!');
-      setTimeout(() => setSuccess(''), 2000);
+      toast.success('World settings saved');
     }
   };
 
@@ -109,9 +103,6 @@ export default function WorldSettings({ serverId, isOwner, onSaveRef }: Props) {
 
   return (
     <>
-      {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
-      
       <Tabs
         tabs={['Forest', 'Caves']}
         defaultActiveTab={shard === 'Master' ? 0 : 1}

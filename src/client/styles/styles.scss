@@ -579,19 +579,6 @@ button.icon-btn, .icon-btn {
   text-align: center;
 }
 
-.error-message {
-  color: #dc3545;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.success-message {
-  color: #28a745;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-
 .create-server-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -843,16 +830,6 @@ button.icon-btn, .icon-btn {
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: #fff;
-  }
-}
-
-.success-banner {
-  background-color: rgba(40, 167, 69, 0.2);
-  border-color: #28a745;
-  margin-bottom: 1rem;
-  
-  .success-message {
-    margin: 0;
   }
 }
 

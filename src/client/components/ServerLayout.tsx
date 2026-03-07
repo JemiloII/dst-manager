@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { api } from '../api';
+import { api, createSSE } from '../api';
 import { useAuth } from '../stores/Auth';
 import { formatRuntime, capitalize } from '../utils/formatRuntime';
+import { toast } from '../utils/toast';
 import Tabs from './Tabs';
 import ConfirmModal from './ConfirmModal';
 
@@ -39,6 +40,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
   const location = useLocation();
   const [server, setServer] = useState<Server | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [players, setPlayers] = useState<{ count: number; max: number; list: string[] }>({ count: 0, max: 0, list: [] });
   const [copied, setCopied] = useState(false);
   const [, setTick] = useState(0);
@@ -62,8 +64,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
   useEffect(() => {
     if (!server?.id) return;
 
-    const token = localStorage.getItem('accessToken');
-    const es = new EventSource(`/api/servers/${code}/events${token ? `?token=${token}` : ''}`);
+    const es = createSSE(`/servers/${code}/events`);
 
     es.addEventListener('status', (e) => {
       const parsed = JSON.parse(e.data);
@@ -98,8 +99,14 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
     prevStatusRef.current = server?.status ?? null;
     setServer((prev) => prev ? { ...prev, status: 'starting' } : null);
     try {
-      await api.post(`/servers/${code}/start`);
+      const res = await api.post(`/servers/${code}/start`);
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to start server');
+        setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'stopped' } : null);
+      }
     } catch {
+      toast.error('Failed to start server');
       setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'stopped' } : null);
     }
   };
@@ -109,15 +116,51 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
     setServer((prev) => prev ? { ...prev, status: 'stopped', started_at: null } : null);
     setPlayers({ count: 0, max: 0, list: [] });
     try {
-      await api.post(`/servers/${code}/stop`);
+      const res = await api.post(`/servers/${code}/stop`);
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to stop server');
+        setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'running' } : null);
+      }
     } catch {
+      toast.error('Failed to stop server');
+      setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'running' } : null);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    setShowRegenerateConfirm(false);
+    prevStatusRef.current = server?.status ?? null;
+    setServer((prev) => prev ? { ...prev, status: 'stopped', started_at: null } : null);
+    setPlayers({ count: 0, max: 0, list: [] });
+    try {
+      const res = await api.post(`/servers/${code}/regenerate`);
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to regenerate world');
+        setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'running' } : null);
+      } else {
+        toast.success('World regenerated');
+      }
+    } catch {
+      toast.error('Failed to regenerate world');
       setServer((prev) => prev ? { ...prev, status: prevStatusRef.current ?? 'running' } : null);
     }
   };
 
   const handleDelete = async () => {
-    await api.delete(`/servers/${code}`);
-    navigate('/');
+    try {
+      const res = await api.delete(`/servers/${code}`);
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to delete server');
+        return;
+      }
+      toast.success('Server deleted');
+      navigate('/');
+    } catch {
+      toast.error('Failed to delete server');
+    }
   };
 
   const handleExport = async () => {
@@ -136,6 +179,9 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      toast.success('Export downloaded');
+    } else {
+      toast.error('Failed to export server');
     }
   };
 
@@ -206,9 +252,14 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
                 <img src="/images/button_icons/update.png" alt="Download" />
               </button>
               {isTrueOwner && (
-                <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
-                  <img src="/images/button_icons/delete.png" alt="Delete" />
-                </button>
+                <>
+                  <button className="icon-btn" onClick={() => setShowRegenerateConfirm(true)} title="Regenerate World">
+                    <img src="/images/button_icons/world.png" alt="Regenerate World" />
+                  </button>
+                  <button className="icon-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete">
+                    <img src="/images/button_icons/delete.png" alt="Delete" />
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -261,6 +312,14 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
       />
 
       {children(server, isOwner)}
+
+      <ConfirmModal
+        isOpen={showRegenerateConfirm}
+        onCancel={() => setShowRegenerateConfirm(false)}
+        onConfirm={handleRegenerate}
+        title="Regenerate World?"
+        body="All world save data will be permanently deleted. Your config, mods, and world settings will be preserved. The server will be stopped if running."
+      />
 
       <ConfirmModal
         isOpen={showDeleteConfirm}

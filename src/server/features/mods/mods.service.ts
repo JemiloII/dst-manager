@@ -278,25 +278,27 @@ export async function saveModOverrides(shareCode: string, content: string) {
   await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), content);
 }
 
-export async function downloadMissingMods(workshopIds: string[]): Promise<void> {
-  if (!DST_WORKSHOP_DIR || workshopIds.length === 0) return;
+export async function downloadMods(workshopIds: string[]): Promise<void> {
+  if (!workshopIds.length) return;
 
-  const missing: string[] = [];
-  for (const id of workshopIds) {
-    const modPath = path.join(DST_WORKSHOP_DIR, id);
-    const exists = await fs.access(modPath).then(() => true).catch(() => false);
-    if (!exists) missing.push(id);
-  }
+  // Filter to only mods not already downloaded
+  const missing = (await Promise.all(
+    workshopIds.map(async (id) => {
+      const exists = await fs.access(path.join(DST_WORKSHOP_DIR, id)).then(() => true).catch(() => false);
+      return exists ? null : id;
+    })
+  )).filter(Boolean) as string[];
 
-  if (missing.length === 0) return;
+  if (!missing.length) return;
 
-  const downloadCmds = missing.map(id => `+workshop_download_item 322330 ${id}`).join(' ');
-  const cmd = `steamcmd +login anonymous ${downloadCmds} +quit`;
+  // Build steamcmd command — batch all downloads in one call
+  const downloads = missing.map((id) => `+workshop_download_item 322330 ${id}`).join(' ');
+  const cmd = `steamcmd +login anonymous ${downloads} +quit`;
 
   try {
-    await execAsync(cmd, { timeout: 120000 });
-    console.log(`Downloaded ${missing.length} mod(s): ${missing.join(', ')}`);
-  } catch (err) {
-    console.error('Failed to download mods via steamcmd:', err);
+    await execAsync(cmd, { timeout: 300000 });
+  } catch (e) {
+    console.error('Failed to download mods:', e);
   }
 }
+

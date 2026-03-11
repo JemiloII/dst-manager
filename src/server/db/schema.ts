@@ -147,6 +147,11 @@ export class Database {
   }).catch(() => {});
 
   await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN cluster_key TEXT DEFAULT NULL`,
+    args: [],
+  }).catch(() => {});
+
+  await db.execute({
     sql: `ALTER TABLE users ADD COLUMN kuid TEXT DEFAULT NULL`,
     args: [],
   }).catch(() => {});
@@ -165,6 +170,34 @@ export class Database {
     sql: `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_kuid ON users(kuid) WHERE kuid IS NOT NULL`,
     args: [],
   }).catch(() => {});
+
+  // Migration: Allow NULL user_id in server_admins for KUID-only entries
+  const tableInfo = await db.execute({ sql: `PRAGMA table_info(server_admins)`, args: [] });
+  const userIdCol = (tableInfo.rows as any[]).find((r: any) => r.name === 'user_id');
+  if (userIdCol && userIdCol.notnull === 1) {
+    await db.execute({ sql: `DROP TABLE IF EXISTS server_admins_tmp`, args: [] });
+    await db.batch([
+      {
+        sql: `CREATE TABLE server_admins_tmp (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          server_id INTEGER NOT NULL,
+          user_id INTEGER,
+          kuid TEXT DEFAULT '',
+          added_at TEXT DEFAULT (datetime('now')),
+          FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )`,
+        args: [],
+      },
+      {
+        sql: `INSERT INTO server_admins_tmp (id, server_id, user_id, kuid, added_at)
+              SELECT id, server_id, user_id, kuid, added_at FROM server_admins`,
+        args: [],
+      },
+      { sql: `DROP TABLE server_admins`, args: [] },
+      { sql: `ALTER TABLE server_admins_tmp RENAME TO server_admins`, args: [] },
+    ]);
+  }
   }
 }
 

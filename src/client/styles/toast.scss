@@ -1,0 +1,23 @@
+.notistack-SnackbarContainer {
+	z-index: 9999;
+}
+
+.notistack-MuiContent {
+	font-family: inherit;
+	font-size: 1rem;
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(8px);
+}
+
+.notistack-MuiContent-success {
+	background-color: rgba(40, 167, 69, 0.9);
+}
+
+.notistack-MuiContent-error {
+	background-color: rgba(220, 53, 69, 0.9);
+}
+
+.notistack-MuiContent-info {
+	background-color: rgba(255, 138, 0, 0.9);
+}

@@ -61,6 +61,7 @@ interface ServerConfig {
   maxPlayers: number;
   pvp: boolean;
   password: string;
+  clusterKey?: string;
 }
 
 function getClusterIniValues(shareCode: string, portOffset: number, config: ServerConfig) {
@@ -79,7 +80,7 @@ function getClusterIniValues(shareCode: string, portOffset: number, config: Serv
     CLUSTER_INTENTION: config.serverIntention,
     ENABLE_VOTE_KICK: true,
     MASTER_PORT: ports.masterPort,
-    CLUSTER_KEY: `dst-${shareCode}`,
+    CLUSTER_KEY: config.clusterKey || `dst-${shareCode}`,
   };
 }
 
@@ -222,9 +223,4 @@ export async function updateClusterIni(
   await writeClusterIni(shareCode, portOffset, config);
 }
 
-export async function updateModsSetup(workshopIds: string[]) {
-  const modsDir = path.join(DST_INSTALL_DIR, 'mods');
-  const lines = workshopIds.map((id) => `ServerModSetup("${id}")`);
-  const content = lines.join('\n') + '\n';
-  await fs.writeFile(path.join(modsDir, 'dedicated_server_mods_setup.lua'), content);
-}
+

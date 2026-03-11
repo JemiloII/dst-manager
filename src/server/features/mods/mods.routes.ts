@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import { authMiddleware, requireRole, JwtPayload } from '../../middleware/auth';
 import { generateModOverrides } from '../../services/lua';
-import { updateModsSetup } from '../../services/dst';
 import Servers from '../servers/servers.queries';
 import * as modService from './mods.service';
 
@@ -80,31 +79,14 @@ mods.put('/server/:serverId', requireRole('admin', 'user'), async (c) => {
   const body = await c.req.json();
   const modsData = body as Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }>;
 
+  const workshopIds = Object.keys(modsData).map((k) => k.replace('workshop-', ''));
+  await modService.downloadMods(workshopIds);
+
   const content = generateModOverrides(modsData);
   await modService.saveModOverrides(server.share_code as string, content);
 
   const enabledCount = Object.values(modsData).filter((m) => m.enabled).length;
   await Servers.updateModCount(server.id as number, enabledCount);
-
-  // Collect all workshop IDs from all servers
-  const allServers = await modService.getAllServers();
-  const allWorkshopIds = new Set<string>();
-
-  for (const srv of allServers) {
-    const parsed = await modService.getServerModOverrides(srv.share_code as string);
-    if (parsed) {
-      for (const key of Object.keys(parsed)) {
-        const workshopId = key.replace('workshop-', '');
-        allWorkshopIds.add(workshopId);
-      }
-    }
-  }
-
-  const workshopIdArray = Array.from(allWorkshopIds);
-  await updateModsSetup(workshopIdArray);
-
-  // Download missing mods in background so config becomes available
-  modService.downloadMissingMods(workshopIdArray);
 
   return c.json({ success: true });
 });

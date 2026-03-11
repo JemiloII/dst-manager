@@ -148,6 +148,7 @@ export function generateModOverrides(
       lines.push(`  ["${modId}"]={`);
       lines.push(`    configuration_options={`);
       for (const [key, val] of configEntries) {
+        if (!key) continue;
         const formattedKey = /\s/.test(key) ? `["${key}"]` : key;
         if (typeof val === 'string') {
           lines.push(`      ${formattedKey}="${val}",`);

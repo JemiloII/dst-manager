@@ -159,6 +159,19 @@ export class ProcessService {
     };
   }
 
+  private killProcess(pid: number): void {
+    try {
+      // Kill the entire process group (negative PID)
+      process.kill(-pid, 'SIGTERM');
+    } catch {
+      try {
+        process.kill(pid, 'SIGKILL');
+      } catch {
+        // Already dead
+      }
+    }
+  }
+
   async stopServer(serverId: number): Promise<void> {
     const proc = this.processes.get(serverId);
     
@@ -170,17 +183,11 @@ export class ProcessService {
         throw new Error('Server is not running');
       }
       
-      // Kill by PID
-      if (dbPids.master && await this.isProcessRunning(dbPids.master)) {
-        process.kill(dbPids.master, 'SIGTERM');
-      }
-      if (dbPids.caves && await this.isProcessRunning(dbPids.caves)) {
-        process.kill(dbPids.caves, 'SIGTERM');
-      }
+      if (dbPids.master) this.killProcess(dbPids.master);
+      if (dbPids.caves) this.killProcess(dbPids.caves);
     } else {
-      // Use existing process handles
-      if (proc.master) proc.master.kill('SIGTERM');
-      if (proc.caves) proc.caves.kill('SIGTERM');
+      if (proc.masterPid) this.killProcess(proc.masterPid);
+      if (proc.cavesPid) this.killProcess(proc.cavesPid);
     }
     
     await Servers.updateStatus(serverId, 'stopped');

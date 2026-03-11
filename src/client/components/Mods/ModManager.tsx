@@ -221,17 +221,17 @@ export default function ModManager({ serverId, isOwner, onSaveRef }: Props) {
     }
   };
 
-  const handleCopyMods = async (copiedMods: Record<string, ModConfigType>) => {
-    const merged = { ...mods, ...copiedMods };
-    setMods(merged);
+  const handleCopyMods = async (copiedMods: Record<string, ModConfigType>, mode: 'replace' | 'merge') => {
+    const previousMods = mods;
+    const newMods = mode === 'replace' ? copiedMods : { ...mods, ...copiedMods };
+    setMods(newMods);
 
-    const res = await api.put(`/mods/server/${serverId}`, merged);
+    const res = await api.put(`/mods/server/${serverId}`, newMods);
     if (!res.ok) {
       toast.error('Failed to copy mods');
-      setMods(mods);
+      setMods(previousMods);
     } else {
-      const newKeys = Object.keys(copiedMods).filter((k) => !(k in mods));
-      const promises = newKeys.map(async (key) => {
+      const promises = Object.keys(newMods).map(async (key) => {
         const workshopId = key.replace('workshop-', '');
         if (modInfoCache[workshopId]) return null;
         try {

@@ -3,7 +3,6 @@ import { authMiddleware, requireRole, JwtPayload } from '../middleware/auth.js';
 import db from '../db/schema.js';
 import * as modService from '../features/mods/mods.service.js';
 import { generateModOverrides } from '../services/lua.js';
-import { updateModsSetup } from '../services/dst.js';
 import Servers from '../features/servers/servers.queries.js';
 
 type Variables = {
@@ -109,6 +108,8 @@ suggestions.put('/:id/approve', requireRole('admin', 'user'), async (c) => {
   const modKey = `workshop-${workshopId}`;
 
   if (!(modKey in currentMods)) {
+    await modService.downloadMods([workshopId]);
+
     currentMods[modKey] = {
       enabled: true,
       configuration_options: suggestedConfig,
@@ -119,21 +120,6 @@ suggestions.put('/:id/approve', requireRole('admin', 'user'), async (c) => {
 
     const enabledCount = Object.values(currentMods).filter((m) => m.enabled).length;
     await Servers.updateModCount(suggestion.srv_id as number, enabledCount);
-
-    // Update dedicated_server_mods_setup.lua with all workshop IDs
-    const allServers = await modService.getAllServers();
-    const allWorkshopIds = new Set<string>();
-
-    for (const srv of allServers) {
-      const parsed = await modService.getServerModOverrides(srv.share_code as string);
-      if (parsed) {
-        for (const key of Object.keys(parsed)) {
-          allWorkshopIds.add(key.replace('workshop-', ''));
-        }
-      }
-    }
-
-    await updateModsSetup(Array.from(allWorkshopIds));
   }
 
   return c.json({ success: true });

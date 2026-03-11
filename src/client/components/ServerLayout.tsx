@@ -14,6 +14,8 @@ interface Server {
   description: string;
   kuid: string;
   share_code: string;
+  cluster_token: string;
+  cluster_key: string | null;
   max_players: number;
   game_mode: string;
   server_intention: string;

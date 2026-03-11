@@ -50,10 +50,22 @@
     border-color: #FF8A00;
   }
 
+  &.selected {
+    background: rgba(255, 138, 0, 0.2);
+    border-color: #FF8A00;
+  }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.copy-mods-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .copy-mods-name {

@@ -46,41 +46,45 @@ export function parseLuaOverrides(lua: string): Record<string, string | boolean 
 }
 
 export function generateLevelDataOverride(
-  preset: string,
-  location: string,
+  templateLua: string,
   overrides: Record<string, string | boolean | number>,
   playstyle?: string
 ): string {
-  const lines: string[] = ['return {'];
-  lines.push(`  desc="",`);
-  lines.push(`  hideminimap=false,`);
-  lines.push(`  id="${preset}",`);
-  lines.push(`  location="${location}",`);
-  lines.push(`  max_playlist_position=999,`);
-  lines.push(`  min_playlist_position=0,`);
-  lines.push(`  name="${preset}",`);
-  lines.push(`  numrandom_set_pieces=4,`);
-  lines.push(`  override_level_string=false,`);
-  lines.push(`  overrides={`);
+  // Parse the template to get all default overrides
+  const templateOverrides = parseLuaOverrides(templateLua) || {};
 
-  const sortedKeys = Object.keys(overrides).sort();
+  // Merge user overrides on top of template defaults
+  const merged = { ...templateOverrides, ...overrides };
+
+  // Replace only the overrides block and playstyle in the template
+  let result = templateLua;
+
+  // Build new overrides block
+  const overrideLines: string[] = [];
+  const sortedKeys = Object.keys(merged).sort();
   for (const key of sortedKeys) {
-    const val = overrides[key];
+    const val = merged[key];
     if (typeof val === 'string') {
-      lines.push(`    ${key}="${val}",`);
-    } else if (typeof val === 'boolean') {
-      lines.push(`    ${key}=${val},`);
+      overrideLines.push(`    ${key}="${val}",`);
     } else {
-      lines.push(`    ${key}=${val},`);
+      overrideLines.push(`    ${key}=${val},`);
+    }
+  }
+  const newOverridesBlock = `overrides={\n${overrideLines.join('\n')}\n  }`;
+
+  // Replace the overrides block in the template
+  result = result.replace(/overrides\s*=\s*\{[\s\S]*?\n\s*\}/, newOverridesBlock);
+
+  // Replace playstyle if provided
+  if (playstyle) {
+    if (result.includes('playstyle=')) {
+      result = result.replace(/playstyle="[^"]*"/, `playstyle="${playstyle}"`);
+    } else {
+      result = result.replace(/version=4,/, `playstyle="${playstyle}",\n  version=4,`);
     }
   }
 
-  lines.push(`  },`);
-  lines.push(`  playstyle="${playstyle || preset.toLowerCase()}",`);
-  lines.push(`  version=4,`);
-  lines.push(`}`);
-
-  return lines.join('\n') + '\n';
+  return result;
 }
 
 export function parseModOverrides(lua: string): Record<string, { enabled: boolean; configuration_options: Record<string, unknown> }> | null {

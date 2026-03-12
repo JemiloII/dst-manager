@@ -200,18 +200,18 @@ export async function createServerFiles(
 
 export async function writeLevelDataOverrides(shareCode: string, gameMode: string) {
   const clusterDir = getClusterPath(shareCode);
-  const shards: Array<{ name: string; location: string }> = [
-    { name: 'Master', location: 'forest' },
-    { name: 'Caves', location: 'cave' },
+  const shards: Array<{ name: 'Master' | 'Caves' }> = [
+    { name: 'Master' },
+    { name: 'Caves' },
   ];
 
-  await Promise.all(shards.map(({ name, location }) => {
-    const shard = name as 'Master' | 'Caves';
-    const preset = getPresetForShard(gameMode, shard);
-    const overrides = shard === 'Caves' ? {} : getPresetOverrides(preset);
+  await Promise.all(shards.map(async ({ name: shard }) => {
+    const templatePath = path.join(DST_TEMPLATE_DIR, shard, 'leveldataoverride.lua');
+    const templateLua = await fs.readFile(templatePath, 'utf-8');
+    const overrides = shard === 'Caves' ? {} : getPresetOverrides(getPresetForShard(gameMode, shard));
     const playstyle = shard === 'Caves' ? undefined : gameMode;
-    const content = generateLevelDataOverride(preset, location, overrides, playstyle);
-    return fs.writeFile(path.join(clusterDir, name, 'leveldataoverride.lua'), content);
+    const content = generateLevelDataOverride(templateLua, overrides, playstyle);
+    return fs.writeFile(path.join(clusterDir, shard, 'leveldataoverride.lua'), content);
   }));
 }
 

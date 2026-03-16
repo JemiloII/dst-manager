@@ -1,5 +1,6 @@
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 import fs from 'fs/promises';
+import { openSync, writeSync, closeSync, unlinkSync, constants } from 'node:fs';
 import path from 'path';
 import { getClusterPath } from '@server/services/dst.js';
 import Servers from './servers.queries.js';
@@ -16,15 +17,49 @@ interface ServerProcess {
   caves: ChildProcess | null;
   masterPid?: number;
   cavesPid?: number;
+  masterFifoFd?: number;
+  cavesFifoFd?: number;
+  shareCode?: string;
 }
 
 export class ProcessService {
   private processes = new Map<number, ServerProcess>();
-  
+
   private getDstBinary(): string {
-    return path.join(DST_INSTALL_DIR, 'bin64', 'dontstarve_dedicated_server_nullrenderer_x64');
+    return path.join(DST_INSTALL_DIR!, 'bin64', 'dontstarve_dedicated_server_nullrenderer_x64');
   }
-  
+
+  private getFifoPath(shareCode: string, shard: 'Master' | 'Caves'): string {
+    return path.join(getClusterPath(shareCode), shard, 'stdin-fifo');
+  }
+
+  private createFifo(fifoPath: string): void {
+    try { unlinkSync(fifoPath); } catch {}
+    execSync(`mkfifo "${fifoPath}"`);
+  }
+
+  private openFifo(fifoPath: string): number {
+    return openSync(fifoPath, constants.O_RDWR);
+  }
+
+  private closeFifos(proc: ServerProcess): void {
+    if (proc.masterFifoFd !== undefined) {
+      try { closeSync(proc.masterFifoFd); } catch {}
+    }
+    if (proc.cavesFifoFd !== undefined) {
+      try { closeSync(proc.cavesFifoFd); } catch {}
+    }
+  }
+
+  private tryReattachFifos(shareCode: string): { masterFd?: number; cavesFd?: number } | null {
+    let masterFd: number | undefined;
+    let cavesFd: number | undefined;
+    try { masterFd = this.openFifo(this.getFifoPath(shareCode, 'Master')); } catch {}
+    try { cavesFd = this.openFifo(this.getFifoPath(shareCode, 'Caves')); } catch {}
+    if (masterFd === undefined && cavesFd === undefined) return null;
+    return { masterFd, cavesFd };
+  }
+
   private async isProcessRunning(pid: number): Promise<boolean> {
     try {
       process.kill(pid, 0);
@@ -39,47 +74,37 @@ export class ProcessService {
     if (this.processes.has(serverId)) {
       const existing = this.processes.get(serverId)!;
       if (existing.masterPid || existing.cavesPid) {
-        // Verify the cached PIDs are still running
         const masterRunning = existing.masterPid ? await this.isProcessRunning(existing.masterPid) : false;
         const cavesRunning = existing.cavesPid ? await this.isProcessRunning(existing.cavesPid) : false;
-        
+
         if (masterRunning || cavesRunning) {
-          // Processes still running, return them
-          return { 
-            masterPid: existing.masterPid, 
-            cavesPid: existing.cavesPid 
-          };
+          return { masterPid: existing.masterPid, cavesPid: existing.cavesPid };
         } else {
-          // Processes dead, clear cache
+          this.closeFifos(existing);
           this.processes.delete(serverId);
         }
       }
     }
-    
+
     // Check database for running PIDs
     const dbServer = await Servers.findById(serverId);
     if (dbServer?.pids) {
       try {
         const pids = JSON.parse(dbServer.pids);
         if (pids.master || pids.caves) {
-          // Check if processes are actually running
           const masterRunning = pids.master ? await this.isProcessRunning(pids.master) : false;
           const cavesRunning = pids.caves ? await this.isProcessRunning(pids.caves) : false;
-          
+
           if (masterRunning || cavesRunning) {
-            // Cache the process info and return
+            const fifos = this.tryReattachFifos(shareCode);
             this.processes.set(serverId, {
-              master: null,
-              caves: null,
-              masterPid: pids.master,
-              cavesPid: pids.caves
+              master: null, caves: null,
+              masterPid: pids.master, cavesPid: pids.caves,
+              masterFifoFd: fifos?.masterFd, cavesFifoFd: fifos?.cavesFd,
+              shareCode,
             });
-            return { 
-              masterPid: pids.master, 
-              cavesPid: pids.caves 
-            };
+            return { masterPid: pids.master, cavesPid: pids.caves };
           } else {
-            // Processes are dead, clear the database
             await Servers.updateStatus(serverId, 'stopped');
             await Servers.updatePids(serverId, null);
           }
@@ -107,16 +132,24 @@ export class ProcessService {
       await fs.writeFile(agreementsFile, '[agreements]\nprivacy_policy=accepted\neula=accepted\n');
     }
 
-    // Start Master shard
+    // Create named pipes (FIFOs) for stdin — survives Node restarts
+    const masterFifoPath = this.getFifoPath(shareCode, 'Master');
+    const cavesFifoPath = this.getFifoPath(shareCode, 'Caves');
+    this.createFifo(masterFifoPath);
+    this.createFifo(cavesFifoPath);
+    const masterFifoFd = this.openFifo(masterFifoPath);
+    const cavesFifoFd = this.openFifo(cavesFifoPath);
+
+    // Start Master shard — O_RDWR fd keeps FIFO alive even if Node crashes
     const masterProcess = spawn(binary, [
       '-console',
       '-persistent_storage_root', clusterDir,
       '-conf_dir', '.',
       '-cluster', '.',
       '-shard', 'Master',
-    ], { 
-      cwd: path.dirname(binary), // Run from bin64 directory
-      stdio: 'ignore',
+    ], {
+      cwd: path.dirname(binary),
+      stdio: [masterFifoFd, 'ignore', 'ignore'],
       detached: true
     });
 
@@ -127,9 +160,9 @@ export class ProcessService {
       '-conf_dir', '.',
       '-cluster', '.',
       '-shard', 'Caves',
-    ], { 
-      cwd: path.dirname(binary), // Run from bin64 directory
-      stdio: 'ignore',
+    ], {
+      cwd: path.dirname(binary),
+      stdio: [cavesFifoFd, 'ignore', 'ignore'],
       detached: true
     });
 
@@ -146,11 +179,14 @@ export class ProcessService {
     });
 
     // Cache process info
-    this.processes.set(serverId, { 
-      master: masterProcess, 
+    this.processes.set(serverId, {
+      master: masterProcess,
       caves: cavesProcess,
       masterPid: masterProcess.pid,
-      cavesPid: cavesProcess.pid
+      cavesPid: cavesProcess.pid,
+      masterFifoFd,
+      cavesFifoFd,
+      shareCode,
     });
 
     return {
@@ -172,41 +208,115 @@ export class ProcessService {
     }
   }
 
-  async stopServer(serverId: number): Promise<void> {
-    const proc = this.processes.get(serverId);
-    
-    // If not in memory, try to get PIDs from database
+  private async waitForExit(pid: number, timeoutMs: number): Promise<boolean> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      if (!(await this.isProcessRunning(pid))) return true;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    return false;
+  }
+
+  private sendCommand(proc: ServerProcess, command: string): boolean {
+    const buf = Buffer.from(command + '\n');
+    let sent = false;
+    if (proc.masterFifoFd !== undefined) {
+      try { writeSync(proc.masterFifoFd, buf); sent = true; } catch {}
+    }
+    if (proc.cavesFifoFd !== undefined) {
+      try { writeSync(proc.cavesFifoFd, buf); sent = true; } catch {}
+    }
+    return sent;
+  }
+
+  private ensureFifos(proc: ServerProcess): boolean {
+    if (proc.masterFifoFd !== undefined || proc.cavesFifoFd !== undefined) return true;
+    if (!proc.shareCode) return false;
+
+    const fifos = this.tryReattachFifos(proc.shareCode);
+    if (!fifos) return false;
+
+    proc.masterFifoFd = fifos.masterFd;
+    proc.cavesFifoFd = fifos.cavesFd;
+    return true;
+  }
+
+  async stopServer(serverId: number, force = false): Promise<void> {
+    let proc = this.processes.get(serverId);
+
     if (!proc || (!proc.masterPid && !proc.cavesPid)) {
+      // No cached process — check DB for running PIDs
+      const dbServer = await Servers.findById(serverId);
       const dbPids = await Servers.getPids(serverId);
-      
       if (!dbPids || (!dbPids.master && !dbPids.caves)) {
         throw new Error('Server is not running');
       }
-      
-      if (dbPids.master) this.killProcess(dbPids.master);
-      if (dbPids.caves) this.killProcess(dbPids.caves);
-    } else {
+
+      if (!force && dbServer?.share_code) {
+        // Try graceful shutdown via FIFO reattach
+        const fifos = this.tryReattachFifos(dbServer.share_code);
+        if (fifos) {
+          const tempProc: ServerProcess = {
+            master: null, caves: null,
+            masterPid: dbPids.master, cavesPid: dbPids.caves,
+            masterFifoFd: fifos.masterFd, cavesFifoFd: fifos.cavesFd,
+            shareCode: dbServer.share_code,
+          };
+          this.sendCommand(tempProc, 'c_shutdown()');
+          const pids = [dbPids.master, dbPids.caves].filter(Boolean) as number[];
+          const results = await Promise.all(pids.map((pid) => this.waitForExit(pid, 30000)));
+          for (let i = 0; i < pids.length; i++) {
+            if (!results[i]) this.killProcess(pids[i]);
+          }
+          this.closeFifos(tempProc);
+        } else {
+          // No FIFOs available — force kill only option
+          if (dbPids.master) this.killProcess(dbPids.master);
+          if (dbPids.caves) this.killProcess(dbPids.caves);
+        }
+      } else {
+        if (dbPids.master) this.killProcess(dbPids.master);
+        if (dbPids.caves) this.killProcess(dbPids.caves);
+      }
+    } else if (force) {
       if (proc.masterPid) this.killProcess(proc.masterPid);
       if (proc.cavesPid) this.killProcess(proc.cavesPid);
+      this.closeFifos(proc);
+    } else {
+      // Graceful: ensure FIFOs, send c_shutdown(), wait up to 30s
+      this.ensureFifos(proc);
+      const sent = this.sendCommand(proc, 'c_shutdown()');
+      const pids = [proc.masterPid, proc.cavesPid].filter(Boolean) as number[];
+
+      if (sent) {
+        const results = await Promise.all(pids.map((pid) => this.waitForExit(pid, 30000)));
+        for (let i = 0; i < pids.length; i++) {
+          if (!results[i]) this.killProcess(pids[i]);
+        }
+      } else {
+        // Couldn't send command — force kill
+        for (const pid of pids) this.killProcess(pid);
+      }
+      this.closeFifos(proc);
     }
-    
+
     await Servers.updateStatus(serverId, 'stopped');
     sseEmit(serverId, { type: 'status', data: 'stopped' });
     await Servers.updatePids(serverId, null);
     this.processes.delete(serverId);
   }
 
-  async getServerStatus(serverId: number): Promise<{ 
-    status: 'running' | 'stopped', 
-    masterPid?: number, 
-    cavesPid?: number 
+  async getServerStatus(serverId: number): Promise<{
+    status: 'running' | 'stopped',
+    masterPid?: number,
+    cavesPid?: number
   }> {
     // Check in-memory processes first
     const proc = this.processes.get(serverId);
     if (proc && (proc.masterPid || proc.cavesPid)) {
       const masterRunning = proc.masterPid ? await this.isProcessRunning(proc.masterPid) : false;
       const cavesRunning = proc.cavesPid ? await this.isProcessRunning(proc.cavesPid) : false;
-      
+
       if (masterRunning || cavesRunning) {
         return {
           status: 'running',
@@ -215,22 +325,23 @@ export class ProcessService {
         };
       }
     }
-    
-    // Check database PIDs first
-    const dbPids = await Servers.getPids(serverId);
+
+    // Check database PIDs
+    const dbServer = await Servers.findById(serverId);
+    const dbPids = dbServer?.pids ? await Servers.getPids(serverId) : null;
     if (dbPids) {
       const masterRunning = dbPids.master ? await this.isProcessRunning(dbPids.master) : false;
       const cavesRunning = dbPids.caves ? await this.isProcessRunning(dbPids.caves) : false;
-      
+
       if (masterRunning || cavesRunning) {
-        // Update cache
+        // Cache with shareCode for potential FIFO reattach later
         this.processes.set(serverId, {
-          master: null,
-          caves: null,
+          master: null, caves: null,
           masterPid: masterRunning ? dbPids.master : undefined,
-          cavesPid: cavesRunning ? dbPids.caves : undefined
+          cavesPid: cavesRunning ? dbPids.caves : undefined,
+          shareCode: dbServer?.share_code,
         });
-        
+
         return {
           status: 'running',
           masterPid: masterRunning ? dbPids.master : undefined,
@@ -238,18 +349,18 @@ export class ProcessService {
         };
       }
     }
-    
+
     // No PIDs found
     return { status: 'stopped' };
   }
 
   async checkAllServersOnStartup(): Promise<void> {
     const servers = await Servers.findAll();
-    
+
     for (const server of servers) {
       const status = await this.getServerStatus(server.id);
       await Servers.updateStatus(server.id, status.status);
-      
+
       if (status.status === 'running') {
         console.log(`Server ${server.id} is running (Master PID: ${status.masterPid}, Caves PID: ${status.cavesPid})`);
       } else if (server.pids) {

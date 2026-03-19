@@ -4,6 +4,7 @@ import { api } from '../api';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
+import TokenSelector from '../components/TokenSelector/TokenSelector';
 import { toast } from '../utils/toast';
 
 export default function CreateServer() {
@@ -80,20 +81,10 @@ export default function CreateServer() {
                 </div>
               </div>
             </label>
-            <input
-              id="clusterToken"
-              type="text"
+            <TokenSelector
               value={clusterToken}
-              onChange={(e) => setClusterToken(e.target.value)}
-              required
-              placeholder="Paste your cluster token here"
+              onChange={setClusterToken}
             />
-            <p className="form-hint">
-              Get your token from{' '}
-              <a href="https://accounts.klei.com/account/game/servers?game=DontStarveTogether" target="_blank" rel="noopener noreferrer">
-                Klei Account
-              </a>
-            </p>
           </div>
 
           <div className="form-group">

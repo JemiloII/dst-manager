@@ -7,17 +7,50 @@ interface SSEClient {
 }
 
 const clients = new Set<SSEClient>();
-const serverListeners = new Map<number, number>(); // serverId -> listener count
+const serverListeners = new Map<number, number>();
+let globalListeners = 0;
+
+function addListener(serverId: number | null) {
+  if (serverId !== null) {
+    const count = serverListeners.get(serverId) || 0;
+    serverListeners.set(serverId, count + 1);
+    if (count === 0) Monitor.startMonitoring(serverId);
+  } else {
+    globalListeners++;
+    if (globalListeners === 1) Monitor.startMonitoringAll();
+  }
+}
+
+function removeListener(serverId: number | null) {
+  if (serverId !== null) {
+    const count = serverListeners.get(serverId) || 0;
+    if (count > 1) {
+      serverListeners.set(serverId, count - 1);
+    } else {
+      serverListeners.delete(serverId);
+      Monitor.stopMonitoring(serverId);
+    }
+  } else {
+    globalListeners = Math.max(0, globalListeners - 1);
+    if (globalListeners === 0) Monitor.stopMonitoringAll();
+  }
+}
+
+function triggerStatusSync(serverId: number | null) {
+  if (serverId !== null) {
+    Monitor.syncStatus(serverId);
+  } else {
+    Monitor.syncAll();
+  }
+}
 
 export function sseEmit(serverId: number, event: { type: string; [key: string]: unknown }) {
+  const encoded = new TextEncoder().encode(
+    `event: ${event.type}\ndata: ${JSON.stringify({ ...event, serverId })}\n\n`
+  );
   for (const client of clients) {
     if (client.serverId === null || client.serverId === serverId) {
-      try {
-        const data = `event: ${event.type}\ndata: ${JSON.stringify({ ...event, serverId })}\n\n`;
-        client.controller.enqueue(new TextEncoder().encode(data));
-      } catch {
-        clients.delete(client);
-      }
+      try { client.controller.enqueue(encoded); } catch { clients.delete(client); }
     }
   }
 }
@@ -28,51 +61,23 @@ export function sseHandler(serverId: number | null) {
       start(controller) {
         const client: SSEClient = { controller, serverId };
         clients.add(client);
+        addListener(serverId);
+        triggerStatusSync(serverId);
 
-        // Track server-specific listeners and start monitoring if needed
-        if (serverId !== null) {
-          const currentCount = serverListeners.get(serverId) || 0;
-          serverListeners.set(serverId, currentCount + 1);
-          
-          if (currentCount === 0) {
-            // First listener for this server, start monitoring
-            Monitor.startMonitoring(serverId);
-          }
-        }
-
-        c.req.raw.signal.addEventListener('abort', () => {
+        const cleanup = () => {
           clients.delete(client);
-          controller.close();
+          removeListener(serverId);
+          clearInterval(keepAlive);
+          try { controller.close(); } catch {}
+        };
 
-          // Decrement listener count and stop monitoring if no more listeners
-          if (serverId !== null) {
-            const currentCount = serverListeners.get(serverId) || 0;
-            if (currentCount > 1) {
-              serverListeners.set(serverId, currentCount - 1);
-            } else {
-              serverListeners.delete(serverId);
-              Monitor.stopMonitoring(serverId);
-            }
-          }
-        });
+        c.req.raw.signal.addEventListener('abort', cleanup);
 
         const keepAlive = setInterval(() => {
           try {
             controller.enqueue(new TextEncoder().encode(': keepalive\n\n'));
           } catch {
-            clearInterval(keepAlive);
-            clients.delete(client);
-            
-            // Clean up listener tracking on error
-            if (serverId !== null) {
-              const currentCount = serverListeners.get(serverId) || 0;
-              if (currentCount > 1) {
-                serverListeners.set(serverId, currentCount - 1);
-              } else {
-                serverListeners.delete(serverId);
-                Monitor.stopMonitoring(serverId);
-              }
-            }
+            cleanup();
           }
         }, 30000);
       },

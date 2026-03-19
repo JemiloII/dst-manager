@@ -301,4 +301,3 @@ export async function downloadMods(workshopIds: string[]): Promise<void> {
     console.error('Failed to download mods:', e);
   }
 }
-

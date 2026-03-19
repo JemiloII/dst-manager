@@ -1,0 +1,67 @@
+@use '../../styles/variables' as *;
+
+.token-selector {
+  .token-selector-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    select {
+      flex: 1;
+    }
+  }
+
+  .token-selector-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .token-selector-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    color: #ccc;
+  }
+
+  .token-selector-label {
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+
+  .token-selector-delete {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    line-height: 1;
+
+    &:hover {
+      color: #dc3545;
+    }
+  }
+
+  .token-selector-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: $primary;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+
+    &:hover {
+      background: rgba($primary, 0.1);
+    }
+  }
+}

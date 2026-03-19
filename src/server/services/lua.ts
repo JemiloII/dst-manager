@@ -105,7 +105,7 @@ export function parseModOverrides(lua: string): Record<string, { enabled: boolea
     const modId = match[1];
     const body = match[2];
 
-    const enabledMatch = body.match(/enabled\s*=\s*(true|false)/);
+    const enabledMatch = body.match(/\benabled\s*=\s*(true|false)/);
     const enabled = enabledMatch ? enabledMatch[1] === 'true' : false;
 
     const configOptions: Record<string, unknown> = {};

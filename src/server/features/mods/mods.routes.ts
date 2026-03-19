@@ -54,7 +54,7 @@ mods.get('/server/:serverId', async (c) => {
     return c.json({ error: 'Server not found' }, 404);
   }
 
-  if (user.role !== 'admin' && user.role !== 'guest' && server.user_id !== user.id) {
+  if (user.role !== 'admin' && server.user_id !== user.id) {
     return c.json({ error: 'Forbidden' }, 403);
   }
 

@@ -277,7 +277,7 @@ export default function ServerLayout({ children, onSave, onRevert, saveTitle = "
         <div
           className="share-link"
           onClick={() => {
-            const host = window.location.hostname === 'localhost' ? 'https://dontstarvetogether.gg' : window.location.origin;
+            const host = window.location.hostname === 'localhost' ? 'https://dst.cx' : window.location.origin;
             navigator.clipboard.writeText(`${host}/s/${server.share_code}`);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);

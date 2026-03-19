@@ -105,6 +105,33 @@ export default function Dashboard() {
     });
   }, [servers, players, statusFilter, roleFilter, sortBy, user?.id, user?.role]);
 
+  const isAdmin = user?.role === 'admin';
+
+  // Group servers by owner for admin view
+  const grouped = useMemo(() => {
+    if (!isAdmin) return null;
+
+    const groups = new Map<string, typeof filtered>();
+    for (const server of filtered) {
+      const ownerName = server.owner_name || 'Unknown';
+      if (!groups.has(ownerName)) groups.set(ownerName, []);
+      groups.get(ownerName)!.push(server);
+    }
+
+    // Sort: admin's own servers first, then alphabetical
+    const adminName = user?.displayName || user?.username || '';
+    const sorted = new Map<string, typeof filtered>();
+    if (groups.has(adminName)) {
+      sorted.set(adminName, groups.get(adminName)!);
+    }
+    const otherKeys = [...groups.keys()].filter((k) => k !== adminName).sort((a, b) => a.localeCompare(b));
+    for (const key of otherKeys) {
+      sorted.set(key, groups.get(key)!);
+    }
+
+    return sorted;
+  }, [filtered, isAdmin, user?.displayName, user?.username]);
+
   const handleStart = async (code: string) => {
     const res = await api.post(`/servers/${code}/start`);
     if (!res.ok) {
@@ -118,6 +145,55 @@ export default function Dashboard() {
   const handleStop = async (code: string) => {
     await api.post(`/servers/${code}/stop`);
     await fetchServers();
+  };
+
+  const renderServerCard = (server: typeof filtered[number]) => {
+    const playerInfo = players[server.id];
+    const canControl = server.user_id === user?.id || user?.role === 'admin';
+    return (
+      <Link key={server.id} to={`/servers/${server.share_code}`} className="server-card">
+        <div className="server-card-icon">
+          <img
+            src={`/images/serverplaystyles/${server.game_mode}_small.png`}
+            alt={capitalize(server.game_mode)}
+            title={capitalize(server.game_mode)}
+          />
+        </div>
+        <div className="server-info">
+          <h3>
+            {isAdmin && server.owner_name && <span className="server-owner">{server.owner_name}</span>}
+            {server.name}
+          </h3>
+          <div className="server-meta">
+            <span className={`status-badge ${server.status}`}>{server.status}</span>
+            <span>{capitalize(server.game_mode)}</span>
+            <span className="meta-divider">|</span>
+            <span>Mods: {server.mod_count || 0}</span>
+            <span className="meta-divider">|</span>
+            <span>
+              Players: {playerInfo ? `${playerInfo.count}/${playerInfo.max}` : `0/${server.max_players}`}
+            </span>
+            {server.started_at ? <><span className="meta-divider">|</span><span>{formatRuntime(server.started_at)}</span></> : null}
+            {server.pvp ? <><span className="meta-divider">|</span><span>PvP</span></> : null}
+          </div>
+        </div>
+        <div className="server-actions">
+          {canControl && (
+            <>
+              {server.status === 'stopped' ? (
+                <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStart(server.share_code); }} title="Start">
+                  <img src="/images/button_icons/AFKstart.png" alt="Start" />
+                </button>
+              ) : (
+                <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStop(server.share_code); }} title="Stop">
+                  <img src="/images/button_icons/AFKstop.png" alt="Stop" />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </Link>
+    );
   };
 
   if (loading) {
@@ -184,52 +260,15 @@ export default function Dashboard() {
         <div className="card">
           <p>No servers match your filters.</p>
         </div>
+      ) : isAdmin && grouped ? (
+        [...grouped.entries()].map(([ownerName, groupServers]) => (
+          <div key={ownerName} className="server-group">
+            <div className="server-group-header">{ownerName}</div>
+            {groupServers.map(renderServerCard)}
+          </div>
+        ))
       ) : (
-        filtered.map((server) => {
-          const playerInfo = players[server.id];
-          const canControl = server.user_id === user?.id || user?.role === 'admin';
-          return (
-            <Link key={server.id} to={`/servers/${server.share_code}`} className="server-card">
-              <div className="server-card-icon">
-                <img
-                  src={`/images/serverplaystyles/${server.game_mode}_small.png`}
-                  alt={capitalize(server.game_mode)}
-                  title={capitalize(server.game_mode)}
-                />
-              </div>
-              <div className="server-info">
-                <h3>{server.name}</h3>
-                <div className="server-meta">
-                  <span className={`status-badge ${server.status}`}>{server.status}</span>
-                  <span>{capitalize(server.game_mode)}</span>
-                  <span className="meta-divider">|</span>
-                  <span>Mods: {server.mod_count || 0}</span>
-                  <span className="meta-divider">|</span>
-                  <span>
-                    Players: {playerInfo ? `${playerInfo.count}/${playerInfo.max}` : `0/${server.max_players}`}
-                  </span>
-                  {server.started_at ? <><span className="meta-divider">|</span><span>{formatRuntime(server.started_at)}</span></> : null}
-                  {server.pvp ? <><span className="meta-divider">|</span><span>PvP</span></> : null}
-                </div>
-              </div>
-              <div className="server-actions">
-                {canControl && (
-                  <>
-                    {server.status === 'stopped' ? (
-                      <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStart(server.share_code); }} title="Start">
-                        <img src="/images/button_icons/AFKstart.png" alt="Start" />
-                      </button>
-                    ) : (
-                      <button className="icon-btn" onClick={(e) => { e.preventDefault(); handleStop(server.share_code); }} title="Stop">
-                        <img src="/images/button_icons/AFKstop.png" alt="Stop" />
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </Link>
-          );
-        })
+        filtered.map(renderServerCard)
       )}
     </>
   );

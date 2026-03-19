@@ -106,6 +106,7 @@ class ValidationService {
       kuid,
       shareCode: VALIDATION_SHARE_CODE,
       clusterToken: VALIDATION_CLUSTER_TOKEN,
+      clusterTokenId: null,
       maxPlayers: 64,
       gameMode: 'endless',
       serverIntention: 'cooperative',

@@ -7,6 +7,7 @@ interface Server {
   name: string;
   description: string;
   cluster_token: string;
+  cluster_token_id: number | null;
   kuid: string;
   share_code: string;
   max_players: number;
@@ -18,6 +19,7 @@ interface Server {
   status: 'stopped' | 'starting' | 'running' | 'paused';
   started_at: string | null;
   created_at: string;
+  owner_name?: string;
 }
 
 interface PlayerInfo {

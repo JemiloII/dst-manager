@@ -5,6 +5,7 @@ import ServerLayout from '../components/ServerLayout';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
+import TokenSelector from '../components/TokenSelector/TokenSelector';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { toast } from '../utils/toast';
 
@@ -186,10 +187,9 @@ export default function Config() {
               </div>
             </div>
           </label>
-          <input
-            type="text"
+          <TokenSelector
             value={form.clusterToken}
-            onChange={(e) => setForm({ ...form, clusterToken: e.target.value })}
+            onChange={(token) => setForm({ ...form, clusterToken: token })}
             disabled={!isOwner}
           />
         </div>

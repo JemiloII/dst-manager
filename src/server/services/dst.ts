@@ -65,9 +65,6 @@ interface ServerConfig {
 }
 
 function getClusterIniValues(shareCode: string, portOffset: number, config: ServerConfig) {
-  const desc = config.description
-    ? `${config.description}\n${SERVER_HOST}`
-    : SERVER_HOST;
   const ports = getPortsForServer(portOffset);
 
   return {
@@ -75,7 +72,7 @@ function getClusterIniValues(shareCode: string, portOffset: number, config: Serv
     MAX_PLAYERS: config.maxPlayers,
     PVP: config.pvp,
     CLUSTER_NAME: config.name,
-    CLUSTER_DESCRIPTION: desc,
+    CLUSTER_DESCRIPTION: config.description || '',
     CLUSTER_PASSWORD: config.password,
     CLUSTER_INTENTION: config.serverIntention,
     ENABLE_VOTE_KICK: true,
@@ -142,8 +139,8 @@ export async function ensureServerFiles(
 ): Promise<void> {
   const clusterDir = getClusterPath(server.share_code);
 
-  await fs.mkdir(path.join(clusterDir, 'Master'), { recursive: true });
-  await fs.mkdir(path.join(clusterDir, 'Caves'), { recursive: true });
+  await fs.mkdir(path.join(clusterDir, 'Master'), { recursive: true, mode: 0o775 });
+  await fs.mkdir(path.join(clusterDir, 'Caves'), { recursive: true, mode: 0o775 });
 
   await fs.writeFile(path.join(clusterDir, 'cluster_token.txt'), server.cluster_token.trim());
 

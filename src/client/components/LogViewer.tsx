@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api, createSSE, SSEConnection } from '../api';
 import Tabs from './Tabs';
+import Checkbox from './Checkbox/Checkbox';
 
 interface Props {
   serverId: string;
@@ -14,8 +15,14 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
     Caves: '',
     Chat: ''
   });
-  const logRef = useRef<HTMLDivElement>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const logRef = useRef<HTMLDivElement | null>(null);
   const esRef = useRef<SSEConnection | null>(null);
+
+  const logCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    logRef.current = node;
+    if (node) node.scrollTop = node.scrollHeight;
+  }, [shard]);
 
   // Fetch initial logs
   useEffect(() => {
@@ -54,10 +61,9 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
-  }, [logs, shard]);
+    if (!autoScroll || !logRef.current) return;
+    logRef.current.scrollTop = logRef.current.scrollHeight;
+  }, [logs, shard, autoScroll]);
 
   const handleClear = useCallback(async () => {
     await api.delete(`/logs/${serverId}/${shard}`);
@@ -66,14 +72,17 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
 
   const LogContent = ({ type }: { type: 'Master' | 'Caves' | 'Chat' }) => (
     <div className="log-viewer-wrapper">
-      <button
-        onClick={handleClear}
-        className="icon-btn log-clear-btn"
-        title="Clear logs"
-      >
-        <img src="/images/button_icons/clean_all.png" alt="Clear" />
-      </button>
-      <div className="log-viewer" ref={type === shard ? logRef : undefined}>
+      <div className="log-overlay-controls">
+        <Checkbox label="Auto Scroll" checked={autoScroll} onChange={setAutoScroll} />
+        <button
+          onClick={handleClear}
+          className="icon-btn log-clear-btn"
+          title="Clear logs"
+        >
+          <img src="/images/button_icons/clean_all.png" alt="Clear" />
+        </button>
+      </div>
+      <div className="log-viewer" ref={type === shard ? logCallbackRef : undefined}>
         {logs[type] || 'No logs available.'}
       </div>
     </div>

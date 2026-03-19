@@ -9,12 +9,13 @@ import { authRoutes } from './features/auth/index.js';
 import { serverRoutes, processService, serverService } from './features/servers/index.js';
 import { modsRouter } from './features/mods';
 import { lobbiesRoutes } from './features/lobbies';
-import world from './routes/world';
-import suggestions from './routes/suggestions';
-import tickets from './routes/tickets';
-import logs from './routes/logs';
-import admin from './routes/admin';
-import interactions from './routes/interactions';
+import { worldRoutes } from './features/world/index.js';
+import { suggestionRoutes } from './features/suggestions/index.js';
+import { ticketRoutes } from './features/tickets/index.js';
+import { logRoutes } from './features/logs/index.js';
+import { adminRoutes } from './features/admin/index.js';
+import { interactionRoutes } from './features/interactions/index.js';
+import { tokensRoutes } from './features/tokens/index.js';
 import { preferencesRoutes } from './features/preferences/index.js';
 import { validationRoutes, validationService } from './features/validation/index.js';
 import { Monitor } from './services/monitor';
@@ -32,7 +33,7 @@ const DEV = NODE_ENV === 'development';
 const app = new Hono();
 
 app.use('*', cors({
-  origin: ['https://dontstarvetogether.gg', 'https://dst.gg', 'http://localhost:7891'],
+  origin: ['https://dontstarvetogether.gg', 'https://dst.gg', 'https://dst.cx', 'http://localhost:7891'],
 }));
 
 // Error handling middleware
@@ -45,12 +46,13 @@ app.route('/api/auth', authRoutes);
 app.route('/api/servers', serverRoutes);
 app.route('/api/mods', modsRouter);
 app.route('/api/lobbies', lobbiesRoutes);
-app.route('/api/world', world);
-app.route('/api/suggestions', suggestions);
-app.route('/api/tickets', tickets);
-app.route('/api/logs', logs);
-app.route('/api/admin', admin);
-app.route('/api/interactions', interactions);
+app.route('/api/world', worldRoutes);
+app.route('/api/suggestions', suggestionRoutes);
+app.route('/api/tickets', ticketRoutes);
+app.route('/api/logs', logRoutes);
+app.route('/api/admin', adminRoutes);
+app.route('/api/interactions', interactionRoutes);
+app.route('/api/tokens', tokensRoutes);
 app.route('/api/preferences', preferencesRoutes);
 app.route('/api/validation', validationRoutes);
 

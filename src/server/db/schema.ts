@@ -128,6 +128,18 @@ export class Database {
       )`,
       args: [],
     },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS cluster_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        token TEXT NOT NULL,
+        kuid TEXT NOT NULL,
+        nickname TEXT DEFAULT '',
+        created_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )`,
+      args: [],
+    },
   ]);
 
   // Migrations for existing databases
@@ -170,6 +182,42 @@ export class Database {
     sql: `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_kuid ON users(kuid) WHERE kuid IS NOT NULL`,
     args: [],
   }).catch(() => {});
+
+  // Migration: Add cluster_token_id to servers
+  await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN cluster_token_id INTEGER DEFAULT NULL REFERENCES cluster_tokens(id)`,
+    args: [],
+  }).catch(() => {});
+
+  // Migration: Move existing cluster tokens to cluster_tokens table
+  try {
+    const existing = await db.execute({
+      sql: `SELECT DISTINCT s.user_id, s.cluster_token, s.kuid FROM servers s WHERE s.cluster_token_id IS NULL AND s.cluster_token != ''`,
+      args: [],
+    });
+    for (const row of existing.rows as any[]) {
+      const dup = await db.execute({
+        sql: `SELECT id FROM cluster_tokens WHERE user_id = ? AND token = ?`,
+        args: [row.user_id, row.cluster_token],
+      });
+      let tokenId: number;
+      if (dup.rows.length > 0) {
+        tokenId = (dup.rows[0] as any).id;
+      } else {
+        const ins = await db.execute({
+          sql: `INSERT INTO cluster_tokens (user_id, token, kuid) VALUES (?, ?, ?)`,
+          args: [row.user_id, row.cluster_token, row.kuid],
+        });
+        tokenId = Number(ins.lastInsertRowid);
+      }
+      await db.execute({
+        sql: `UPDATE servers SET cluster_token_id = ? WHERE user_id = ? AND cluster_token = ? AND cluster_token_id IS NULL`,
+        args: [tokenId, row.user_id, row.cluster_token],
+      });
+    }
+  } catch (e) {
+    console.error('Token migration error:', e);
+  }
 
   // Migration: Allow NULL user_id in server_admins for KUID-only entries
   const tableInfo = await db.execute({ sql: `PRAGMA table_info(server_admins)`, args: [] });

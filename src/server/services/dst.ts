@@ -62,17 +62,19 @@ interface ServerConfig {
   pvp: boolean;
   password: string;
   clusterKey?: string;
+  branding?: boolean;
 }
 
 function getClusterIniValues(shareCode: string, portOffset: number, config: ServerConfig) {
   const ports = getPortsForServer(portOffset);
+  const branding = !!config.branding;
 
   return {
     GAME_MODE: config.gameMode,
     MAX_PLAYERS: config.maxPlayers,
     PVP: config.pvp,
-    CLUSTER_NAME: config.name,
-    CLUSTER_DESCRIPTION: config.description || '',
+    CLUSTER_NAME: branding ? `DST.CX | ${config.name}` : config.name,
+    CLUSTER_DESCRIPTION: branding ? `Hosted free at dst.cx\n${config.description || ''}` : (config.description || ''),
     CLUSTER_PASSWORD: config.password,
     CLUSTER_INTENTION: config.serverIntention,
     ENABLE_VOTE_KICK: true,
@@ -134,6 +136,7 @@ export async function ensureServerFiles(
     max_players: number;
     pvp: number | boolean;
     password: string;
+    branding?: number;
   },
   additionalKuids: string[] = []
 ): Promise<void> {
@@ -154,6 +157,7 @@ export async function ensureServerFiles(
     maxPlayers: server.max_players,
     pvp: !!server.pvp,
     password: server.password || '',
+    branding: !!server.branding,
   };
 
   await writeClusterIni(server.share_code, server.port_offset, config);

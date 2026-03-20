@@ -85,7 +85,7 @@ export default function Layout() {
           {user?.role === 'admin' && (
             <><Link to="/admin" className="footer-link">Admin</Link> | </>
           )}
-          <Link to="/terms" className="footer-link">Terms of Service</Link> | dst.gg © {new Date().getFullYear()}
+          <Link to="/terms" className="footer-link">Terms of Service</Link> | dst.cx © {new Date().getFullYear()}
         </p>
       </footer>
 

@@ -10,8 +10,8 @@ import { toast } from '../utils/toast';
 
 const STATUS_OPTIONS = ['all', 'running', 'stopped'];
 const STATUS_LABELS: Record<string, string> = { all: 'All', running: 'Running', stopped: 'Stopped' };
-const ROLE_OPTIONS = ['all', 'owned', 'admin'];
-const ROLE_LABELS: Record<string, string> = { all: 'All', owned: 'Owned', admin: 'Admin' };
+const SHOW_OPTIONS = ['all', 'owned', 'admin'];
+const SHOW_LABELS: Record<string, string> = { all: 'All', owned: 'Owned', admin: 'Admin' };
 const SORT_OPTIONS = ['az', 'players', 'runtime', 'status'];
 const SORT_LABELS: Record<string, string> = { az: 'A-Z', players: 'Players', runtime: 'Runtime', status: 'Status' };
 
@@ -214,10 +214,10 @@ export default function Dashboard() {
               onChange={(v) => setPreference('dashboard_status', v as string)}
             />
             <CycleSelector
-              label="Role"
+              label="Show"
               value={roleFilter}
-              options={ROLE_OPTIONS}
-              optionLabels={ROLE_LABELS}
+              options={SHOW_OPTIONS}
+              optionLabels={SHOW_LABELS}
               onChange={(v) => setPreference('dashboard_role', v as string)}
             />
             <CycleSelector

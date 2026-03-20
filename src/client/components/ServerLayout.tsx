@@ -25,6 +25,7 @@ interface Server {
   status: string;
   started_at: string | null;
   is_server_admin?: boolean;
+  branding: number;
 }
 
 interface Props {

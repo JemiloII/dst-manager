@@ -11,6 +11,10 @@ export default function PasswordInput(props: Props) {
         {...props}
         type={visible ? 'text' : 'password'}
         className={`password-input ${props.className || ''}`}
+        autoComplete="off"
+        data-1p-ignore
+        data-lpignore="true"
+        data-form-type="other"
       />
       <button
         type="button"

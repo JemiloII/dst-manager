@@ -4,17 +4,24 @@ import Auth from '@server/features/auth/auth.queries.js';
 interface Limits {
   maxServers: number;
   maxRunning: number;
+  maxPlayers: number;
 }
 
 const LIMITS = {
-  unvalidated: { maxServers: 2, maxRunning: 1 },
-  validated: { maxServers: 5, maxRunning: 3 },
-  admin: { maxServers: Infinity, maxRunning: Infinity },
+  unvalidated: { maxServers: 2, maxRunning: 1, maxPlayers: 6 },
+  validated: { maxServers: 5, maxRunning: 3, maxPlayers: 8 },
+  admin: { maxServers: Infinity, maxRunning: Infinity, maxPlayers: 64 },
 } as const;
 
 export function getLimitsForUser(role: string, isValidated: boolean): Limits {
   if (role === 'admin') return LIMITS.admin;
   return isValidated ? LIMITS.validated : LIMITS.unvalidated;
+}
+
+export async function getMaxPlayers(userId: number): Promise<number> {
+  const user = await Auth.findUserById(userId);
+  if (!user) return LIMITS.unvalidated.maxPlayers;
+  return getLimitsForUser(user.role, !!user.is_validated).maxPlayers;
 }
 
 export async function checkCanCreateServer(userId: number): Promise<{ allowed: boolean; reason?: string }> {

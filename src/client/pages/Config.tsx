@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../api';
+import { useAuth } from '../stores/Auth';
 import ServerLayout from '../components/ServerLayout';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
@@ -24,12 +25,16 @@ interface Server {
   pvp: number;
   password: string;
   status: string;
+  branding: number;
 }
 
 export default function Config() {
   const { code } = useParams<{ code: string }>();
-  const [form, setForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '', clusterToken: '', clusterKey: '' });
-  const [originalForm, setOriginalForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '', clusterToken: '', clusterKey: '' });
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const maxPlayerLimit = isAdmin ? 64 : user?.isValidated ? 8 : 6;
+  const [form, setForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '', clusterToken: '', clusterKey: '', branding: true });
+  const [originalForm, setOriginalForm] = useState({ name: '', description: '', gameMode: '', serverIntention: 'cooperative', maxPlayers: 6, pvp: false, password: '', clusterToken: '', clusterKey: '', branding: true });
   const [hasChanges, setHasChanges] = useState(false);
   const [serverData, setServerData] = useState<Server | null>(null);
   const [confirmType, setConfirmType] = useState<'token' | 'key' | null>(null);
@@ -53,6 +58,7 @@ export default function Config() {
       max_players: Number(form.maxPlayers),
       pvp: form.pvp ? 1 : 0,
       password: form.password,
+      branding: form.branding,
     };
     if (form.clusterToken !== originalForm.clusterToken) {
       body.cluster_token = form.clusterToken;
@@ -75,6 +81,7 @@ export default function Config() {
           password: data.password,
           clusterToken: data.cluster_token || '',
           clusterKey: data.cluster_key || `dst-${data.share_code}`,
+          branding: !!data.branding,
         };
         setForm(updatedForm);
         setOriginalForm(updatedForm);
@@ -138,6 +145,7 @@ export default function Config() {
             password: server.password,
             clusterToken: server.cluster_token || '',
             clusterKey: server.cluster_key || `dst-${server.share_code}`,
+            branding: !!server.branding,
           };
           setForm(formData);
           setOriginalForm(formData);
@@ -223,7 +231,7 @@ export default function Config() {
             <input
               type="range"
               min={1}
-              max={64}
+              max={maxPlayerLimit}
               value={form.maxPlayers}
               onChange={(e) => setForm({ ...form, maxPlayers: parseInt(e.target.value, 10) || 1 })}
             />
@@ -239,6 +247,15 @@ export default function Config() {
             disabled={!isOwner}
           />
         </div>
+        {user?.role === 'admin' && (
+          <div className="form-group">
+            <Checkbox
+              label="Branding"
+              checked={form.branding}
+              onChange={(checked) => setForm({ ...form, branding: checked })}
+            />
+          </div>
+        )}
         <div className="form-group">
           <label>Password</label>
           <PasswordInput

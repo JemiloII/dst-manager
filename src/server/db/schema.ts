@@ -219,6 +219,11 @@ export class Database {
     console.error('Token migration error:', e);
   }
 
+  await db.execute({
+    sql: `ALTER TABLE servers ADD COLUMN branding INTEGER DEFAULT 1`,
+    args: [],
+  }).catch(() => {});
+
   // Migration: Allow NULL user_id in server_admins for KUID-only entries
   const tableInfo = await db.execute({ sql: `PRAGMA table_info(server_admins)`, args: [] });
   const userIdCol = (tableInfo.rows as any[]).find((r: any) => r.name === 'user_id');

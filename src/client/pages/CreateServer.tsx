@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { useAuth } from '../stores/Auth';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PasswordInput from '../components/PasswordInput';
 import PlayStyleSelector, { gameModeOptions, serverIntentionOptions } from '../components/PlayStyleSelector/PlayStyleSelector';
@@ -9,6 +10,9 @@ import { toast } from '../utils/toast';
 
 export default function CreateServer() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const maxPlayerLimit = isAdmin ? 64 : user?.isValidated ? 8 : 6;
   const [name, setName] = useState('');
   const [clusterToken, setClusterToken] = useState('');
   const [description, setDescription] = useState('');
@@ -17,6 +21,8 @@ export default function CreateServer() {
   const [maxPlayers, setMaxPlayers] = useState(6);
   const [pvp, setPvp] = useState(false);
   const [password, setPassword] = useState('');
+  const [branding, setBranding] = useState(true);
+  const [clusterKey, setClusterKey] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,12 +30,14 @@ export default function CreateServer() {
     const res = await api.post('/servers', {
       name,
       clusterToken,
+      clusterKey,
       description,
       gameMode,
       serverIntention,
       maxPlayers,
       pvp,
       password,
+      branding,
     });
 
     const data = await res.json();
@@ -114,7 +122,7 @@ export default function CreateServer() {
               id="maxPlayers"
               type="range"
               min={1}
-              max={64}
+              max={maxPlayerLimit}
               value={maxPlayers}
               onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
             />
@@ -127,6 +135,15 @@ export default function CreateServer() {
               onChange={setPvp}
             />
           </div>
+          {isAdmin && (
+            <div className="form-group">
+              <Checkbox
+                label="Branding"
+                checked={branding}
+                onChange={setBranding}
+              />
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="password">Server Password (optional)</label>
@@ -134,6 +151,39 @@ export default function CreateServer() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="clusterKey" className="label-with-tooltip">
+              Cluster Key (optional)
+              <div className="tooltip-wrapper">
+                <button
+                  type="button"
+                  className="tooltip-trigger"
+                  onMouseEnter={(e) => {
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    if (tooltip) (tooltip as HTMLElement).style.display = 'block';
+                  }}
+                  onMouseLeave={(e) => {
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    if (tooltip) (tooltip as HTMLElement).style.display = 'none';
+                  }}
+                >
+                  ?
+                </button>
+                <div className="tooltip-content">
+                  <p>A unique key used by players to reconnect to this server. Leave blank to auto-generate.</p>
+                </div>
+              </div>
+            </label>
+            <input
+              id="clusterKey"
+              type="text"
+              value={clusterKey}
+              onChange={(e) => setClusterKey(e.target.value)}
+              placeholder="Auto-generated if left blank"
+              autoComplete="off"
             />
           </div>
 

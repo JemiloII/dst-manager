@@ -1,67 +1,66 @@
 @use '../../styles/variables' as *;
 
 .token-selector {
-  .token-selector-row {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 0.5rem;
+  position: relative;
 
-    select {
-      flex: 1;
-    }
-  }
-
-  .token-selector-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .token-selector-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.08);
+  .token-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 4px;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.85rem;
-    color: #ccc;
+    max-height: 200px;
+    overflow-y: auto;
   }
 
-  .token-selector-label {
-    font-family: monospace;
-    font-size: 0.85rem;
-  }
+  .token-dropdown-item {
+    display: flex;
+    align-items: center;
 
-  .token-selector-delete {
-    background: transparent;
-    border: none;
-    color: #888;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0 0.25rem;
-    line-height: 1;
-
-    &:hover {
-      color: #dc3545;
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
   }
 
-  .token-selector-toggle {
+  .token-dropdown-select {
+    flex: 1;
+    display: block;
+    padding: 0.6rem 0.75rem;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: $primary;
-    font-size: 0.85rem;
+    border: none;
+    border-radius: 0;
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
+    text-align: left;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #ccc;
+    margin: 0;
+    width: auto;
 
     &:hover {
-      background: rgba($primary, 0.1);
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .token-dropdown-delete {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
+
+    &:hover {
+      opacity: 1;
     }
   }
 }

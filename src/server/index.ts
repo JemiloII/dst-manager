@@ -19,6 +19,7 @@ import { tokensRoutes } from './features/tokens/index.js';
 import { preferencesRoutes } from './features/preferences/index.js';
 import { validationRoutes, validationService } from './features/validation/index.js';
 import { Monitor } from './services/monitor';
+import { updater } from './services/updater';
 
 const {
   ADMIN_USER = '',
@@ -93,6 +94,7 @@ async function start() {
     await serverService.syncModCounts();
 
     Monitor.start();
+    updater.startPeriodicCheck();
 
     // Start validation server (if configured)
     await validationService.startValidationServer();

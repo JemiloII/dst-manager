@@ -6,49 +6,22 @@ import { sseEmit } from './sse.js';
 import Servers from '../features/servers/servers.queries.js';
 import { getClusterPath } from './dst.js';
 
-interface ServerInstance {
-  name: string;
-  connected: number;
-  maxconnections: number;
-  players: string[];
-  port: number;
-  host: string;
-}
-
 interface LogWatcher {
   close(): void;
 }
 
+interface PlayerInfo {
+  count: number;
+  max: number;
+  list: string[];
+}
+
+const PLAYER_QUERY_CMD = 'local t=TheNet:GetClientTable() if t then local k={} for i,v in ipairs(t) do if v.userid~="" and v.netid~=nil and v.netid~="" then k[#k+1]=v.userid end end print("__PC:"..#k..":"..table.concat(k,",")) end\n';
+
 class ServerMonitor {
-  private instanceCache: ServerInstance[] = [];
   private watchers = new Map<number, LogWatcher>();
   private globalPollInterval: ReturnType<typeof setInterval> | null = null;
-
-  private async fetchLobbyListings(): Promise<ServerInstance[]> {
-    try {
-      const response = await fetch('https://d26ly0au0tyuy.cloudfront.net/lobbyListings.json.gz');
-      if (!response.ok) return [];
-
-      const decompressed = new Response(
-        response.body!.pipeThrough(new DecompressionStream('gzip'))
-      );
-      const data = await decompressed.json();
-
-      if (Array.isArray(data)) {
-        return data.map((entry: Record<string, unknown>) => ({
-          name: (entry.name as string) || '',
-          connected: (entry.connected as number) || 0,
-          maxconnections: (entry.maxconnections as number) || 0,
-          players: Array.isArray(entry.players) ? entry.players as string[] : [],
-          port: (entry.port as number) || 0,
-          host: (entry.host as string) || '',
-        }));
-      }
-      return [];
-    } catch {
-      return [];
-    }
-  }
+  private playerCache = new Map<number, PlayerInfo>();
 
   private async isProcessRunning(pid: number): Promise<boolean> {
     try {
@@ -59,27 +32,38 @@ class ServerMonitor {
     }
   }
 
-  private sendCavesShutdown(shareCode: string): void {
+  private sendFifoCommand(shareCode: string, shard: 'Master' | 'Caves', command: string): boolean {
     try {
-      const fifoPath = path.join(getClusterPath(shareCode), 'Caves', 'console_pipe');
+      const fifoPath = path.join(getClusterPath(shareCode), shard, 'console_pipe');
       const fd = openSync(fifoPath, constants.O_WRONLY | constants.O_NONBLOCK);
-      writeSync(fd, Buffer.from('c_shutdown()\n'));
+      writeSync(fd, Buffer.from(command));
       closeSync(fd);
-    } catch {}
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private emitPlayerUpdate(serverId: number, next: PlayerInfo) {
+    const prev = this.playerCache.get(serverId);
+    if (prev && prev.count === next.count && prev.max === next.max && prev.list.join() === next.list.join()) return;
+    this.playerCache.set(serverId, next);
+    sseEmit(serverId, { type: 'players', data: next });
   }
 
   private async markServerStopped(serverId: number, shareCode: string) {
     const dbPids = await Servers.getPids(serverId);
     const cavesRunning = dbPids?.caves ? await this.isProcessRunning(dbPids.caves) : false;
-    if (cavesRunning) this.sendCavesShutdown(shareCode);
+    if (cavesRunning) this.sendFifoCommand(shareCode, 'Caves', 'c_shutdown()\n');
 
     await Servers.updateStatus(serverId, 'stopped');
     await Servers.updatePids(serverId, null);
     sseEmit(serverId, { type: 'status', data: 'stopped' });
+    this.clearPlayerCache(serverId);
     this.stopMonitoring(serverId);
   }
 
-  private watchLog(serverId: number, shareCode: string): LogWatcher {
+  private watchLog(serverId: number, shareCode: string, maxPlayers: number): LogWatcher {
     const masterDir = path.join(getClusterPath(shareCode), 'Master');
     const logPath = path.join(masterDir, 'server_log.txt');
     let offset = 0;
@@ -99,6 +83,19 @@ class ServerMonitor {
 
       if (line.includes('Shutting down')) {
         await this.markServerStopped(serverId, shareCode);
+      }
+
+      // Parse player query response: __PC:count:kuid1,kuid2,...
+      const pcIndex = line.indexOf('__PC:');
+      if (pcIndex !== -1) {
+        const payload = line.substring(pcIndex + 5);
+        const colonIndex = payload.indexOf(':');
+        if (colonIndex !== -1) {
+          const count = parseInt(payload.substring(0, colonIndex));
+          const kuidsStr = payload.substring(colonIndex + 1);
+          const list = kuidsStr ? kuidsStr.split(',') : [];
+          this.emitPlayerUpdate(serverId, { count, max: maxPlayers, list });
+        }
       }
     };
 
@@ -153,9 +150,15 @@ class ServerMonitor {
       } catch {}
     }
 
+    // Query players periodically via FIFO
+    const queryPlayers = () => this.sendFifoCommand(shareCode, 'Master', PLAYER_QUERY_CMD);
+    const playerInterval = setInterval(queryPlayers, 15000);
+    setTimeout(queryPlayers, 3000); // Initial query after server has time to boot
+
     return {
       close() {
         closed = true;
+        clearInterval(playerInterval);
         fileWatcher?.close();
         dirWatcher?.close();
       }
@@ -171,7 +174,7 @@ class ServerMonitor {
     const pids = await Servers.getPids(serverId);
     if (!pids) return;
 
-    const watcher = this.watchLog(serverId, server.share_code);
+    const watcher = this.watchLog(serverId, server.share_code, server.max_players);
     this.watchers.set(serverId, watcher);
   }
 
@@ -213,6 +216,7 @@ class ServerMonitor {
       if (!row.pids || row.pids === '{}') {
         await Servers.updateStatus(row.id, 'stopped');
         sseEmit(row.id, { type: 'status', data: 'stopped' });
+        this.clearPlayerCache(row.id);
         continue;
       }
 
@@ -225,13 +229,12 @@ class ServerMonitor {
           await Servers.updateStatus(row.id, 'stopped');
           await Servers.updatePids(row.id, null);
           sseEmit(row.id, { type: 'status', data: 'stopped' });
+          this.clearPlayerCache(row.id);
         }
       } catch (e) {
         console.error(`Failed to check PIDs for server ${row.id}:`, e);
       }
     }
-
-    this.instanceCache = await this.fetchLobbyListings();
   }
 
   start(intervalMs = 60000) {
@@ -288,6 +291,12 @@ class ServerMonitor {
     }
 
     sseEmit(serverId, { type: 'status', data: server.status });
+
+    // Send cached player data immediately so SSE clients don't wait for next query
+    const cached = this.playerCache.get(serverId);
+    if (cached) {
+      sseEmit(serverId, { type: 'players', data: cached });
+    }
   }
 
   async syncAll() {
@@ -301,18 +310,8 @@ class ServerMonitor {
     }
   }
 
-  getInstances(): ServerInstance[] {
-    return this.instanceCache;
-  }
-
-  getPlayersOnServer(portOffset: number): { count: number; players: string[] } {
-    const serverPort = 10998 + (portOffset * 2);
-    const found = this.instanceCache.find(s => s.port === serverPort);
-
-    return {
-      count: found?.connected || 0,
-      players: found?.players || []
-    };
+  clearPlayerCache(serverId: number) {
+    this.playerCache.delete(serverId);
   }
 }
 

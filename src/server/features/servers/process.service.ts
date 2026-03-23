@@ -5,6 +5,7 @@ import path from 'path';
 import { getClusterPath } from '@server/services/dst.js';
 import Servers from './servers.queries.js';
 import { sseEmit } from '@server/services/sse.js';
+import { clearModSetupFile } from '@server/features/mods/mods.service.js';
 
 const { DST_INSTALL_DIR } = process.env;
 
@@ -44,6 +45,10 @@ export class ProcessService {
     } catch {
       return false;
     }
+  }
+
+  announce(shareCode: string, message: string): boolean {
+    return this.sendCommand(shareCode, `c_announce("${message}")`, 'Master');
   }
 
   private sendCommand(shareCode: string, command: string, shard: 'Master' | 'Caves' = 'Master'): boolean {
@@ -137,6 +142,13 @@ export class ProcessService {
     } catch {
       await fs.writeFile(agreementsFile, '[agreements]\nprivacy_policy=accepted\neula=accepted\n');
     }
+
+    // Ensure DST doesn't try to download mods — we handle that via steamcmd
+    await clearModSetupFile();
+
+    // Check for DST updates before spawning (lazy import to avoid circular dep)
+    const { updater } = await import('@server/services/updater.js');
+    await updater.checkOnServerStart();
 
     // Create FIFOs for both shards
     const masterFifoPath = this.getFifoPath(shareCode, 'Master');

@@ -10,7 +10,7 @@ import { ModConfig, WorkshopSearchResult } from './mods.types';
 import Mods from './mods.queries';
 
 const execAsync = promisify(exec);
-const { DST_WORKSHOP_DIR = '' } = process.env;
+const { DST_INSTALL_DIR = '', DST_WORKSHOP_DIR = '' } = process.env;
 
 // Detect if text contains Chinese characters
 function containsChinese(text: string): boolean {
@@ -299,5 +299,18 @@ export async function downloadMods(workshopIds: string[]): Promise<void> {
     await execAsync(cmd, { timeout: 300000 });
   } catch (e) {
     console.error('Failed to download mods:', e);
+  }
+}
+
+/**
+ * Empties dedicated_server_mods_setup.lua so DST never downloads mods on startup.
+ * We handle mod downloads ourselves via steamcmd.
+ */
+export async function clearModSetupFile(): Promise<void> {
+  const setupPath = path.join(DST_INSTALL_DIR, 'mods', 'dedicated_server_mods_setup.lua');
+  try {
+    await fs.writeFile(setupPath, '--managed by dst server manager\n');
+  } catch (e) {
+    console.error('[mods] Failed to clear dedicated_server_mods_setup.lua:', e);
   }
 }

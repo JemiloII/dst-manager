@@ -116,10 +116,6 @@ class DSTUpdater {
     }
   }
 
-  async checkOnServerStart(): Promise<void> {
-    await this.checkAndUpdate();
-  }
-
   startPeriodicCheck(intervalMs = 300000): void {
     if (this.intervalId) return;
     console.log(`[updater] Starting periodic check every ${intervalMs / 1000}s`);

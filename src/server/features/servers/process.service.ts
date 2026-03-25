@@ -146,10 +146,6 @@ export class ProcessService {
     // Ensure DST doesn't try to download mods — we handle that via steamcmd
     await clearModSetupFile();
 
-    // Check for DST updates before spawning (lazy import to avoid circular dep)
-    const { updater } = await import('@server/services/updater.js');
-    await updater.checkOnServerStart();
-
     // Create FIFOs for both shards
     const masterFifoPath = this.getFifoPath(shareCode, 'Master');
     const cavesFifoPath = this.getFifoPath(shareCode, 'Caves');
@@ -205,32 +201,26 @@ export class ProcessService {
     };
   }
 
-  private async waitForDeath(pids: number[], timeoutMs = 10000): Promise<boolean> {
-    const start = Date.now();
-    while (Date.now() - start < timeoutMs) {
+  private watchForShutdown(serverId: number, pids: number[]): void {
+    const check = async () => {
       const alive = await Promise.all(pids.map((p) => this.isProcessRunning(p)));
-      if (alive.every((a) => !a)) return true;
-      await new Promise((r) => setTimeout(r, 500));
-    }
-    return false;
+      if (alive.some((a) => a)) return;
+      clearInterval(interval);
+      await this.markStopped(serverId);
+    };
+    const interval = setInterval(check, 2000);
   }
 
   async stopServer(serverId: number): Promise<void> {
     const proc = await this.resolveProcess(serverId);
     if (!proc) throw new Error('Server is not running');
 
-    // Send c_shutdown() to both shards
+    // Send c_shutdown() to both shards — DST handles its own graceful save & exit
     this.sendCommand(proc.shareCode, 'c_shutdown()', 'Master');
     this.sendCommand(proc.shareCode, 'c_shutdown()', 'Caves');
 
-    // Wait for both processes to die, force kill if they don't
     const pids = [proc.masterPid, proc.cavesPid].filter(Boolean) as number[];
-    const died = await this.waitForDeath(pids);
-    if (!died) {
-      for (const pid of pids) this.killProcess(pid);
-    }
-
-    await this.markStopped(serverId);
+    this.watchForShutdown(serverId, pids);
   }
 
   async forceKillServer(serverId: number): Promise<void> {
@@ -279,21 +269,11 @@ export class ProcessService {
       const masterLog = await this.readLog(server.share_code, 'Master');
       const lastLine = this.lastLogLine(masterLog);
 
-      // Last line says "Shutting down" OR Master PID dead — kill Caves
+      // Last line says "Shutting down" OR Master PID dead — tell Caves to shut down too
       if ((lastLine.includes('Shutting down') || !masterRunning) && cavesRunning) {
-        // 3. Tell Caves to shut down
         this.sendCommand(server.share_code, 'c_shutdown()', 'Caves');
-
-        // 4. Poll for up to 30s waiting for both to die
         const allPids = [pids.master, pids.caves].filter(Boolean) as number[];
-        const died = await this.waitForDeath(allPids, 30000);
-
-        // 5. Force kill anything still alive
-        if (!died) {
-          for (const pid of allPids) this.killProcess(pid);
-        }
-
-        await this.markStopped(serverId);
+        this.watchForShutdown(serverId, allPids);
         return 'stopped';
       }
 

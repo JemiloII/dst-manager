@@ -21,8 +21,8 @@ export default function LogViewer({ serverId, serverStatus }: Props) {
 
   const logCallbackRef = useCallback((node: HTMLDivElement | null) => {
     logRef.current = node;
-    if (node) node.scrollTop = node.scrollHeight;
-  }, [shard]);
+    if (node && autoScroll) node.scrollTop = node.scrollHeight;
+  }, [shard, autoScroll]);
 
   // Fetch initial logs
   useEffect(() => {

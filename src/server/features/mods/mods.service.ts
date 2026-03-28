@@ -278,21 +278,45 @@ export async function saveModOverrides(shareCode: string, content: string) {
   await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), content);
 }
 
+// Some Steam Workshop mods are downloaded as legacy .bin archives instead of extracted
+// files. DST can't load these — it needs modinfo.lua/modmain.lua directly in the folder.
+// This extracts any .bin archives in-place so DST finds the mod files.
+// If a .bin exists alongside modinfo.lua, we compare timestamps — a newer .bin means
+// steamcmd updated the mod and we need to re-extract.
+async function extractLegacyBins(workshopIds: string[]): Promise<void> {
+  await Promise.all(workshopIds.map(async (id) => {
+    const modPath = path.join(DST_WORKSHOP_DIR, id);
+    try {
+      const files = await fs.readdir(modPath);
+      const binFile = files.find(f => f.endsWith('.bin'));
+      if (!binFile) return;
+
+      const binPath = path.join(modPath, binFile);
+      const modinfoPath = path.join(modPath, 'modinfo.lua');
+
+      // Skip if modinfo.lua exists and is newer than the .bin (already extracted)
+      try {
+        const binStat = await fs.stat(binPath);
+        const modinfoStat = await fs.stat(modinfoPath);
+        if (modinfoStat.mtimeMs >= binStat.mtimeMs) return;
+      } catch {
+        // modinfo.lua doesn't exist — needs extraction
+      }
+
+      const directory = await unzipper.Open.file(binPath);
+      await directory.extract({ path: modPath });
+    } catch (e) {
+      console.error(`[mods] Failed to extract legacy bin for ${id}:`, e);
+    }
+  }));
+}
+
 export async function downloadMods(workshopIds: string[]): Promise<void> {
   if (!workshopIds.length) return;
 
-  // Filter to only mods not already downloaded
-  const missing = (await Promise.all(
-    workshopIds.map(async (id) => {
-      const exists = await fs.access(path.join(DST_WORKSHOP_DIR, id)).then(() => true).catch(() => false);
-      return exists ? null : id;
-    })
-  )).filter(Boolean) as string[];
-
-  if (!missing.length) return;
-
-  // Build steamcmd command — batch all downloads in one call
-  const downloads = missing.map((id) => `+workshop_download_item 322330 ${id}`).join(' ');
+  // Always pass all IDs to steamcmd — it handles both fresh downloads and updates.
+  // Skipping existing mods would prevent updates from being applied.
+  const downloads = workshopIds.map((id) => `+workshop_download_item 322330 ${id}`).join(' ');
   const cmd = `steamcmd +login anonymous ${downloads} +quit`;
 
   try {
@@ -300,6 +324,9 @@ export async function downloadMods(workshopIds: string[]): Promise<void> {
   } catch (e) {
     console.error('Failed to download mods:', e);
   }
+
+  // Extract any legacy .bin archives so DST can load the mod files
+  await extractLegacyBins(workshopIds);
 }
 
 /**

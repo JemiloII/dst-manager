@@ -2,8 +2,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { renderIniTemplate } from '@server/utils/ini.js';
-import { generateLevelDataOverride } from '@server/services/lua.js';
+import { generateLevelDataOverride, parseModOverrides, generateModOverrides } from '@server/services/lua.js';
 import { getPresetForShard, getPresetOverrides } from '@server/services/presets.js';
+import { getEnabledMods } from '@server/features/mods/mods.service.js';
 
 const DST_TEMPLATE_DIR = './dst';
 
@@ -166,14 +167,39 @@ export async function ensureServerFiles(
   const templateFiles = [
     { src: path.join(DST_TEMPLATE_DIR, 'Master', 'leveldataoverride.lua'), dest: path.join(clusterDir, 'Master', 'leveldataoverride.lua') },
     { src: path.join(DST_TEMPLATE_DIR, 'Caves', 'leveldataoverride.lua'), dest: path.join(clusterDir, 'Caves', 'leveldataoverride.lua') },
-    { src: path.join(DST_TEMPLATE_DIR, 'Master', 'modoverrides.lua'), dest: path.join(clusterDir, 'Master', 'modoverrides.lua') },
-    { src: path.join(DST_TEMPLATE_DIR, 'Caves', 'modoverrides.lua'), dest: path.join(clusterDir, 'Caves', 'modoverrides.lua') },
   ];
 
   for (const { src, dest } of templateFiles) {
     const exists = await fs.access(dest).then(() => true).catch(() => false);
     if (!exists) {
       await fs.cp(src, dest).catch(() => {});
+    }
+  }
+
+  // Merge template modoverrides with currently enabled mods
+  const enabledMods = await getEnabledMods(server.share_code);
+  if (enabledMods.length > 0) {
+    const templateModsPath = path.join(DST_TEMPLATE_DIR, 'Master', 'modoverrides.lua');
+    const enabledModsPath = path.join(clusterDir, 'Master', 'modoverrides.lua');
+
+    try {
+      const templateMods = parseModOverrides(await fs.readFile(templateModsPath, 'utf-8'));
+      const enabledModConfig = enabledMods.map(id => ({
+        id,
+        config: { enabled: true, configuration_options: {} }
+      }));
+
+      // Merge template mods with enabled mods
+      const mergedMods = { ...templateMods };
+      for (const mod of enabledModConfig) {
+        mergedMods[mod.id] = mod.config;
+      }
+
+      const mergedContent = generateModOverrides(mergedMods);
+      await fs.writeFile(enabledModsPath, mergedContent);
+      await fs.writeFile(path.join(clusterDir, 'Caves', 'modoverrides.lua'), mergedContent);
+    } catch (e) {
+      console.error('[dst] Failed to merge modoverrides:', e);
     }
   }
 }

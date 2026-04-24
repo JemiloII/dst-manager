@@ -262,13 +262,26 @@ export async function getAllServers() {
 export async function getServerModOverrides(shareCode: string) {
   const clusterDir = getClusterPath(shareCode);
   const modOverridesPath = path.join(clusterDir, 'Master', 'modoverrides.lua');
-  
+
   try {
     const content = await fs.readFile(modOverridesPath, 'utf-8');
     return parseModOverrides(content);
   } catch {
     return null;
   }
+}
+
+export async function getEnabledMods(shareCode: string): Promise<string[]> {
+  const mods = await getServerModOverrides(shareCode);
+  if (!mods) return [];
+
+  const enabled = new Set<string>();
+  for (const [modId, config] of Object.entries(mods)) {
+    if (config.enabled) {
+      enabled.add(modId);
+    }
+  }
+  return Array.from(enabled);
 }
 
 export async function saveModOverrides(shareCode: string, content: string) {
